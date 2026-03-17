@@ -5,6 +5,7 @@ export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/auth',
     component: AuthLayout,
+    meta: { guestOnly: true },
     children: [
       {
         path: 'login',

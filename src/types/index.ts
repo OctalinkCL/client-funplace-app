@@ -97,6 +97,22 @@ export interface Booking {
   spaces?: Pick<Space, 'id' | 'title' | 'slug'>
 }
 
+export interface CreateSpacePayload {
+  admin_id: string
+  title: string
+  slug: string
+  space_type: SpaceType | null
+  description: string | null
+  capacity: number | null
+  size_m2: number | null
+  region: string | null
+  city: string | null
+  address: string | null
+  is_published: boolean
+}
+
+export type UpdateSpacePayload = Partial<Omit<CreateSpacePayload, 'admin_id'>>
+
 export type SlotStatus = 'AVAILABLE' | 'BLOCKED' | 'PENDING' | 'CONFIRMED'
 
 export interface SimpleSlot {

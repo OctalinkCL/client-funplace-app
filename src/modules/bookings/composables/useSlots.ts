@@ -53,7 +53,7 @@ export async function getSlotsForDate(spaceId: string, date: string): Promise<Si
       .in('block_id', assignedBlockIds),
     supabase
       .from('bookings')
-      .select('*')
+      .select('id, space_id, block_id, date, status')
       .eq('space_id', spaceId)
       .eq('date', date)
       .in('block_id', assignedBlockIds)

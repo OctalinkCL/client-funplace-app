@@ -4,6 +4,8 @@ import type { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/types'
 
+let _initPromise: Promise<void> | null = null
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const profile = ref<Profile | null>(null)
@@ -13,15 +15,21 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => profile.value?.role === 'admin' || profile.value?.role === 'superadmin')
   const isSuperAdmin = computed(() => profile.value?.role === 'superadmin')
 
-  async function initialize() {
-    const { data: { session } } = await supabase.auth.getSession()
-    user.value = session?.user ?? null
-    if (user.value) await fetchProfile()
+  function initialize() {
+    if (!_initPromise) {
+      _initPromise = (async () => {
+        const { data: { session } } = await supabase.auth.getSession()
+        user.value = session?.user ?? null
+        if (user.value) await fetchProfile()
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      user.value = session?.user ?? null
-      if (!user.value) profile.value = null
-    })
+        supabase.auth.onAuthStateChange(async (_event, session) => {
+          user.value = session?.user ?? null
+          if (session?.user && !profile.value) await fetchProfile()
+          if (!session?.user) profile.value = null
+        })
+      })()
+    }
+    return _initPromise
   }
 
   async function login(email: string, password: string) {
@@ -40,6 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
     await supabase.auth.signOut()
     user.value = null
     profile.value = null
+    _initPromise = null // permitir re-inicialización tras logout
   }
 
   async function fetchProfile() {

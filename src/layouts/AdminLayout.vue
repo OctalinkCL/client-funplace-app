@@ -22,9 +22,7 @@
     <!-- Main -->
     <div class="flex-1 flex flex-col">
       <header class="border-b px-6 py-3 flex items-center justify-end">
-        <button class="text-sm text-muted-foreground hover:text-foreground" @click="logout">
-          Cerrar sesión
-        </button>
+        <LogoutButton />
       </header>
       <main class="flex-1 p-6">
         <RouterView />
@@ -34,14 +32,5 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth.store'
-
-const auth = useAuthStore()
-const router = useRouter()
-
-async function logout() {
-  await auth.logout()
-  router.push({ name: 'login' })
-}
+import LogoutButton from '@/modules/auth/components/LogoutButton.vue'
 </script>

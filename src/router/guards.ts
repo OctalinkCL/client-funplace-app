@@ -7,17 +7,17 @@ export function setupGuards(router: Router) {
 
     const auth = useAuthStore()
 
-    // Si no hay sesión activa → redirigir a login
+    // Garantizar que la sesión esté cargada antes de verificar
+    await auth.initialize()
+
     if (!auth.isAuthenticated) {
       return { name: 'login', query: { redirect: to.fullPath } }
     }
 
-    // Si hay sesión pero no se cargó el perfil todavía → cargarlo
     if (!auth.profile) {
       await auth.fetchProfile()
     }
 
-    // Verificar que tenga rol admin o superadmin
     if (!auth.isAdmin) {
       return { path: '/' }
     }

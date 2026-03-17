@@ -11,6 +11,11 @@ export const authRoutes: RouteRecordRaw[] = [
         name: 'login',
         component: () => import('@/modules/auth/views/LoginView.vue'),
       },
+      {
+        path: 'update-password',
+        name: 'update-password',
+        component: () => import('@/modules/auth/views/UpdatePasswordView.vue'),
+      },
     ],
   },
 ]

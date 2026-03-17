@@ -1,0 +1,59 @@
+<template>
+  <Card class="w-full">
+    <CardHeader>
+      <CardTitle>Crear contraseña</CardTitle>
+      <CardDescription>Elige una contraseña para tu cuenta.</CardDescription>
+    </CardHeader>
+
+    <CardContent>
+      <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
+        <div class="flex flex-col gap-1.5">
+          <Label for="password">Nueva contraseña</Label>
+          <Input
+            id="password"
+            v-model="password"
+            type="password"
+            autocomplete="new-password"
+            required
+            minlength="8"
+          />
+        </div>
+
+        <p v-if="error" class="text-sm text-destructive">{{ error }}</p>
+
+        <Button type="submit" :disabled="loading" class="w-full">
+          {{ loading ? 'Guardando...' : 'Guardar contraseña' }}
+        </Button>
+      </form>
+    </CardContent>
+  </Card>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { supabase } from '@/lib/supabase'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+
+const router = useRouter()
+const password = ref('')
+const error = ref('')
+const loading = ref(false)
+
+async function handleSubmit() {
+  error.value = ''
+  loading.value = true
+  try {
+    const { error: err } = await supabase.auth.updateUser({ password: password.value })
+    if (err) throw err
+    router.push({ name: 'admin-bookings' })
+  } catch (e: unknown) {
+    error.value = e instanceof Error ? e.message : 'Error al guardar la contraseña.'
+  } finally {
+    loading.value = false
+  }
+}
+</script>

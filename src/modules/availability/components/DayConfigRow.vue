@@ -29,7 +29,6 @@
           class="cursor-pointer font-normal text-sm"
         >
           {{ block.name }}
-          <span class="text-muted-foreground ml-1">{{ block.start_time }} – {{ block.end_time }}</span>
         </Label>
       </div>
       <p v-if="blocks.length === 0" class="text-sm text-muted-foreground">

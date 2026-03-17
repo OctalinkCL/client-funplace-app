@@ -24,39 +24,45 @@ export function useAvailability() {
   const blocksError = ref<string | null>(null)
   const daysError = ref<string | null>(null)
 
+  // Helper interno: carga datos sin tocar `loading` (para refresco silencioso)
+  async function fetchSchedule(spaceId: string) {
+    const schedule = await availabilityService.getBySpaceId(spaceId)
+    if (!schedule) {
+      blocks.value = []
+      dayConfigs.value = initDayConfigs()
+      return
+    }
+
+    const sortedBlocks = [...(schedule.time_blocks ?? [])].sort(
+      (a, b) => a.sort_order - b.sort_order,
+    )
+    blocks.value = sortedBlocks.map(b => ({
+      tempId: b.id,
+      name: b.name,
+      start_time: b.start_time.slice(0, 5),
+      end_time: b.end_time.slice(0, 5),
+      sort_order: b.sort_order,
+    }))
+
+    const configs = initDayConfigs()
+    for (const dc of schedule.day_schedule_configs ?? []) {
+      const assignedIds = (dc.day_block_assignments ?? []).map(a => a.block_id)
+      configs[dc.day_of_week] = {
+        day_of_week: dc.day_of_week,
+        enabled: dc.enabled,
+        blockTempIds: assignedIds,
+      }
+    }
+    dayConfigs.value = configs
+  }
+
+  // Carga inicial — muestra spinner
   async function loadSchedule(spaceId: string) {
     loading.value = true
     blocksError.value = null
     daysError.value = null
     try {
-      const schedule = await availabilityService.getBySpaceId(spaceId)
-      if (!schedule) {
-        blocks.value = []
-        dayConfigs.value = initDayConfigs()
-        return
-      }
-
-      const sortedBlocks = [...(schedule.time_blocks ?? [])].sort(
-        (a, b) => a.sort_order - b.sort_order,
-      )
-      blocks.value = sortedBlocks.map(b => ({
-        tempId: b.id,
-        name: b.name,
-        start_time: b.start_time.slice(0, 5),
-        end_time: b.end_time.slice(0, 5),
-        sort_order: b.sort_order,
-      }))
-
-      const configs = initDayConfigs()
-      for (const dc of schedule.day_schedule_configs ?? []) {
-        const assignedIds = (dc.day_block_assignments ?? []).map(a => a.block_id)
-        configs[dc.day_of_week] = {
-          day_of_week: dc.day_of_week,
-          enabled: dc.enabled,
-          blockTempIds: assignedIds,
-        }
-      }
-      dayConfigs.value = configs
+      await fetchSchedule(spaceId)
     } catch (e) {
       blocksError.value = e instanceof Error ? e.message : 'Error al cargar la disponibilidad.'
     } finally {
@@ -101,15 +107,14 @@ export function useAvailability() {
     if (i !== -1) dayConfigs.value[i] = updated
   }
 
+  // Guarda bloques + preserva asignaciones de días actuales; refresca sin flash
   async function saveBlocks(spaceId: string) {
     savingBlocks.value = true
     savedBlocks.value = false
     blocksError.value = null
     try {
-      // Guarda bloques + preserva asignaciones de días actuales
       await availabilityService.saveSchedule(spaceId, blocks.value, dayConfigs.value)
-      // Recarga para refrescar IDs reales desde DB
-      await loadSchedule(spaceId)
+      await fetchSchedule(spaceId) // refresco silencioso — sin spinner
       savedBlocks.value = true
     } catch (e) {
       blocksError.value = e instanceof Error ? e.message : 'Error al guardar los bloques.'

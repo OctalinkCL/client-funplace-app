@@ -113,6 +113,19 @@ export interface CreateSpacePayload {
 
 export type UpdateSpacePayload = Partial<Omit<CreateSpacePayload, 'admin_id'>>
 
+export interface CreateBookingPayload {
+  space_id: string
+  block_id: string
+  date: string
+  start_time: string
+  end_time: string
+  block_name: string
+  customer_name: string
+  customer_email: string
+  customer_phone?: string | null
+  notes?: string | null
+}
+
 export type SlotStatus = 'AVAILABLE' | 'BLOCKED' | 'PENDING' | 'CONFIRMED'
 
 export interface SimpleSlot {

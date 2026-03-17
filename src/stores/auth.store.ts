@@ -1,1 +1,56 @@
-export {}
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import type { User } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
+import type { Profile } from '@/types'
+
+export const useAuthStore = defineStore('auth', () => {
+  const user = ref<User | null>(null)
+  const profile = ref<Profile | null>(null)
+  const loading = ref(false)
+
+  const isAuthenticated = computed(() => !!user.value)
+  const isAdmin = computed(() => profile.value?.role === 'admin' || profile.value?.role === 'superadmin')
+  const isSuperAdmin = computed(() => profile.value?.role === 'superadmin')
+
+  async function initialize() {
+    const { data: { session } } = await supabase.auth.getSession()
+    user.value = session?.user ?? null
+    if (user.value) await fetchProfile()
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      user.value = session?.user ?? null
+      if (!user.value) profile.value = null
+    })
+  }
+
+  async function login(email: string, password: string) {
+    loading.value = true
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) throw error
+      user.value = data.user
+      await fetchProfile()
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function logout() {
+    await supabase.auth.signOut()
+    user.value = null
+    profile.value = null
+  }
+
+  async function fetchProfile() {
+    if (!user.value) return
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.value.id)
+      .single()
+    if (!error) profile.value = data
+  }
+
+  return { user, profile, loading, isAuthenticated, isAdmin, isSuperAdmin, initialize, login, logout, fetchProfile }
+})

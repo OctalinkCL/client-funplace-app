@@ -23,15 +23,4 @@ export const publicRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-  {
-    path: '/login',
-    component: () => import('@/layouts/AuthLayout.vue'),
-    children: [
-      {
-        path: '',
-        name: 'login',
-        component: () => import('@/modules/auth/views/LoginView.vue'),
-      },
-    ],
-  },
 ]

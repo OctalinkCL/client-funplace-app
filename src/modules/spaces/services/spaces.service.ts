@@ -2,6 +2,34 @@ import { supabase } from '@/lib/supabase'
 import type { Space, SpaceImage, Amenity, CreateSpacePayload, UpdateSpacePayload } from '@/types'
 
 export const spacesService = {
+  async getPublished(filters?: { region?: string; city?: string }): Promise<Space[]> {
+    let query = supabase
+      .from('spaces')
+      .select('*, space_amenities(amenity), space_images(id, url, sort_order)')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false })
+      .order('sort_order', { referencedTable: 'space_images', ascending: true })
+
+    if (filters?.region) query = query.eq('region', filters.region)
+    if (filters?.city) query = query.eq('city', filters.city)
+
+    const { data, error } = await query
+    if (error) throw error
+    return data
+  },
+
+  async getBySlug(slug: string): Promise<Space> {
+    const { data, error } = await supabase
+      .from('spaces')
+      .select('*, space_amenities(amenity), space_images(*)')
+      .eq('slug', slug)
+      .eq('is_published', true)
+      .order('sort_order', { referencedTable: 'space_images', ascending: true })
+      .single()
+    if (error) throw error
+    return data
+  },
+
   async getByAdmin(adminId: string): Promise<Space[]> {
     const { data, error } = await supabase
       .from('spaces')

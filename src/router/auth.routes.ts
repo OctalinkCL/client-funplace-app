@@ -15,6 +15,7 @@ export const authRoutes: RouteRecordRaw[] = [
       {
         path: 'update-password',
         name: 'update-password',
+        meta: { guestOnly: false, requiresRecovery: true },
         component: () => import('@/modules/auth/views/UpdatePasswordView.vue'),
       },
     ],

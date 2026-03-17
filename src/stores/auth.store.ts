@@ -10,6 +10,11 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const profile = ref<Profile | null>(null)
   const loading = ref(false)
+  const isPasswordRecovery = ref(false)
+
+  function setPasswordRecovery(value: boolean) {
+    isPasswordRecovery.value = value
+  }
 
   const isAuthenticated = computed(() => !!user.value)
   const isAdmin = computed(() => profile.value?.role === 'admin' || profile.value?.role === 'superadmin')
@@ -61,5 +66,5 @@ export const useAuthStore = defineStore('auth', () => {
     if (!error) profile.value = data
   }
 
-  return { user, profile, loading, isAuthenticated, isAdmin, isSuperAdmin, initialize, login, logout, fetchProfile }
+  return { user, profile, loading, isAuthenticated, isAdmin, isSuperAdmin, isPasswordRecovery, initialize, login, logout, fetchProfile, setPasswordRecovery }
 })

@@ -1,5 +1,13 @@
 export type UserRole = 'admin' | 'superadmin'
 
+export interface AmenityRecord {
+  id: string
+  key: string
+  name: string
+  icon: string
+  sort_order: number
+}
+
 export interface Profile {
   id: string
   role: UserRole
@@ -8,12 +16,6 @@ export interface Profile {
 }
 
 export type SpaceType = 'casa' | 'sala' | 'estudio' | 'oficina' | 'galeria' | 'otro'
-
-export type Amenity =
-  | 'wifi' | 'tv_monitor' | 'projector' | 'kitchen' | 'oven'
-  | 'refrigerator' | 'air_conditioning' | 'heating' | 'parking'
-  | 'garden' | 'pool' | 'bbq' | 'sound_system' | 'bicycle_parking'
-  | 'bathrooms' | 'disability_access'
 
 export interface Space {
   id: string
@@ -30,7 +32,7 @@ export interface Space {
   is_published: boolean
   created_at: string
   updated_at: string
-  space_amenities?: { amenity: Amenity }[]
+  space_amenities?: { amenity_id: string }[]
   space_images?: SpaceImage[]
 }
 
@@ -82,7 +84,7 @@ export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
 export interface Booking {
   id: string
   space_id: string
-  block_id: string
+  block_id: string | null
   date: string
   start_time: string
   end_time: string
@@ -95,6 +97,35 @@ export interface Booking {
   created_at: string
   updated_at: string
   spaces?: Pick<Space, 'id' | 'title' | 'slug'>
+}
+
+export interface CreateSpacePayload {
+  admin_id: string
+  title: string
+  slug: string
+  space_type: SpaceType | null
+  description: string | null
+  capacity: number | null
+  size_m2: number | null
+  region: string | null
+  city: string | null
+  address: string | null
+  is_published: boolean
+}
+
+export type UpdateSpacePayload = Partial<Omit<CreateSpacePayload, 'admin_id'>>
+
+export interface CreateBookingPayload {
+  space_id: string
+  block_id: string
+  date: string
+  start_time: string
+  end_time: string
+  block_name: string
+  customer_name: string
+  customer_email: string
+  customer_phone?: string | null
+  notes?: string | null
 }
 
 export type SlotStatus = 'AVAILABLE' | 'BLOCKED' | 'PENDING' | 'CONFIRMED'

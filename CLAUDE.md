@@ -51,6 +51,10 @@ src/
 ├── types/
 │   └── index.ts                     # todos los tipos TypeScript del proyecto
 │
+├── constants/
+│   ├── spaces.ts                    # REGIONS_AND_CITIES, SpaceType labels, generateSlug()
+│   └── icons.ts                     # LUCIDE_ICON_MAP (nombre de ícono → componente Vue)
+│
 ├── layouts/
 │   ├── PublicLayout.vue             # header público + footer
 │   ├── AdminLayout.vue              # sidebar admin + header con usuario
@@ -60,6 +64,7 @@ src/
 │   ├── index.ts                     # configuración principal del router
 │   ├── public.routes.ts             # rutas públicas
 │   ├── admin.routes.ts              # rutas admin (protegidas)
+│   ├── auth.routes.ts               # rutas de autenticación
 │   └── guards.ts                    # navigation guards con verificación de rol
 │
 ├── stores/
@@ -67,8 +72,11 @@ src/
 │
 └── modules/
     ├── auth/
-    │   └── views/
-    │       └── LoginView.vue
+    │   ├── views/
+    │   │   ├── LoginView.vue
+    │   │   └── UpdatePasswordView.vue   # recuperación / cambio de contraseña
+    │   └── components/
+    │       └── LogoutButton.vue
     │
     ├── spaces/
     │   ├── views/
@@ -87,20 +95,22 @@ src/
     │   │   │   └── SpaceImageGallery.vue
     │   │   └── admin/
     │   │       ├── SpaceForm.vue
-    │   │       ├── AmenitiesSelector.vue
+    │   │       ├── AmenitiesSelector.vue   # checkboxes con íconos Lucide dinámicos
     │   │       └── ImageUploader.vue
     │   ├── composables/
     │   │   ├── useSpaces.ts
-    │   │   └── useSpaceForm.ts
+    │   │   ├── useSpaceForm.ts
+    │   │   └── useAmenities.ts             # fetch de amenities desde DB
     │   └── services/
-    │       └── spaces.service.ts
+    │       ├── spaces.service.ts
+    │       └── amenities.service.ts        # getAll() amenities desde tabla DB
     │
     ├── availability/
     │   ├── views/
     │   │   └── admin/
     │   │       └── AdminAvailabilityView.vue  # configurar horario semanal
     │   ├── components/
-    │   │   ├── TimeBlockForm.vue
+    │   │   ├── BlocksManager.vue           # CRUD inline de bloques horarios
     │   │   ├── WeeklyScheduleEditor.vue
     │   │   └── DayConfigRow.vue
     │   ├── composables/
@@ -194,30 +204,26 @@ create table spaces (
 );
 
 -- ============================================================
+-- TABLA: amenities
+-- Lista de amenities gestionada en DB (database-driven)
+-- Poblar con INSERT después de crear la tabla
+-- ============================================================
+create table amenities (
+  id         uuid primary key default uuid_generate_v4(),
+  key        text not null unique,             -- ej. 'wifi', 'pool'
+  name       text not null,                   -- ej. 'WiFi', 'Piscina'
+  icon       text,                            -- nombre del ícono Lucide (ej. 'Wifi')
+  sort_order integer not null default 0
+);
+
+-- ============================================================
 -- TABLA: space_amenities
--- Lista fija de amenities como valores controlados
+-- Relación espacio ↔ amenity via FK (no texto hardcoded)
 -- ============================================================
 create table space_amenities (
-  space_id uuid not null references spaces(id) on delete cascade,
-  amenity  text not null check (amenity in (
-    'wifi',
-    'tv_monitor',
-    'projector',
-    'kitchen',
-    'oven',
-    'refrigerator',
-    'air_conditioning',
-    'heating',
-    'parking',
-    'garden',
-    'pool',
-    'bbq',
-    'sound_system',
-    'bicycle_parking',
-    'bathrooms',
-    'disability_access'
-  )),
-  primary key (space_id, amenity)
+  space_id   uuid not null references spaces(id) on delete cascade,
+  amenity_id uuid not null references amenities(id) on delete cascade,
+  primary key (space_id, amenity_id)
 );
 
 -- ============================================================
@@ -336,6 +342,7 @@ Ejecutar después del schema. Esto es la capa de seguridad que reemplaza un back
 -- ============================================================
 alter table profiles enable row level security;
 alter table spaces enable row level security;
+alter table amenities enable row level security;
 alter table space_amenities enable row level security;
 alter table space_images enable row level security;
 alter table weekly_schedules enable row level security;
@@ -382,14 +389,20 @@ create policy "spaces: admin delete own" on spaces
   for delete using (admin_id = auth.uid());
 
 -- ============================================================
+-- AMENITIES (tabla maestra — lectura pública)
+-- ============================================================
+create policy "amenities: public read" on amenities
+  for select using (true);
+
+-- ============================================================
 -- SPACE_AMENITIES
 -- ============================================================
-create policy "amenities: public read" on space_amenities
+create policy "space_amenities: public read" on space_amenities
   for select using (
     exists (select 1 from spaces where id = space_id and is_published = true)
   );
 
-create policy "amenities: admin manage own" on space_amenities
+create policy "space_amenities: admin manage own" on space_amenities
   for all using (
     exists (select 1 from spaces where id = space_id and admin_id = auth.uid())
   );
@@ -567,6 +580,15 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
 
 export type UserRole = 'admin' | 'superadmin'
 
+// Registro de amenity tal como viene de la tabla `amenities`
+export interface AmenityRecord {
+  id: string
+  key: string        // ej. 'wifi', 'pool'
+  name: string       // ej. 'WiFi', 'Piscina'
+  icon: string       // nombre del ícono Lucide (ej. 'Wifi')
+  sort_order: number
+}
+
 export interface Profile {
   id: string
   role: UserRole
@@ -575,12 +597,6 @@ export interface Profile {
 }
 
 export type SpaceType = 'casa' | 'sala' | 'estudio' | 'oficina' | 'galeria' | 'otro'
-
-export type Amenity =
-  | 'wifi' | 'tv_monitor' | 'projector' | 'kitchen' | 'oven'
-  | 'refrigerator' | 'air_conditioning' | 'heating' | 'parking'
-  | 'garden' | 'pool' | 'bbq' | 'sound_system' | 'bicycle_parking'
-  | 'bathrooms' | 'disability_access'
 
 export interface Space {
   id: string
@@ -598,7 +614,7 @@ export interface Space {
   created_at: string
   updated_at: string
   // relaciones (se cargan con joins)
-  space_amenities?: { amenity: Amenity }[]
+  space_amenities?: { amenity_id: string }[]
   space_images?: SpaceImage[]
 }
 
@@ -650,7 +666,7 @@ export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
 export interface Booking {
   id: string
   space_id: string
-  block_id: string
+  block_id: string | null   // nullable: el bloque puede haber sido eliminado
   date: string
   start_time: string
   end_time: string
@@ -664,6 +680,35 @@ export interface Booking {
   updated_at: string
   // relaciones opcionales
   spaces?: Pick<Space, 'id' | 'title' | 'slug'>
+}
+
+export interface CreateSpacePayload {
+  admin_id: string
+  title: string
+  slug: string
+  space_type: SpaceType | null
+  description: string | null
+  capacity: number | null
+  size_m2: number | null
+  region: string | null
+  city: string | null
+  address: string | null
+  is_published: boolean
+}
+
+export type UpdateSpacePayload = Partial<Omit<CreateSpacePayload, 'admin_id'>>
+
+export interface CreateBookingPayload {
+  space_id: string
+  block_id: string
+  date: string
+  start_time: string
+  end_time: string
+  block_name: string
+  customer_name: string
+  customer_email: string
+  customer_phone?: string | null
+  notes?: string | null
 }
 
 export type SlotStatus = 'AVAILABLE' | 'BLOCKED' | 'PENDING' | 'CONFIRMED'
@@ -722,15 +767,21 @@ export interface SimpleSlot {
 ```typescript
 // src/stores/auth.store.ts
 // Estado:
-//   user: User | null          (de Supabase Auth)
-//   profile: Profile | null    (de tabla profiles)
+//   user: User | null             (de Supabase Auth)
+//   profile: Profile | null       (de tabla profiles)
 //   loading: boolean
+//   isPasswordRecovery: boolean   (flujo recuperación de contraseña)
+//   isInviteSetup: boolean        (flujo setup de cuenta para usuario invitado)
 //
 // Actions:
-//   initialize()   → llama supabase.auth.getSession() al montar la app
-//   login(email, password) → supabase.auth.signInWithPassword()
-//   logout()       → supabase.auth.signOut()
-//   fetchProfile() → select from profiles where id = user.id
+//   initialize()              → inspecciona el hash de la URL buscando type=invite o
+//                               type=recovery ANTES de que Supabase lo consuma, luego
+//                               llama supabase.auth.getSession()
+//   login(email, password)    → supabase.auth.signInWithPassword()
+//   logout()                  → supabase.auth.signOut()
+//   fetchProfile()            → select from profiles where id = user.id
+//   setPasswordRecovery(val)  → setter para isPasswordRecovery
+//   setInviteSetup(val)       → setter para isInviteSetup
 //
 // Getters:
 //   isAuthenticated: boolean
@@ -798,25 +849,29 @@ El formulario de creación/edición de un espacio incluye estas secciones:
 - `city` — select controlado (ciudades filtradas por región)
 - `address` — texto libre (referencial, sin geolocalización en MVP)
 
-### Facilidades (lista fija con checkboxes + íconos)
-| Key | Label |
-|-----|-------|
-| wifi | WiFi |
-| tv_monitor | TV / Monitor |
-| projector | Proyector |
-| kitchen | Cocina |
-| oven | Horno |
-| refrigerator | Refrigerador |
-| air_conditioning | Aire Acondicionado |
-| heating | Calefacción |
-| parking | Estacionamiento |
-| garden | Jardín |
-| pool | Piscina |
-| bbq | Parrilla / BBQ |
-| sound_system | Sistema de Sonido |
-| bicycle_parking | Bicicletero |
-| bathrooms | Baños |
-| disability_access | Acceso para discapacitados |
+### Facilidades (database-driven, con íconos Lucide)
+Los amenities se cargan desde la tabla `amenities` (via `amenities.service.ts` + `useAmenities()`). No son hardcodeados en el frontend. Cada registro tiene `key`, `name`, `icon` (nombre de ícono Lucide) y `sort_order`.
+
+Los datos iniciales a insertar en la tabla `amenities`:
+
+| key | name | icon Lucide |
+|-----|------|-------------|
+| wifi | WiFi | Wifi |
+| tv_monitor | TV / Monitor | Monitor |
+| projector | Proyector | Projector |
+| kitchen | Cocina | UtensilsCrossed |
+| oven | Horno | Flame |
+| refrigerator | Refrigerador | Refrigerator |
+| air_conditioning | Aire Acondicionado | Wind |
+| heating | Calefacción | Thermometer |
+| parking | Estacionamiento | Car |
+| garden | Jardín | Trees |
+| pool | Piscina | Waves |
+| bbq | Parrilla / BBQ | Flame |
+| sound_system | Sistema de Sonido | Music |
+| bicycle_parking | Bicicletero | Bike |
+| bathrooms | Baños | Bath |
+| disability_access | Acceso para discapacitados | Accessibility |
 
 ### Imágenes
 - Upload múltiple de imágenes (jpeg, png, webp — máx 5MB c/u)
@@ -994,4 +1049,40 @@ Para evitar scope creep, estas features están explícitamente fuera del MVP:
 
 ---
 
-*Documento generado para Claude Code. Versión MVP — Marzo 2026.*
+## 20. Estado de Implementación (Marzo 2026)
+
+### Módulos completados ✅
+
+| Módulo | Estado | Notas |
+|--------|--------|-------|
+| Auth (login / logout) | ✅ Completo | Login, logout, recuperación de contraseña, guards de ruta, flujo de invitación de admin |
+| Auth — setup de cuenta (usuario invitado) | ✅ Completo | `SetupAccountView.vue`; detecta `type=invite` en URL hash; distingue flujo invitación vs recuperación de contraseña |
+| Espacios — listado público | ✅ Completo | Filtros por región/ciudad, tarjetas, galería |
+| Espacios — detalle público | ✅ Completo | Imágenes, amenities, calendario de disponibilidad |
+| Espacios — formulario admin | ✅ Completo | Crear y editar con imágenes, amenities DB-driven, slug automático |
+| Espacios — gestión admin | ✅ Completo | Listado, publicar/despublicar, eliminar |
+| Disponibilidad — horario semanal | ✅ Completo | Bloques horarios + asignación por día de semana |
+| Reservas — formulario cliente | ✅ Completo | Calendario, selector de bloque, formulario, confirmación |
+| Reservas — dashboard admin | ✅ Completo | Listado con filtros (espacio, estado), métricas por estado (total/pendiente/confirmado/cancelado), acciones rápidas, sorting PENDING primero |
+| Reservas — calendario admin | ✅ Completo | Vista mensual, panel lateral con slots, bloquear/desbloquear/confirmar/cancelar |
+| Amenities — sistema DB-driven | ✅ Completo | Tabla `amenities`, `amenities.service.ts`, `useAmenities()`, íconos Lucide |
+
+### Decisiones de implementación tomadas
+
+- **Amenities database-driven:** En lugar del `CHECK IN (...)` del spec original, se usa una tabla `amenities` con FK. Esto permite agregar/editar amenities sin tocar el código.
+- **`Booking.block_id` es nullable:** El bloque puede haber sido eliminado después de crear la reserva. Los datos del bloque se preservan en `start_time`, `end_time`, `block_name` (campos desnormalizados).
+- **`src/constants/`:** Directorio nuevo para constantes de dominio reutilizables (`REGIONS_AND_CITIES`, `LUCIDE_ICON_MAP`, `generateSlug()`).
+- **`BlocksManager.vue`** reemplaza al `TimeBlockForm.vue` standalone del spec — es un componente de gestión CRUD inline de bloques dentro de `AdminAvailabilityView`.
+- **Cache de schedule en `useSlots.ts`:** El schedule se cachea en memoria para evitar re-fetches al navegar entre fechas del mismo espacio.
+- **Flujo invite vs recovery diferenciados:** Se agregaron `isInviteSetup` e `isPasswordRecovery` al auth store. `initialize()` inspecciona el hash de la URL antes de que Supabase lo consuma para distinguir ambos flujos y dirigir al usuario a la vista correcta (`SetupAccountView` vs `UpdatePasswordView`).
+- **Switch `is_published` con `v-model`:** En `SpaceForm.vue` se usa `v-model="form.is_published"` en lugar de `v-model:checked` para que reka-ui sincronice correctamente el estado visual del Switch con el valor real del espacio.
+
+### Pendiente para siguientes fases
+
+- ❌ Emails automáticos de notificación (Resend)
+- ❌ Pasarela de pagos
+- ❌ Panel superadmin
+
+---
+
+*Documento generado para Claude Code. Versión MVP — Marzo 2026. Última actualización: 18/03/2026 (rev. 2).*

@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { Space, SpaceImage, CreateSpacePayload, UpdateSpacePayload } from '@/types'
+import type { Space, CreateSpacePayload, UpdateSpacePayload } from '@/types'
 
 export const spacesService = {
   async getPublished(filters?: { region?: string; city?: string }): Promise<Space[]> {
@@ -105,38 +105,4 @@ export const spacesService = {
     }
   },
 
-  async uploadImage(spaceId: string, file: File, sortOrder = 0): Promise<SpaceImage> {
-    const ext = file.name.split('.').pop() ?? 'jpg'
-    const storagePath = `${spaceId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
-    const { error: uploadError } = await supabase.storage
-      .from('space-images')
-      .upload(storagePath, file)
-    if (uploadError) throw uploadError
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('space-images')
-      .getPublicUrl(storagePath)
-
-    const { data, error: insertError } = await supabase
-      .from('space_images')
-      .insert({ space_id: spaceId, url: publicUrl, storage_path: storagePath, sort_order: sortOrder })
-      .select()
-      .single()
-    if (insertError) throw insertError
-    return data
-  },
-
-  async deleteImage(image: SpaceImage): Promise<void> {
-    const { error: storageError } = await supabase.storage
-      .from('space-images')
-      .remove([image.storage_path])
-    if (storageError) throw storageError
-
-    const { error: dbError } = await supabase
-      .from('space_images')
-      .delete()
-      .eq('id', image.id)
-    if (dbError) throw dbError
-  },
 }

@@ -1,6 +1,8 @@
 import { reactive, ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { spacesService } from '../services/spaces.service'
+import { imagesService } from '../services/images.service'
+import type { CompressionMeta } from '../services/images.service'
 import { generateSlug, REGIONS_AND_CITIES } from '@/constants/spaces'
 import type { SpaceImage, SpaceType } from '@/types'
 
@@ -26,6 +28,8 @@ export function useSpaceForm(spaceId?: string) {
   const existingImages = ref<SpaceImage[]>([])
   const pendingFiles = ref<File[]>([])
   const pendingPreviews = ref<string[]>([])
+  const pendingCompressionMetas = ref<CompressionMeta[]>([])
+  const uploadingCount = ref(0)
   const loading = ref(false)
   const loadingSpace = ref(false)
   const error = ref<string | null>(null)
@@ -78,11 +82,19 @@ export function useSpaceForm(spaceId?: string) {
     return null
   }
 
-  function addPendingFile(file: File): string | null {
+  async function addPendingFile(file: File): Promise<string | null> {
     const validationError = validateFile(file)
     if (validationError) return validationError
-    pendingFiles.value.push(file)
-    pendingPreviews.value.push(URL.createObjectURL(file))
+
+    try {
+      const { blob, meta } = await imagesService.compress(file)
+      const compressedFile = new File([blob], file.name, { type: 'image/jpeg' })
+      pendingFiles.value.push(compressedFile)
+      pendingPreviews.value.push(URL.createObjectURL(blob))
+      pendingCompressionMetas.value.push(meta)
+    } catch {
+      return 'Error al procesar la imagen.'
+    }
     return null
   }
 
@@ -90,20 +102,22 @@ export function useSpaceForm(spaceId?: string) {
     URL.revokeObjectURL(pendingPreviews.value[index])
     pendingFiles.value.splice(index, 1)
     pendingPreviews.value.splice(index, 1)
+    pendingCompressionMetas.value.splice(index, 1)
   }
 
   async function addImageInEditMode(file: File): Promise<string | null> {
     if (!spaceId) return null
     const validationError = validateFile(file)
     if (validationError) return validationError
-    loading.value = true
+
+    uploadingCount.value++
     try {
-      const image = await spacesService.uploadImage(spaceId, file, existingImages.value.length)
+      const { image } = await imagesService.upload(spaceId, file, existingImages.value.length)
       existingImages.value.push(image)
     } catch (e) {
       return e instanceof Error ? e.message : 'Error al subir la imagen.'
     } finally {
-      loading.value = false
+      uploadingCount.value--
     }
     return null
   }
@@ -111,7 +125,7 @@ export function useSpaceForm(spaceId?: string) {
   async function removeExistingImage(image: SpaceImage) {
     existingImages.value = existingImages.value.filter(i => i.id !== image.id)
     try {
-      await spacesService.deleteImage(image)
+      await imagesService.delete(image)
     } catch (e) {
       existingImages.value.push(image)
       error.value = e instanceof Error ? e.message : 'Error al eliminar la imagen.'
@@ -155,7 +169,8 @@ export function useSpaceForm(spaceId?: string) {
         const imageErrors: string[] = []
         for (let i = 0; i < pendingFiles.value.length; i++) {
           try {
-            await spacesService.uploadImage(space.id, pendingFiles.value[i], i)
+            // Files are already compressed from addPendingFile
+            await imagesService.upload(space.id, pendingFiles.value[i], i)
           } catch {
             imageErrors.push(pendingFiles.value[i].name)
           }
@@ -163,7 +178,6 @@ export function useSpaceForm(spaceId?: string) {
         cleanupPreviews()
 
         if (imageErrors.length > 0) {
-          // Espacio creado pero algunas imágenes fallaron — no es error fatal
           error.value = `Espacio creado, pero estas imágenes no se subieron: ${imageErrors.join(', ')}`
         }
 
@@ -171,7 +185,6 @@ export function useSpaceForm(spaceId?: string) {
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Error al guardar el espacio.'
-      // Slug duplicado
       if (msg.includes('23505') || msg.includes('duplicate')) {
         error.value = 'Ya existe un espacio con ese nombre. Intenta un título diferente.'
       } else {
@@ -189,6 +202,8 @@ export function useSpaceForm(spaceId?: string) {
     existingImages,
     pendingFiles,
     pendingPreviews,
+    pendingCompressionMetas,
+    uploadingCount,
     loading,
     loadingSpace,
     error,

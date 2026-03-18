@@ -120,7 +120,7 @@
       <h2 class="text-base font-semibold">Publicación</h2>
       <Separator />
       <div class="flex items-center gap-3">
-        <Switch id="is_published" v-model:checked="form.is_published" />
+        <Switch id="is_published" v-model="form.is_published" />
         <Label for="is_published" class="cursor-pointer">
           {{ form.is_published ? 'Publicado — visible para clientes' : 'Borrador — solo visible para ti' }}
         </Label>

@@ -767,15 +767,21 @@ export interface SimpleSlot {
 ```typescript
 // src/stores/auth.store.ts
 // Estado:
-//   user: User | null          (de Supabase Auth)
-//   profile: Profile | null    (de tabla profiles)
+//   user: User | null             (de Supabase Auth)
+//   profile: Profile | null       (de tabla profiles)
 //   loading: boolean
+//   isPasswordRecovery: boolean   (flujo recuperación de contraseña)
+//   isInviteSetup: boolean        (flujo setup de cuenta para usuario invitado)
 //
 // Actions:
-//   initialize()   → llama supabase.auth.getSession() al montar la app
-//   login(email, password) → supabase.auth.signInWithPassword()
-//   logout()       → supabase.auth.signOut()
-//   fetchProfile() → select from profiles where id = user.id
+//   initialize()              → inspecciona el hash de la URL buscando type=invite o
+//                               type=recovery ANTES de que Supabase lo consuma, luego
+//                               llama supabase.auth.getSession()
+//   login(email, password)    → supabase.auth.signInWithPassword()
+//   logout()                  → supabase.auth.signOut()
+//   fetchProfile()            → select from profiles where id = user.id
+//   setPasswordRecovery(val)  → setter para isPasswordRecovery
+//   setInviteSetup(val)       → setter para isInviteSetup
 //
 // Getters:
 //   isAuthenticated: boolean
@@ -1049,14 +1055,15 @@ Para evitar scope creep, estas features están explícitamente fuera del MVP:
 
 | Módulo | Estado | Notas |
 |--------|--------|-------|
-| Auth (login / logout) | ✅ Completo | Login, logout, recuperación de contraseña, guards de ruta |
+| Auth (login / logout) | ✅ Completo | Login, logout, recuperación de contraseña, guards de ruta, flujo de invitación de admin |
+| Auth — setup de cuenta (usuario invitado) | ✅ Completo | `SetupAccountView.vue`; detecta `type=invite` en URL hash; distingue flujo invitación vs recuperación de contraseña |
 | Espacios — listado público | ✅ Completo | Filtros por región/ciudad, tarjetas, galería |
 | Espacios — detalle público | ✅ Completo | Imágenes, amenities, calendario de disponibilidad |
 | Espacios — formulario admin | ✅ Completo | Crear y editar con imágenes, amenities DB-driven, slug automático |
 | Espacios — gestión admin | ✅ Completo | Listado, publicar/despublicar, eliminar |
 | Disponibilidad — horario semanal | ✅ Completo | Bloques horarios + asignación por día de semana |
 | Reservas — formulario cliente | ✅ Completo | Calendario, selector de bloque, formulario, confirmación |
-| Reservas — dashboard admin | ✅ Completo | Listado con filtros (espacio, estado, fecha), acciones rápidas |
+| Reservas — dashboard admin | ✅ Completo | Listado con filtros (espacio, estado), métricas por estado (total/pendiente/confirmado/cancelado), acciones rápidas, sorting PENDING primero |
 | Reservas — calendario admin | ✅ Completo | Vista mensual, panel lateral con slots, bloquear/desbloquear/confirmar/cancelar |
 | Amenities — sistema DB-driven | ✅ Completo | Tabla `amenities`, `amenities.service.ts`, `useAmenities()`, íconos Lucide |
 
@@ -1067,6 +1074,8 @@ Para evitar scope creep, estas features están explícitamente fuera del MVP:
 - **`src/constants/`:** Directorio nuevo para constantes de dominio reutilizables (`REGIONS_AND_CITIES`, `LUCIDE_ICON_MAP`, `generateSlug()`).
 - **`BlocksManager.vue`** reemplaza al `TimeBlockForm.vue` standalone del spec — es un componente de gestión CRUD inline de bloques dentro de `AdminAvailabilityView`.
 - **Cache de schedule en `useSlots.ts`:** El schedule se cachea en memoria para evitar re-fetches al navegar entre fechas del mismo espacio.
+- **Flujo invite vs recovery diferenciados:** Se agregaron `isInviteSetup` e `isPasswordRecovery` al auth store. `initialize()` inspecciona el hash de la URL antes de que Supabase lo consuma para distinguir ambos flujos y dirigir al usuario a la vista correcta (`SetupAccountView` vs `UpdatePasswordView`).
+- **Switch `is_published` con `v-model`:** En `SpaceForm.vue` se usa `v-model="form.is_published"` en lugar de `v-model:checked` para que reka-ui sincronice correctamente el estado visual del Switch con el valor real del espacio.
 
 ### Pendiente para siguientes fases
 
@@ -1076,4 +1085,4 @@ Para evitar scope creep, estas features están explícitamente fuera del MVP:
 
 ---
 
-*Documento generado para Claude Code. Versión MVP — Marzo 2026. Última actualización: 18/03/2026.*
+*Documento generado para Claude Code. Versión MVP — Marzo 2026. Última actualización: 18/03/2026 (rev. 2).*

@@ -1,11 +1,11 @@
 import { supabase } from '@/lib/supabase'
-import type { Space, SpaceImage, Amenity, CreateSpacePayload, UpdateSpacePayload } from '@/types'
+import type { Space, SpaceImage, CreateSpacePayload, UpdateSpacePayload } from '@/types'
 
 export const spacesService = {
   async getPublished(filters?: { region?: string; city?: string }): Promise<Space[]> {
     let query = supabase
       .from('spaces')
-      .select('*, space_amenities(amenity), space_images(id, url, sort_order)')
+      .select('*, space_amenities(amenity_id), space_images(id, url, sort_order)')
       .eq('is_published', true)
       .order('created_at', { ascending: false })
       .order('sort_order', { referencedTable: 'space_images', ascending: true })
@@ -21,7 +21,7 @@ export const spacesService = {
   async getBySlug(slug: string): Promise<Space> {
     const { data, error } = await supabase
       .from('spaces')
-      .select('*, space_amenities(amenity), space_images(*)')
+      .select('*, space_amenities(amenity_id), space_images(*)')
       .eq('slug', slug)
       .eq('is_published', true)
       .order('sort_order', { referencedTable: 'space_images', ascending: true })
@@ -43,7 +43,7 @@ export const spacesService = {
   async getById(id: string): Promise<Space> {
     const { data, error } = await supabase
       .from('spaces')
-      .select('*, space_amenities(amenity), space_images(*)')
+      .select('*, space_amenities(amenity_id), space_images(*)')
       .eq('id', id)
       .order('sort_order', { referencedTable: 'space_images', ascending: true })
       .single()
@@ -85,19 +85,24 @@ export const spacesService = {
     if (error) throw error
   },
 
-  async setAmenities(spaceId: string, amenities: Amenity[]): Promise<void> {
+  async setAmenities(spaceId: string, amenityIds: string[]): Promise<void> {
     const { error: deleteError } = await supabase
       .from('space_amenities')
       .delete()
       .eq('space_id', spaceId)
-    if (deleteError) throw deleteError
+    if (deleteError) throw new Error(`Error al limpiar facilidades: ${deleteError.message}`)
 
-    if (amenities.length === 0) return
+    if (amenityIds.length === 0) return
 
-    const { error: insertError } = await supabase
+    const { data, error: insertError } = await supabase
       .from('space_amenities')
-      .insert(amenities.map(amenity => ({ space_id: spaceId, amenity })))
-    if (insertError) throw insertError
+      .insert(amenityIds.map(amenity_id => ({ space_id: spaceId, amenity_id })))
+      .select()
+
+    if (insertError) throw new Error(`Error al guardar facilidades: ${insertError.message} (${insertError.code})`)
+    if (!data || data.length !== amenityIds.length) {
+      throw new Error('No se pudieron guardar las facilidades. Verifica los permisos en Supabase (RLS).')
+    }
   },
 
   async uploadImage(spaceId: string, file: File, sortOrder = 0): Promise<SpaceImage> {

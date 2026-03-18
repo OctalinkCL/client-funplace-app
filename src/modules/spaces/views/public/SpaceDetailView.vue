@@ -61,17 +61,9 @@
       </div>
 
       <!-- Facilidades -->
-      <div v-if="amenities.length > 0" class="space-y-3">
+      <div v-if="space.space_amenities && space.space_amenities.length > 0" class="space-y-3">
         <h2 class="text-lg font-semibold">Facilidades</h2>
-        <div class="flex flex-wrap gap-2">
-          <span
-            v-for="amenity in amenities"
-            :key="amenity"
-            class="inline-flex items-center rounded-md border px-3 py-1 text-sm"
-          >
-            {{ AMENITY_LABELS[amenity] }}
-          </span>
-        </div>
+        <SpaceAmenities :space-amenities="space.space_amenities ?? []" :amenity-list="amenityList" />
       </div>
 
       <Separator />
@@ -118,18 +110,22 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { spacesService } from '../../services/spaces.service'
-import { SPACE_TYPE_LABELS, AMENITY_LABELS } from '@/constants/spaces'
+import { SPACE_TYPE_LABELS } from '@/constants/spaces'
+import SpaceAmenities from '../../components/public/SpaceAmenities.vue'
+import { useAmenities } from '../../composables/useAmenities'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import AvailabilityCalendar from '@/modules/bookings/components/public/AvailabilityCalendar.vue'
 import SlotSelector from '@/modules/bookings/components/public/SlotSelector.vue'
 import { clearSlotsCache } from '@/modules/bookings/composables/useSlots'
-import type { Space, Amenity, SimpleSlot } from '@/types'
+import type { Space, SimpleSlot } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
 const slug = route.params.slug as string
+
+const { amenities: amenityList, fetchAmenities } = useAmenities()
 
 const space = ref<Space | null>(null)
 const loading = ref(false)
@@ -137,10 +133,6 @@ const error = ref<string | null>(null)
 const activeImage = ref('')
 const selectedDate = ref('')
 const selectedSlot = ref<SimpleSlot | null>(null)
-
-const amenities = computed<Amenity[]>(
-  () => space.value?.space_amenities?.map(a => a.amenity) ?? [],
-)
 
 const MONTHS_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 const DAYS_ES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
@@ -172,6 +164,7 @@ function goToBooking() {
 
 onMounted(async () => {
   clearSlotsCache()
+  fetchAmenities()
   loading.value = true
   try {
     space.value = await spacesService.getBySlug(slug)

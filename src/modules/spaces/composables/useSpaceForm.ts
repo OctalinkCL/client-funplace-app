@@ -1,8 +1,8 @@
-import { reactive, ref, computed, watch, onUnmounted } from 'vue'
+import { reactive, ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { spacesService } from '../services/spaces.service'
 import { generateSlug, REGIONS_AND_CITIES } from '@/constants/spaces'
-import type { Amenity, SpaceImage, SpaceType } from '@/types'
+import type { SpaceImage, SpaceType } from '@/types'
 
 export function useSpaceForm(spaceId?: string) {
   const auth = useAuthStore()
@@ -22,7 +22,7 @@ export function useSpaceForm(spaceId?: string) {
     is_published: false,
   })
 
-  const selectedAmenities = ref<Amenity[]>([])
+  const selectedAmenities = ref<string[]>([])
   const existingImages = ref<SpaceImage[]>([])
   const pendingFiles = ref<File[]>([])
   const pendingPreviews = ref<string[]>([])
@@ -56,10 +56,11 @@ export function useSpaceForm(spaceId?: string) {
       form.capacity = space.capacity
       form.size_m2 = space.size_m2
       form.region = space.region
+      await nextTick() // allow region watcher to fire before setting city
       form.city = space.city
       form.address = space.address ?? ''
       form.is_published = space.is_published
-      selectedAmenities.value = (space.space_amenities ?? []).map(a => a.amenity)
+      selectedAmenities.value = (space.space_amenities ?? []).map(a => a.amenity_id)
       existingImages.value = space.space_images ?? []
     } finally {
       loadingSpace.value = false

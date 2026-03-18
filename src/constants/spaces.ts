@@ -1,4 +1,4 @@
-import type { Amenity, SpaceType } from '@/types'
+import type { SpaceType } from '@/types'
 
 // ============================================================
 // Regiones y ciudades de Chile
@@ -23,32 +23,6 @@ export const REGIONS_AND_CITIES = {
 } as const
 
 export const REGIONS = Object.keys(REGIONS_AND_CITIES)
-
-// ============================================================
-// Labels en español para amenities
-// ============================================================
-export const AMENITY_LABELS: Record<Amenity, string> = {
-  wifi: 'WiFi',
-  tv_monitor: 'TV / Monitor',
-  projector: 'Proyector',
-  kitchen: 'Cocina',
-  oven: 'Horno',
-  refrigerator: 'Refrigerador',
-  air_conditioning: 'Aire Acondicionado',
-  heating: 'Calefacción',
-  parking: 'Estacionamiento',
-  garden: 'Jardín',
-  pool: 'Piscina',
-  bbq: 'Parrilla / BBQ',
-  sound_system: 'Sistema de Sonido',
-  bicycle_parking: 'Bicicletero',
-  bathrooms: 'Baños',
-  disability_access: 'Acceso para discapacitados',
-}
-
-export const AMENITY_LIST = (Object.entries(AMENITY_LABELS) as [Amenity, string][]).map(
-  ([key, label]) => ({ key, label }),
-)
 
 // ============================================================
 // Labels en español para tipos de espacio

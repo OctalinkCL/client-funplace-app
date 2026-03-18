@@ -97,7 +97,7 @@
     <section class="space-y-4">
       <h2 class="text-base font-semibold">Facilidades</h2>
       <Separator />
-      <AmenitiesSelector v-model="selectedAmenities" />
+      <AmenitiesSelector v-model="selectedAmenities" :amenities="amenities" />
     </section>
 
     <!-- Imágenes -->
@@ -144,6 +144,7 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSpaceForm } from '../../composables/useSpaceForm'
+import { useAmenities } from '../../composables/useAmenities'
 import { SPACE_TYPE_LIST, REGIONS } from '@/constants/spaces'
 import AmenitiesSelector from './AmenitiesSelector.vue'
 import ImageUploader from './ImageUploader.vue'
@@ -170,7 +171,10 @@ const {
   removeExistingImage, submit,
 } = useSpaceForm(props.spaceId)
 
+const { amenities, fetchAmenities } = useAmenities()
+
 onMounted(() => {
+  fetchAmenities()
   if (props.spaceId) loadSpace(props.spaceId)
 })
 

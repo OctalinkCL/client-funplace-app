@@ -11,9 +11,14 @@ export const useAuthStore = defineStore('auth', () => {
   const profile = ref<Profile | null>(null)
   const loading = ref(false)
   const isPasswordRecovery = ref(false)
+  const isInviteSetup = ref(false)
 
   function setPasswordRecovery(value: boolean) {
     isPasswordRecovery.value = value
+  }
+
+  function setInviteSetup(value: boolean) {
+    isInviteSetup.value = value
   }
 
   const isAuthenticated = computed(() => !!user.value)
@@ -23,14 +28,30 @@ export const useAuthStore = defineStore('auth', () => {
   function initialize() {
     if (!_initPromise) {
       _initPromise = (async () => {
+        // Leer el hash ANTES de que getSession() lo procese y limpie
+        const hashParams = new URLSearchParams(window.location.hash.slice(1))
+        const urlType = hashParams.get('type')
+        if (urlType === 'invite' || urlType === 'recovery') {
+          isPasswordRecovery.value = true
+          isInviteSetup.value = urlType === 'invite'
+        }
+
         const { data: { session } } = await supabase.auth.getSession()
         user.value = session?.user ?? null
         if (user.value) await fetchProfile()
 
-        supabase.auth.onAuthStateChange(async (_event, session) => {
+        supabase.auth.onAuthStateChange(async (event, session) => {
           user.value = session?.user ?? null
           if (session?.user && !profile.value) await fetchProfile()
-          if (!session?.user) profile.value = null
+          if (!session?.user) {
+            profile.value = null
+            isPasswordRecovery.value = false
+            isInviteSetup.value = false
+          }
+          // Fallback: detectar evento en caso de que el hash ya fue procesado
+          if (event === 'PASSWORD_RECOVERY') {
+            isPasswordRecovery.value = true
+          }
         })
       })()
     }
@@ -66,5 +87,5 @@ export const useAuthStore = defineStore('auth', () => {
     if (!error) profile.value = data
   }
 
-  return { user, profile, loading, isAuthenticated, isAdmin, isSuperAdmin, isPasswordRecovery, initialize, login, logout, fetchProfile, setPasswordRecovery }
+  return { user, profile, loading, isAuthenticated, isAdmin, isSuperAdmin, isPasswordRecovery, isInviteSetup, initialize, login, logout, fetchProfile, setPasswordRecovery, setInviteSetup }
 })

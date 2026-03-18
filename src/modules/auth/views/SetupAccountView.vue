@@ -1,14 +1,26 @@
 <template>
   <Card class="w-full">
     <CardHeader>
-      <CardTitle>Crear contraseña</CardTitle>
-      <CardDescription>Elige una contraseña para tu cuenta.</CardDescription>
+      <CardTitle>Bienvenido a Funplace</CardTitle>
+      <CardDescription>Configura tu nombre y contraseña para activar tu cuenta.</CardDescription>
     </CardHeader>
 
     <CardContent>
       <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
         <div class="flex flex-col gap-1.5">
-          <Label for="password">Nueva contraseña</Label>
+          <Label for="fullName">Nombre completo</Label>
+          <Input
+            id="fullName"
+            v-model="fullName"
+            type="text"
+            autocomplete="name"
+            placeholder="Tu nombre"
+            required
+          />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <Label for="password">Contraseña</Label>
           <Input
             id="password"
             v-model="password"
@@ -34,7 +46,7 @@
         <p v-if="error" class="text-sm text-destructive">{{ error }}</p>
 
         <Button type="submit" :disabled="loading" class="w-full">
-          {{ loading ? 'Guardando...' : 'Guardar contraseña' }}
+          {{ loading ? 'Configurando...' : 'Activar cuenta' }}
         </Button>
       </form>
     </CardContent>
@@ -53,6 +65,7 @@ import { Button } from '@/components/ui/button'
 
 const router = useRouter()
 const auth = useAuthStore()
+const fullName = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const error = ref('')
@@ -68,12 +81,24 @@ async function handleSubmit() {
 
   loading.value = true
   try {
-    const { error: err } = await supabase.auth.updateUser({ password: password.value })
-    if (err) throw err
+    const { error: authError } = await supabase.auth.updateUser({
+      password: password.value,
+      data: { full_name: fullName.value },
+    })
+    if (authError) throw authError
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ full_name: fullName.value })
+      .eq('id', auth.user!.id)
+    if (profileError) throw profileError
+
+    await auth.fetchProfile()
     auth.setPasswordRecovery(false)
+    auth.setInviteSetup(false)
     router.push({ name: 'admin-bookings' })
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Error al guardar la contraseña.'
+    error.value = e instanceof Error ? e.message : 'Error al configurar la cuenta.'
   } finally {
     loading.value = false
   }

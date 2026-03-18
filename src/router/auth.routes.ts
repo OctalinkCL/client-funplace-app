@@ -18,6 +18,12 @@ export const authRoutes: RouteRecordRaw[] = [
         meta: { guestOnly: false, requiresRecovery: true },
         component: () => import('@/modules/auth/views/UpdatePasswordView.vue'),
       },
+      {
+        path: 'setup-account',
+        name: 'setup-account',
+        meta: { guestOnly: false, requiresRecovery: true },
+        component: () => import('@/modules/auth/views/SetupAccountView.vue'),
+      },
     ],
   },
 ]

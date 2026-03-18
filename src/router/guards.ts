@@ -8,6 +8,13 @@ export function setupGuards(router: Router) {
     // Garantizar que la sesión esté cargada antes de verificar
     await auth.initialize()
 
+    // Modo recovery/invite: forzar navegación a la página correcta
+    if (auth.isPasswordRecovery) {
+      const target = auth.isInviteSetup ? 'setup-account' : 'update-password'
+      if (to.name !== target) return { name: target }
+      return true
+    }
+
     // Rutas solo para no autenticados (ej. /auth/login)
     if (to.meta.guestOnly && auth.isAuthenticated) {
       return { name: 'admin-bookings' }

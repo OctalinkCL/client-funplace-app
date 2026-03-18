@@ -5,6 +5,45 @@
       <h1 class="text-2xl font-semibold">Reservas</h1>
     </div>
 
+    <!-- Métricas -->
+    <div v-if="!loading" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div
+        class="rounded-lg border p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+        :class="{ 'ring-2 ring-ring': filterStatus === '' }"
+        @click="filterStatus = ''"
+      >
+        <p class="text-2xl font-bold">{{ totalCount }}</p>
+        <p class="text-xs text-muted-foreground mt-0.5">Total</p>
+      </div>
+
+      <div
+        class="rounded-lg border p-4 cursor-pointer hover:bg-orange-50 transition-colors bg-orange-50/40"
+        :class="{ 'ring-2 ring-orange-400': filterStatus === 'PENDING' }"
+        @click="filterStatus = filterStatus === 'PENDING' ? '' : 'PENDING'"
+      >
+        <p class="text-2xl font-bold text-orange-600">{{ pendingCount }}</p>
+        <p class="text-xs text-orange-600/80 mt-0.5">Pendientes</p>
+      </div>
+
+      <div
+        class="rounded-lg border p-4 cursor-pointer hover:bg-green-50 transition-colors"
+        :class="{ 'ring-2 ring-green-500': filterStatus === 'CONFIRMED' }"
+        @click="filterStatus = filterStatus === 'CONFIRMED' ? '' : 'CONFIRMED'"
+      >
+        <p class="text-2xl font-bold text-green-600">{{ confirmedCount }}</p>
+        <p class="text-xs text-green-600/80 mt-0.5">Confirmadas</p>
+      </div>
+
+      <div
+        class="rounded-lg border p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+        :class="{ 'ring-2 ring-ring': filterStatus === 'CANCELLED' }"
+        @click="filterStatus = filterStatus === 'CANCELLED' ? '' : 'CANCELLED'"
+      >
+        <p class="text-2xl font-bold text-muted-foreground">{{ cancelledCount }}</p>
+        <p class="text-xs text-muted-foreground mt-0.5">Canceladas</p>
+      </div>
+    </div>
+
     <!-- Filtros -->
     <div class="flex flex-wrap gap-3 mb-6">
       <select
@@ -117,6 +156,11 @@ const { bookings, loading, error, fetchByAdmin, updateStatus } = useBookings()
 const adminSpaces = ref<Space[]>([])
 const filterSpaceId = ref('')
 const filterStatus = ref('')
+
+const totalCount = computed(() => bookings.value.length)
+const pendingCount = computed(() => bookings.value.filter(b => b.status === 'PENDING').length)
+const confirmedCount = computed(() => bookings.value.filter(b => b.status === 'CONFIRMED').length)
+const cancelledCount = computed(() => bookings.value.filter(b => b.status === 'CANCELLED').length)
 
 const filteredBookings = computed(() => {
   let list = [...bookings.value]

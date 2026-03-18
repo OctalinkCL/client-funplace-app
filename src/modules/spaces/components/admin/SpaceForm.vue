@@ -107,6 +107,7 @@
       <ImageUploader
         :existing-images="existingImages"
         :pending-previews="pendingPreviews"
+        :pending-compression-metas="pendingCompressionMetas"
         :is-edit-mode="isEditMode"
         :uploading="loading"
         @add-file="handleAddFile"
@@ -165,7 +166,7 @@ const emit = defineEmits<{ saved: [spaceId: string] }>()
 const router = useRouter()
 
 const {
-  form, selectedAmenities, existingImages, pendingPreviews,
+  form, selectedAmenities, existingImages, pendingPreviews, pendingCompressionMetas,
   loading, loadingSpace, error, isEditMode, availableCities,
   loadSpace, addPendingFile, removePendingFile, addImageInEditMode,
   removeExistingImage, submit,
@@ -178,11 +179,11 @@ onMounted(() => {
   if (props.spaceId) loadSpace(props.spaceId)
 })
 
-function handleAddFile(file: File) {
+async function handleAddFile(file: File) {
   if (isEditMode.value) {
     addImageInEditMode(file)
   } else {
-    const err = addPendingFile(file)
+    const err = await addPendingFile(file)
     if (err) error.value = err
   }
 }

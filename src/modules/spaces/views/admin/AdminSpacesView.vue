@@ -67,6 +67,13 @@
             <Button
               variant="ghost"
               size="sm"
+              @click="router.push({ name: 'admin-calendar', params: { spaceId: space.id } })"
+            >
+              Calendario
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               @click="togglePublish(space)"
             >
               {{ space.is_published ? 'Despublicar' : 'Publicar' }}

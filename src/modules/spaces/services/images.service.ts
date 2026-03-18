@@ -13,11 +13,11 @@ export interface UploadResult {
 }
 
 const COMPRESSION_OPTIONS = {
-  maxSizeMB: 0.8,
+  maxSizeMB: 0.5,
   maxWidthOrHeight: 1200,
   useWebWorker: true,
   fileType: 'image/jpeg' as const,
-  initialQuality: 0.85,
+  initialQuality: 0.80,
 }
 
 export const imagesService = {

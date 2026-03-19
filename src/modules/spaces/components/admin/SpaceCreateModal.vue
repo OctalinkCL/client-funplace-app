@@ -1,29 +1,17 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div
-        v-if="open"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        @keydown.esc="close"
-      >
+      <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown.esc="close">
         <!-- Overlay -->
         <div class="absolute inset-0 bg-black/50" />
 
         <!-- Panel -->
-        <div
-          class="relative z-10 w-full max-w-lg bg-background rounded-xl shadow-xl flex flex-col max-h-[90vh]"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-title"
-        >
+        <div class="relative z-10 w-full max-w-lg bg-background rounded-xl shadow-xl flex flex-col max-h-[90vh]"
+          role="dialog" aria-modal="true" aria-labelledby="modal-title">
           <!-- Header -->
           <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
             <h2 id="modal-title" class="text-lg font-semibold">Nuevo espacio</h2>
-            <button
-              type="button"
-              class="text-muted-foreground hover:text-foreground transition-colors"
-              @click="close"
-            >
+            <button type="button" class="text-muted-foreground hover:text-foreground transition-colors" @click="close">
               <X class="w-5 h-5" />
             </button>
           </div>
@@ -33,13 +21,7 @@
             <!-- Nombre -->
             <div class="space-y-1.5">
               <Label for="create-title">Nombre del espacio *</Label>
-              <Input
-                id="create-title"
-                v-model="form.title"
-                required
-                autofocus
-                placeholder="Casa LimaLimón"
-              />
+              <Input id="create-title" v-model="form.title" required autofocus placeholder="Casa LimaLimón" />
               <p v-if="form.slug" class="text-xs text-muted-foreground">
                 URL: /espacios/{{ form.slug }}
               </p>
@@ -62,35 +44,20 @@
               </div>
               <div class="space-y-1.5">
                 <Label for="create-capacity">Capacidad</Label>
-                <Input
-                  id="create-capacity"
-                  v-model.number="form.capacity"
-                  type="number"
-                  min="1"
-                  placeholder="50 personas"
-                />
+                <Input id="create-capacity" v-model.number="form.capacity" type="number" min="1"
+                  placeholder="50 personas" />
               </div>
               <div class="space-y-1.5">
                 <Label for="create-size">Superficie (m²)</Label>
-                <Input
-                  id="create-size"
-                  v-model.number="form.size_m2"
-                  type="number"
-                  min="1"
-                  placeholder="120"
-                />
+                <Input id="create-size" v-model.number="form.size_m2" type="number" min="1" placeholder="120" />
               </div>
             </div>
 
             <!-- Descripción -->
             <div class="space-y-1.5">
               <Label for="create-description">Descripción</Label>
-              <Textarea
-                id="create-description"
-                v-model="form.description"
-                placeholder="Describe el espacio brevemente..."
-                rows="3"
-              />
+              <Textarea id="create-description" v-model="form.description"
+                placeholder="Describe el espacio brevemente..." rows="3" />
             </div>
 
             <!-- Región / Ciudad / Dirección -->
@@ -123,13 +90,13 @@
               </div>
               <div class="space-y-1.5">
                 <Label for="create-address">Dirección</Label>
-                <Input
-                  id="create-address"
-                  v-model="form.address"
-                  placeholder="Av. Providencia 1234"
-                />
+                <Input id="create-address" v-model="form.address" placeholder="Av. Providencia 1234" />
               </div>
             </div>
+
+            <PlaceSearchTest />
+
+            {{ form }}
 
             <!-- Error -->
             <p v-if="error" class="text-sm text-destructive">{{ error }}</p>
@@ -160,6 +127,7 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
+import PlaceSearchTest from './PlaceSearchTest.vue'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{
@@ -204,6 +172,7 @@ async function handleSubmit() {
 .modal-leave-active {
   transition: opacity 0.15s ease;
 }
+
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;

@@ -6,6 +6,13 @@
       <Button @click="router.push({ name: 'admin-space-new' })">Nuevo espacio</Button>
     </div>
 
+    <!-- TEST: Google Places API — remover antes de producción -->
+    <div class="mb-6 p-4 border-2 border-dashed border-yellow-400 rounded-lg bg-yellow-50 flex flex-col gap-4">
+      <p class="text-xs text-yellow-700 font-semibold">⚠️ TEST: Google Places API</p>
+      <PlaceSearchTest />
+      <PlaceSearchData />
+    </div>
+
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-20">
       <p class="text-muted-foreground">Cargando...</p>
@@ -97,6 +104,8 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSpaces } from '../../composables/useSpaces'
+import PlaceSearchTest from '../../components/admin/PlaceSearchTest.vue'
+import PlaceSearchData from '../../components/admin/PlaceSearchData.vue'
 import { SPACE_TYPE_LABELS } from '@/constants/spaces'
 import type { Space, SpaceType } from '@/types'
 import { Button } from '@/components/ui/button'

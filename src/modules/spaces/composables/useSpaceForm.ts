@@ -10,6 +10,7 @@ export function useSpaceForm(spaceId?: string) {
   const auth = useAuthStore()
 
   const isEditMode = computed(() => !!spaceId)
+  const slugSuffix = isEditMode.value ? undefined : Date.now().toString(36)
 
   const form = reactive({
     title: '',
@@ -36,9 +37,11 @@ export function useSpaceForm(spaceId?: string) {
   const loadingSpace = ref(false)
   const error = ref<string | null>(null)
 
-  // Auto-generate slug from title
+  // Auto-generate slug from title (only in create mode)
   watch(() => form.title, (title) => {
-    form.slug = generateSlug(title)
+    if (!isEditMode.value) {
+      form.slug = generateSlug(title, slugSuffix)
+    }
   })
 
   function applyPlaceData(place: PlaceResult) {
@@ -143,6 +146,14 @@ export function useSpaceForm(spaceId?: string) {
 
   async function submit(): Promise<string | null> {
     error.value = null
+    if (!form.title.trim()) {
+      error.value = 'El nombre del espacio es obligatorio.'
+      return null
+    }
+    if (!isEditMode.value && !form.address) {
+      error.value = 'Debes buscar y seleccionar una dirección.'
+      return null
+    }
     loading.value = true
     try {
       const payload = {

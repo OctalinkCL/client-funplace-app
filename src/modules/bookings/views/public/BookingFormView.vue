@@ -116,11 +116,14 @@ const form = reactive({ name: '', email: '', phone: '', notes: '' })
 const MONTHS_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 const DAYS_ES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
 
+function isValidDate(s: string) { return /^\d{4}-\d{2}-\d{2}$/.test(s) }
+function isValidUUID(s: string) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) }
+
 const formattedDate = computed(() => {
   if (!date) return ''
   const [y, m, d] = date.split('-').map(Number)
-  const dt = new Date(y, m - 1, d)
-  return `${DAYS_ES[dt.getDay()]} ${d} de ${MONTHS_ES[m - 1]} ${y}`
+  const dt = new Date(Date.UTC(y, m - 1, d))
+  return `${DAYS_ES[dt.getUTCDay()]} ${d} de ${MONTHS_ES[m - 1]} ${y}`
 })
 
 async function submitBooking() {
@@ -149,7 +152,10 @@ async function submitBooking() {
 }
 
 onMounted(async () => {
-  if (!date || !blockId) { slotUnavailable.value = true; return }
+  if (!date || !blockId || !isValidDate(date) || !isValidUUID(blockId)) {
+    slotUnavailable.value = true
+    return
+  }
   loading.value = true
   try {
     space.value = await spacesService.getBySlug(slug)

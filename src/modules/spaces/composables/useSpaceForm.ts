@@ -3,8 +3,8 @@ import { useAuthStore } from '@/stores/auth.store'
 import { spacesService } from '../services/spaces.service'
 import { imagesService } from '../services/images.service'
 import type { CompressionMeta } from '../services/images.service'
-import { generateSlug, REGIONS_AND_CITIES } from '@/constants/spaces'
-import type { SpaceImage, SpaceType } from '@/types'
+import { generateSlug, extractPlaceData } from '@/constants/spaces'
+import type { SpaceImage, SpaceType, PlaceResult } from '@/types'
 
 export function useSpaceForm(spaceId?: string) {
   const auth = useAuthStore()
@@ -21,6 +21,8 @@ export function useSpaceForm(spaceId?: string) {
     region: null as string | null,
     city: null as string | null,
     address: '',
+    lat: null as number | null,
+    lng: null as number | null,
     is_published: false,
   })
 
@@ -34,20 +36,19 @@ export function useSpaceForm(spaceId?: string) {
   const loadingSpace = ref(false)
   const error = ref<string | null>(null)
 
-  const availableCities = computed(() => {
-    if (!form.region) return []
-    return (REGIONS_AND_CITIES as Record<string, readonly string[]>)[form.region] ?? []
-  })
-
   // Auto-generate slug from title
   watch(() => form.title, (title) => {
     form.slug = generateSlug(title)
   })
 
-  // Reset city when region changes
-  watch(() => form.region, () => {
-    form.city = null
-  })
+  function applyPlaceData(place: PlaceResult) {
+    const { region, city, address, lat, lng } = extractPlaceData(place)
+    form.region = region
+    form.city = city
+    form.address = address
+    form.lat = lat
+    form.lng = lng
+  }
 
   async function loadSpace(id: string) {
     loadingSpace.value = true
@@ -63,6 +64,8 @@ export function useSpaceForm(spaceId?: string) {
       await nextTick() // allow region watcher to fire before setting city
       form.city = space.city
       form.address = space.address ?? ''
+      form.lat = space.lat
+      form.lng = space.lng
       form.is_published = space.is_published
       selectedAmenities.value = (space.space_amenities ?? []).map(a => a.amenity_id)
       existingImages.value = space.space_images ?? []
@@ -152,6 +155,8 @@ export function useSpaceForm(spaceId?: string) {
         region: form.region,
         city: form.city,
         address: form.address || null,
+        lat: form.lat,
+        lng: form.lng,
         is_published: form.is_published,
       }
 
@@ -208,7 +213,7 @@ export function useSpaceForm(spaceId?: string) {
     loadingSpace,
     error,
     isEditMode,
-    availableCities,
+    applyPlaceData,
     loadSpace,
     addPendingFile,
     removePendingFile,

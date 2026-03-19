@@ -32,23 +32,21 @@
 
         <div class="space-y-1.5">
           <Label for="capacity">Capacidad (personas)</Label>
-          <Input id="capacity" v-model.number="form.capacity" type="number" min="1" placeholder="50" />
+          <Input id="capacity" :value="form.capacity ?? undefined" type="number" min="1" placeholder="50"
+            @change="form.capacity = ($event.target as HTMLInputElement).valueAsNumber || null" />
         </div>
 
         <div class="space-y-1.5">
           <Label for="size_m2">Superficie (m²)</Label>
-          <Input id="size_m2" v-model.number="form.size_m2" type="number" min="1" placeholder="120" />
+          <Input id="size_m2" :value="form.size_m2 ?? undefined" type="number" min="1" placeholder="120"
+            @change="form.size_m2 = ($event.target as HTMLInputElement).valueAsNumber || null" />
         </div>
       </div>
 
       <div class="space-y-1.5">
         <Label for="description">Descripción</Label>
-        <Textarea
-          id="description"
-          v-model="form.description"
-          placeholder="Describe el espacio, sus características y qué lo hace especial..."
-          rows="4"
-        />
+        <Textarea id="description" v-model="form.description"
+          placeholder="Describe el espacio, sus características y qué lo hace especial..." rows="4" />
       </div>
     </section>
 
@@ -57,40 +55,36 @@
       <h2 class="text-base font-semibold">Ubicación</h2>
       <Separator />
 
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="space-y-1.5">
-          <Label>Región</Label>
-          <Select v-model="form.region">
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar región" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem v-for="region in REGIONS" :key="region" :value="region">
-                {{ region }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+      <!-- Modo creación: buscador siempre visible -->
+      <template v-if="!isEditMode">
+        <PlaceSearchInput @place-selected="applyPlaceData" />
+        <div v-if="form.address" class="text-xs text-muted-foreground -mt-2">
+          <span class="font-medium text-foreground">Región:</span> {{ form.region }}
+          <span class="mx-1">·</span>
+          <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
         </div>
+      </template>
 
-        <div class="space-y-1.5">
-          <Label>Ciudad</Label>
-          <Select v-model="form.city" :disabled="!form.region">
-            <SelectTrigger>
-              <SelectValue :placeholder="form.region ? 'Seleccionar ciudad' : 'Primero elige región'" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem v-for="city in availableCities" :key="city" :value="city">
-                {{ city }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+      <!-- Modo edición: mostrar dirección actual con opción de editar -->
+      <template v-else>
+        <div v-if="!editingLocation" class="space-y-1.5">
+          <p class="text-sm text-foreground">{{ form.address || 'Sin dirección' }}</p>
+          <div v-if="form.region || form.city" class="text-xs text-muted-foreground">
+            <span class="font-medium text-foreground">Región:</span> {{ form.region }}
+            <span class="mx-1">·</span>
+            <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
+          </div>
+          <Button type="button" variant="outline" size="sm" @click="editingLocation = true">
+            Editar dirección
+          </Button>
         </div>
-
-        <div class="space-y-1.5">
-          <Label for="address">Dirección referencial</Label>
-          <Input id="address" v-model="form.address" placeholder="Av. Providencia 1234" />
+        <div v-else class="space-y-2">
+          <PlaceSearchInput @place-selected="handlePlaceSelected" />
+          <Button type="button" variant="ghost" size="sm" @click="editingLocation = false">
+            Cancelar
+          </Button>
         </div>
-      </div>
+      </template>
     </section>
 
     <!-- Facilidades -->
@@ -104,16 +98,9 @@
     <section class="space-y-4">
       <h2 class="text-base font-semibold">Imágenes</h2>
       <Separator />
-      <ImageUploader
-        :existing-images="existingImages"
-        :pending-previews="pendingPreviews"
-        :pending-compression-metas="pendingCompressionMetas"
-        :is-edit-mode="isEditMode"
-        :uploading="loading"
-        @add-file="handleAddFile"
-        @remove-existing="removeExistingImage"
-        @remove-pending="removePendingFile"
-      />
+      <ImageUploader :existing-images="existingImages" :pending-previews="pendingPreviews"
+        :pending-compression-metas="pendingCompressionMetas" :is-edit-mode="isEditMode" :uploading="loading"
+        @add-file="handleAddFile" @remove-existing="removeExistingImage" @remove-pending="removePendingFile" />
     </section>
 
     <!-- Publicación -->
@@ -142,13 +129,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSpaceForm } from '../../composables/useSpaceForm'
 import { useAmenities } from '../../composables/useAmenities'
-import { SPACE_TYPE_LIST, REGIONS } from '@/constants/spaces'
+import { SPACE_TYPE_LIST } from '@/constants/spaces'
 import AmenitiesSelector from './AmenitiesSelector.vue'
 import ImageUploader from './ImageUploader.vue'
+import PlaceSearchInput from './PlaceSearchInput.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -158,7 +146,6 @@ import { Separator } from '@/components/ui/separator'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
-import type { SpaceImage } from '@/types'
 
 const props = defineProps<{ spaceId?: string }>()
 const emit = defineEmits<{ saved: [spaceId: string] }>()
@@ -167,10 +154,17 @@ const router = useRouter()
 
 const {
   form, selectedAmenities, existingImages, pendingPreviews, pendingCompressionMetas,
-  loading, loadingSpace, error, isEditMode, availableCities,
+  loading, loadingSpace, error, isEditMode,
   loadSpace, addPendingFile, removePendingFile, addImageInEditMode,
-  removeExistingImage, submit,
+  removeExistingImage, submit, applyPlaceData,
 } = useSpaceForm(props.spaceId)
+
+const editingLocation = ref(false)
+
+function handlePlaceSelected(place: import('@/types').PlaceResult) {
+  applyPlaceData(place)
+  editingLocation.value = false
+}
 
 const { amenities, fetchAmenities } = useAmenities()
 

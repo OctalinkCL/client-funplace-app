@@ -4,21 +4,21 @@ import type { SpaceType, PlaceResult } from '@/types'
 // Regiones y ciudades de Chile
 // ============================================================
 export const REGIONS_AND_CITIES = {
-  'Región Metropolitana': ['Santiago', 'Providencia', 'Las Condes', 'Ñuñoa', 'Maipú', 'La Florida', 'San Bernardo', 'Puente Alto'],
+  'Región Metropolitana de Santiago': ['Santiago', 'Providencia', 'Las Condes', 'Ñuñoa', 'Maipú', 'La Florida', 'San Bernardo', 'Puente Alto'],
   'Valparaíso': ['Valparaíso', 'Viña del Mar', 'Quilpué', 'Villa Alemana', 'San Antonio'],
-  'Biobío': ['Concepción', 'Talcahuano', 'Los Ángeles', 'Chillán'],
+  'Bío Bío': ['Concepción', 'Talcahuano', 'Los Ángeles', 'Chillán'],
   'La Araucanía': ['Temuco', 'Villarrica', 'Pucón'],
   'Los Lagos': ['Puerto Montt', 'Osorno', 'Castro', 'Puerto Varas'],
   'Coquimbo': ['La Serena', 'Coquimbo', 'Ovalle'],
-  "O'Higgins": ['Rancagua', 'San Fernando'],
+  "Libertador General Bernardo O'Higgins": ['Rancagua', 'San Fernando'],
   'Maule': ['Talca', 'Curicó', 'Linares'],
   'Los Ríos': ['Valdivia', 'La Unión'],
   'Antofagasta': ['Antofagasta', 'Calama'],
   'Atacama': ['Copiapó', 'Vallenar'],
   'Tarapacá': ['Iquique', 'Alto Hospicio'],
   'Arica y Parinacota': ['Arica'],
-  'Magallanes': ['Punta Arenas'],
-  'Aysén': ['Coyhaique'],
+  'Magallanes y la Antártica Chilena': ['Punta Arenas'],
+  'Aysén del General Carlos Ibáñez del Campo': ['Coyhaique'],
   'Ñuble': ['Chillán'],
 } as const
 
@@ -43,17 +43,6 @@ export const SPACE_TYPE_LIST = (Object.entries(SPACE_TYPE_LABELS) as [SpaceType,
 // ============================================================
 // Utilidades
 // ============================================================
-// ============================================================
-// Google Places — normalización de regiones
-// ============================================================
-const GOOGLE_REGION_MAP: Record<string, string> = {
-  'Región Metropolitana de Santiago': 'Región Metropolitana',
-  'Bío Bío': 'Biobío',
-  "Libertador General Bernardo O'Higgins": "O'Higgins",
-  'Magallanes y la Antártica Chilena': 'Magallanes',
-  'Aysén del General Carlos Ibáñez del Campo': 'Aysén',
-}
-
 export function extractPlaceData(place: PlaceResult): {
   region: string | null
   city: string | null
@@ -64,8 +53,7 @@ export function extractPlaceData(place: PlaceResult): {
   const get = (type: string) =>
     place.addressComponents.find(c => c.types.includes(type))
 
-  const googleRegion = get('administrative_area_level_1')?.longText ?? null
-  const region = googleRegion ? (GOOGLE_REGION_MAP[googleRegion] ?? googleRegion) : null
+  const region = get('administrative_area_level_1')?.longText ?? null
   const city = get('administrative_area_level_2')?.longText ?? null
 
   return { region, city, address: place.formattedAddress, lat: place.lat, lng: place.lng }

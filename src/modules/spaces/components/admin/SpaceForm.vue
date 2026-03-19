@@ -44,12 +44,8 @@
 
       <div class="space-y-1.5">
         <Label for="description">Descripción</Label>
-        <Textarea
-          id="description"
-          v-model="form.description"
-          placeholder="Describe el espacio, sus características y qué lo hace especial..."
-          rows="4"
-        />
+        <Textarea id="description" v-model="form.description"
+          placeholder="Describe el espacio, sus características y qué lo hace especial..." rows="4" />
       </div>
     </section>
 
@@ -58,12 +54,36 @@
       <h2 class="text-base font-semibold">Ubicación</h2>
       <Separator />
 
-      <PlaceSearchInput :initial-value="form.address || undefined" @place-selected="applyPlaceData" />
-      <div v-if="form.address" class="text-xs text-muted-foreground -mt-2">
-        <span class="font-medium text-foreground">Región:</span> {{ form.region }}
-        <span class="mx-1">·</span>
-        <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
-      </div>
+      <!-- Modo creación: buscador siempre visible -->
+      <template v-if="!isEditMode">
+        <PlaceSearchInput @place-selected="applyPlaceData" />
+        <div v-if="form.address" class="text-xs text-muted-foreground -mt-2">
+          <span class="font-medium text-foreground">Región:</span> {{ form.region }}
+          <span class="mx-1">·</span>
+          <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
+        </div>
+      </template>
+
+      <!-- Modo edición: mostrar dirección actual con opción de editar -->
+      <template v-else>
+        <div v-if="!editingLocation" class="space-y-1.5">
+          <p class="text-sm text-foreground">{{ form.address || 'Sin dirección' }}</p>
+          <div v-if="form.region || form.city" class="text-xs text-muted-foreground">
+            <span class="font-medium text-foreground">Región:</span> {{ form.region }}
+            <span class="mx-1">·</span>
+            <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
+          </div>
+          <Button type="button" variant="outline" size="sm" @click="editingLocation = true">
+            Editar dirección
+          </Button>
+        </div>
+        <div v-else class="space-y-2">
+          <PlaceSearchInput @place-selected="handlePlaceSelected" />
+          <Button type="button" variant="ghost" size="sm" @click="editingLocation = false">
+            Cancelar
+          </Button>
+        </div>
+      </template>
     </section>
 
     <!-- Facilidades -->
@@ -77,16 +97,9 @@
     <section class="space-y-4">
       <h2 class="text-base font-semibold">Imágenes</h2>
       <Separator />
-      <ImageUploader
-        :existing-images="existingImages"
-        :pending-previews="pendingPreviews"
-        :pending-compression-metas="pendingCompressionMetas"
-        :is-edit-mode="isEditMode"
-        :uploading="loading"
-        @add-file="handleAddFile"
-        @remove-existing="removeExistingImage"
-        @remove-pending="removePendingFile"
-      />
+      <ImageUploader :existing-images="existingImages" :pending-previews="pendingPreviews"
+        :pending-compression-metas="pendingCompressionMetas" :is-edit-mode="isEditMode" :uploading="loading"
+        @add-file="handleAddFile" @remove-existing="removeExistingImage" @remove-pending="removePendingFile" />
     </section>
 
     <!-- Publicación -->
@@ -115,13 +128,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSpaceForm } from '../../composables/useSpaceForm'
 import { useAmenities } from '../../composables/useAmenities'
 import { SPACE_TYPE_LIST, REGIONS } from '@/constants/spaces'
 import AmenitiesSelector from './AmenitiesSelector.vue'
 import ImageUploader from './ImageUploader.vue'
+import PlaceSearchInput from './PlaceSearchInput.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -142,8 +156,15 @@ const {
   form, selectedAmenities, existingImages, pendingPreviews, pendingCompressionMetas,
   loading, loadingSpace, error, isEditMode, availableCities,
   loadSpace, addPendingFile, removePendingFile, addImageInEditMode,
-  removeExistingImage, submit,
+  removeExistingImage, submit, applyPlaceData,
 } = useSpaceForm(props.spaceId)
+
+const editingLocation = ref(false)
+
+function handlePlaceSelected(place: import('@/types').PlaceResult) {
+  applyPlaceData(place)
+  editingLocation.value = false
+}
 
 const { amenities, fetchAmenities } = useAmenities()
 

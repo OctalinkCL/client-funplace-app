@@ -6,13 +6,6 @@
       <Button @click="router.push({ name: 'admin-space-new' })">Nuevo espacio</Button>
     </div>
 
-    <!-- TEST: Google Places API — remover antes de producción -->
-    <div class="mb-6 p-4 border-2 border-dashed border-yellow-400 rounded-lg bg-yellow-50 flex flex-col gap-4">
-      <p class="text-xs text-yellow-700 font-semibold">⚠️ TEST: Google Places API</p>
-      <PlaceSearchTest />
-      <PlaceSearchData />
-    </div>
-
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-20">
       <p class="text-muted-foreground">Cargando...</p>
@@ -33,12 +26,8 @@
         <CardContent class="flex items-center gap-4 p-4">
           <!-- Thumbnail -->
           <div class="w-20 h-16 rounded-md overflow-hidden bg-muted shrink-0">
-            <img
-              v-if="space.space_images?.[0]?.url"
-              :src="space.space_images[0].url"
-              :alt="space.title"
-              class="w-full h-full object-cover"
-            />
+            <img v-if="space.space_images?.[0]?.url" :src="space.space_images[0].url" :alt="space.title"
+              class="w-full h-full object-cover" />
           </div>
 
           <!-- Info -->
@@ -57,40 +46,23 @@
 
           <!-- Acciones -->
           <div class="flex items-center gap-1 shrink-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              @click="router.push({ name: 'admin-space-edit', params: { id: space.id } })"
-            >
+            <Button variant="ghost" size="sm"
+              @click="router.push({ name: 'admin-space-edit', params: { id: space.id } })">
               Editar
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              @click="router.push({ name: 'admin-availability', params: { id: space.id } })"
-            >
+            <Button variant="ghost" size="sm"
+              @click="router.push({ name: 'admin-availability', params: { id: space.id } })">
               Disponibilidad
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              @click="router.push({ name: 'admin-calendar', params: { spaceId: space.id } })"
-            >
+            <Button variant="ghost" size="sm"
+              @click="router.push({ name: 'admin-calendar', params: { spaceId: space.id } })">
               Calendario
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              @click="togglePublish(space)"
-            >
+            <Button variant="ghost" size="sm" @click="togglePublish(space)">
               {{ space.is_published ? 'Despublicar' : 'Publicar' }}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              class="text-destructive hover:text-destructive"
-              @click="handleDelete(space)"
-            >
+            <Button variant="ghost" size="sm" class="text-destructive hover:text-destructive"
+              @click="handleDelete(space)">
               Eliminar
             </Button>
           </div>
@@ -104,8 +76,6 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSpaces } from '../../composables/useSpaces'
-import PlaceSearchTest from '../../components/admin/PlaceSearchTest.vue'
-import PlaceSearchData from '../../components/admin/PlaceSearchData.vue'
 import { SPACE_TYPE_LABELS } from '@/constants/spaces'
 import type { Space, SpaceType } from '@/types'
 import { Button } from '@/components/ui/button'

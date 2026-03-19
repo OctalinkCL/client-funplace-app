@@ -163,7 +163,7 @@ onMounted(async () => {
   loading.value = true
   try {
     space.value = await spacesService.getBySlug(slug)
-    const slots = await getSlotsForDate(space.value.id, date)
+    const slots = await getSlotsForDate(space.value.id, date, true)
     const found = slots.find(s => s.blockId === blockId && s.status === 'AVAILABLE')
     if (!found) { slotUnavailable.value = true; return }
     slot.value = found

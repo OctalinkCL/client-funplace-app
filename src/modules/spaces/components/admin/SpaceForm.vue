@@ -32,14 +32,12 @@
 
         <div class="space-y-1.5">
           <Label for="capacity">Capacidad (personas)</Label>
-          <Input id="capacity" :value="form.capacity ?? undefined" type="number" min="1" placeholder="50"
-            @change="form.capacity = ($event.target as HTMLInputElement).valueAsNumber || null" />
+          <Input id="capacity" v-model="capacityModel" type="number" min="1" placeholder="50" />
         </div>
 
         <div class="space-y-1.5">
           <Label for="size_m2">Superficie (m²)</Label>
-          <Input id="size_m2" :value="form.size_m2 ?? undefined" type="number" min="1" placeholder="120"
-            @change="form.size_m2 = ($event.target as HTMLInputElement).valueAsNumber || null" />
+          <Input id="size_m2" v-model="sizeModel" type="number" min="1" placeholder="120" />
         </div>
       </div>
 
@@ -129,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSpaceForm } from '../../composables/useSpaceForm'
 import { useAmenities } from '../../composables/useAmenities'
@@ -160,6 +158,16 @@ const {
 } = useSpaceForm(props.spaceId)
 
 const editingLocation = ref(false)
+
+const capacityModel = computed({
+  get: () => form.capacity ?? undefined,
+  set: (v: string | number | undefined) => { form.capacity = Number(v) || null },
+})
+
+const sizeModel = computed({
+  get: () => form.size_m2 ?? undefined,
+  set: (v: string | number | undefined) => { form.size_m2 = Number(v) || null },
+})
 
 function handlePlaceSelected(place: import('@/types').PlaceResult) {
   applyPlaceData(place)

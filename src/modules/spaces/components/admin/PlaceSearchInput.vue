@@ -76,8 +76,9 @@ async function fetchSuggestions() {
     const data = await res.json()
     if (data.error) throw new Error(data.error.message)
     suggestions.value = (data.suggestions ?? []).filter((s: any) => s.placePrediction)
-  } catch (e: any) {
-    error.value = e.message
+  } catch (e: unknown) {
+    console.error('Google Places error:', e)
+    error.value = 'No se pudieron cargar sugerencias. Inténtalo de nuevo.'
   } finally {
     searching.value = false
   }
@@ -98,15 +99,21 @@ async function select(suggestion: any) {
     const place = await res.json()
     if (place.error) throw new Error(place.error.message)
 
+    if (!place.location?.latitude || !place.location?.longitude) {
+      error.value = 'No se pudieron obtener coordenadas. Intenta con otra dirección.'
+      return
+    }
+
     emit('place-selected', {
-      displayName: place.displayName?.text,
-      formattedAddress: place.formattedAddress,
-      lat: place.location?.latitude,
-      lng: place.location?.longitude,
-      addressComponents: place.addressComponents,
+      displayName: place.displayName?.text ?? '',
+      formattedAddress: place.formattedAddress ?? query.value,
+      lat: place.location.latitude,
+      lng: place.location.longitude,
+      addressComponents: place.addressComponents ?? [],
     })
-  } catch (e: any) {
-    error.value = e.message
+  } catch (e: unknown) {
+    console.error('Google Places error:', e)
+    error.value = 'No se pudieron cargar los datos. Inténtalo de nuevo.'
   }
 }
 </script>

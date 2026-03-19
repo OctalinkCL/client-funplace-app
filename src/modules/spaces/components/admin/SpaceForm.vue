@@ -38,7 +38,8 @@
 
         <div class="space-y-1.5">
           <Label for="size_m2">Superficie (m²)</Label>
-          <Input id="size_m2" v-model.number="form.size_m2" type="number" min="1" placeholder="120" />
+          <Input id="size_m2" :value="form.size_m2 ?? undefined" type="number" min="1" placeholder="120"
+            @change="form.size_m2 = ($event.target as HTMLInputElement).valueAsNumber || null" />
         </div>
       </div>
 
@@ -132,7 +133,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSpaceForm } from '../../composables/useSpaceForm'
 import { useAmenities } from '../../composables/useAmenities'
-import { SPACE_TYPE_LIST, REGIONS } from '@/constants/spaces'
+import { SPACE_TYPE_LIST } from '@/constants/spaces'
 import AmenitiesSelector from './AmenitiesSelector.vue'
 import ImageUploader from './ImageUploader.vue'
 import PlaceSearchInput from './PlaceSearchInput.vue'
@@ -145,7 +146,6 @@ import { Separator } from '@/components/ui/separator'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
-import type { SpaceImage } from '@/types'
 
 const props = defineProps<{ spaceId?: string }>()
 const emit = defineEmits<{ saved: [spaceId: string] }>()
@@ -154,7 +154,7 @@ const router = useRouter()
 
 const {
   form, selectedAmenities, existingImages, pendingPreviews, pendingCompressionMetas,
-  loading, loadingSpace, error, isEditMode, availableCities,
+  loading, loadingSpace, error, isEditMode,
   loadSpace, addPendingFile, removePendingFile, addImageInEditMode,
   removeExistingImage, submit, applyPlaceData,
 } = useSpaceForm(props.spaceId)

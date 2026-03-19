@@ -140,8 +140,8 @@ const DAYS_ES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes'
 const formatSelectedDate = computed(() => {
   if (!selectedDate.value) return ''
   const [y, m, d] = selectedDate.value.split('-').map(Number)
-  const date = new Date(y, m - 1, d)
-  return `${DAYS_ES[date.getDay()]} ${d} de ${MONTHS_ES[m - 1]} ${y}`
+  const date = new Date(Date.UTC(y, m - 1, d))
+  return `${DAYS_ES[date.getUTCDay()]} ${d} de ${MONTHS_ES[m - 1]} ${y}`
 })
 
 function onDateSelect(date: string) {

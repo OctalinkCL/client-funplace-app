@@ -190,7 +190,7 @@
                     size="sm"
                     class="h-7 text-xs"
                     :disabled="actionLoading === slot.blockId"
-                    @click="blockSlot(slot)"
+                    @click="openConfirm('Bloquear horario', 'Este bloque quedará no disponible para nuevas reservas.', () => blockSlot(slot))"
                   >
                     Bloquear
                   </Button>
@@ -210,7 +210,7 @@
                   size="sm"
                   class="h-7 text-xs"
                   :disabled="actionLoading === slot.blockId"
-                  @click="unblockSlot(slot)"
+                  @click="openConfirm('Desbloquear horario', 'Este bloque volverá a estar disponible para reservas.', () => unblockSlot(slot))"
                 >
                   Desbloquear
                 </Button>
@@ -221,7 +221,7 @@
                   size="sm"
                   class="h-7 text-xs"
                   :disabled="actionLoading === slot.blockId"
-                  @click="updateBookingStatus(slot, 'CONFIRMED')"
+                  @click="openConfirm('Confirmar reserva', 'Se notificará al cliente que su reserva fue confirmada.', () => updateBookingStatus(slot, 'CONFIRMED'))"
                 >
                   Confirmar
                 </Button>
@@ -233,7 +233,7 @@
                   size="sm"
                   class="h-7 text-xs text-destructive border-destructive/30 hover:bg-destructive/5"
                   :disabled="actionLoading === slot.blockId"
-                  @click="updateBookingStatus(slot, 'CANCELLED')"
+                  @click="openConfirm('Cancelar reserva', 'Esta acción no se puede deshacer. Se notificará al cliente.', () => updateBookingStatus(slot, 'CANCELLED'))"
                 >
                   Cancelar
                 </Button>
@@ -244,6 +244,19 @@
       </div>
     </div>
   </div>
+
+  <AlertDialog :open="confirmDialog.open" @update:open="val => confirmDialog.open = val">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>{{ confirmDialog.title }}</AlertDialogTitle>
+        <AlertDialogDescription>{{ confirmDialog.description }}</AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+        <AlertDialogAction @click="executeConfirm">Confirmar</AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>
 
 <script setup lang="ts">
@@ -258,6 +271,16 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import type { WeeklySchedule, SimpleSlot, BookingStatus } from '@/types'
 
 const route = useRoute()
@@ -277,6 +300,20 @@ const selectedDate = ref('')
 const slots = ref<SimpleSlot[]>([])
 const loadingSlots = ref(false)
 const actionLoading = ref<string | null>(null)
+
+// Diálogo de confirmación
+const confirmDialog = ref<{ open: boolean; title: string; description: string; action: (() => void) | null }>({
+  open: false, title: '', description: '', action: null,
+})
+
+function openConfirm(title: string, description: string, action: () => void) {
+  confirmDialog.value = { open: true, title, description, action }
+}
+
+function executeConfirm() {
+  confirmDialog.value.action?.()
+  confirmDialog.value.open = false
+}
 
 // Form inline para crear reserva como admin
 const bookingFormSlotId = ref<string | null>(null)

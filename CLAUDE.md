@@ -1038,7 +1038,6 @@ Cuando el admin guarda un nuevo horario, eliminar el anterior en cascada (la FK 
 Para evitar scope creep, estas features están explícitamente fuera del MVP:
 
 - ❌ Panel superadmin (se gestiona directo en Supabase Dashboard)
-- ❌ Emails automáticos de notificación (Resend — siguiente fase)
 - ❌ Pasarela de pagos
 - ❌ Registro libre de clientes
 - ❌ Búsqueda por fecha disponible (el filtro es solo por región/ciudad)
@@ -1066,6 +1065,7 @@ Para evitar scope creep, estas features están explícitamente fuera del MVP:
 | Reservas — dashboard admin | ✅ Completo | Listado con filtros (espacio, estado), métricas por estado (total/pendiente/confirmado/cancelado), acciones rápidas, sorting PENDING primero |
 | Reservas — calendario admin | ✅ Completo | Vista mensual, panel lateral con slots, bloquear/desbloquear/confirmar/cancelar |
 | Amenities — sistema DB-driven | ✅ Completo | Tabla `amenities`, `amenities.service.ts`, `useAmenities()`, íconos Lucide |
+| Emails automáticos (Resend) | ✅ Completo | Edge Function `send-booking-email` en `supabase/functions/`; dispara en created/confirmed/cancelled; sender: `hola@octalink.cl` |
 
 ### Decisiones de implementación tomadas
 
@@ -1076,13 +1076,16 @@ Para evitar scope creep, estas features están explícitamente fuera del MVP:
 - **Cache de schedule en `useSlots.ts`:** El schedule se cachea en memoria para evitar re-fetches al navegar entre fechas del mismo espacio.
 - **Flujo invite vs recovery diferenciados:** Se agregaron `isInviteSetup` e `isPasswordRecovery` al auth store. `initialize()` inspecciona el hash de la URL antes de que Supabase lo consuma para distinguir ambos flujos y dirigir al usuario a la vista correcta (`SetupAccountView` vs `UpdatePasswordView`).
 - **Switch `is_published` con `v-model`:** En `SpaceForm.vue` se usa `v-model="form.is_published"` en lugar de `v-model:checked` para que reka-ui sincronice correctamente el estado visual del Switch con el valor real del espacio.
+- **Edge Function `send-booking-email`:** Implementada en Deno (Supabase Functions). Usa Resend SDK. Requiere vars de entorno `RESEND_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. Todos los datos del cliente se escapan con `escapeHtml()` antes de interpolarse en el HTML del email.
+- **Open redirect corregido en `LoginView.vue`:** El parámetro `redirect` de la query solo se acepta si empieza con `/admin`. Cualquier URL externa es ignorada y se redirige a `admin-bookings`.
+- **AlertDialog para acciones destructivas:** Se usa el componente `shadcn-vue AlertDialog` (instalado en `src/components/ui/alert-dialog/`). Patrón: un único `confirmDialog` ref por vista con `{ open, title, description, action }`. Botones llaman a `openConfirm(title, desc, fn)`. Implementado en `AdminCalendarView.vue` (bloquear/desbloquear/confirmar/cancelar), `AdminBookingsView.vue` (confirmar/cancelar) y `AdminSpacesView.vue` (eliminar espacio, reemplaza `window.confirm`).
 
 ### Pendiente para siguientes fases
 
-- ❌ Emails automáticos de notificación (Resend)
 - ❌ Pasarela de pagos
 - ❌ Panel superadmin
+- ⚠️ Edge Function `send-booking-email` debe desplegarse manualmente con `supabase functions deploy send-booking-email` o desde el Dashboard de Supabase cada vez que se modifique localmente.
 
 ---
 
-*Documento generado para Claude Code. Versión MVP — Marzo 2026. Última actualización: 18/03/2026 (rev. 2).*
+*Documento generado para Claude Code. Versión MVP — Marzo 2026. Última actualización: 19/03/2026 (rev. 3).*

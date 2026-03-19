@@ -3,20 +3,24 @@
     <!-- Región -->
     <div class="space-y-1">
       <label class="text-sm font-medium">Región</label>
+      <div v-if="loading" class="h-9 w-44 animate-pulse rounded-md bg-muted" />
       <select
+        v-else
         :value="region"
         class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         @change="onRegionChange(($event.target as HTMLSelectElement).value)"
       >
         <option value="">Todas las regiones</option>
-        <option v-for="r in REGIONS" :key="r" :value="r">{{ r }}</option>
+        <option v-for="r in regions" :key="r" :value="r">{{ r }}</option>
       </select>
     </div>
 
     <!-- Ciudad -->
     <div class="space-y-1">
       <label class="text-sm font-medium">Ciudad</label>
+      <div v-if="loading" class="h-9 w-36 animate-pulse rounded-md bg-muted" />
       <select
+        v-else
         :value="city"
         :disabled="!region"
         class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
@@ -39,8 +43,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { REGIONS, REGIONS_AND_CITIES } from '@/constants/spaces'
+import { computed, onMounted } from 'vue'
+import { useLocationFilters } from '../../composables/useLocationFilters'
 
 const props = defineProps<{
   region: string
@@ -53,9 +57,13 @@ const emit = defineEmits<{
   'clear': []
 }>()
 
+const { regions, citiesForRegion, loading, fetchLocations } = useLocationFilters()
+
+onMounted(fetchLocations)
+
 const availableCities = computed(() => {
   if (!props.region) return []
-  return REGIONS_AND_CITIES[props.region as keyof typeof REGIONS_AND_CITIES] ?? []
+  return citiesForRegion(props.region)
 })
 
 function onRegionChange(value: string) {

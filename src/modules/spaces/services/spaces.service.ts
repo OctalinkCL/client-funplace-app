@@ -85,6 +85,17 @@ export const spacesService = {
     if (error) throw error
   },
 
+  async getAvailableLocations(): Promise<{ region: string; city: string | null }[]> {
+    const { data, error } = await supabase
+      .from('spaces')
+      .select('region, city')
+      .eq('is_published', true)
+      .not('region', 'is', null)
+      .order('region')
+    if (error) throw error
+    return data as { region: string; city: string | null }[]
+  },
+
   async setAmenities(spaceId: string, amenityIds: string[]): Promise<void> {
     const { error: deleteError } = await supabase
       .from('space_amenities')

@@ -7,7 +7,7 @@
         @keydown.esc="close"
       >
         <!-- Overlay -->
-        <div class="absolute inset-0 bg-black/50" @click="close" />
+        <div class="absolute inset-0 bg-black/50" />
 
         <!-- Panel -->
         <div

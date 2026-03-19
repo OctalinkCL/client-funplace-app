@@ -43,6 +43,11 @@ export const adminRoutes: RouteRecordRaw[] = [
         name: 'admin-availability',
         component: () => import('@/modules/availability/views/admin/AdminAvailabilityView.vue'),
       },
+      {
+        path: 'perfil',
+        name: 'admin-profile',
+        component: () => import('@/modules/auth/views/AdminProfileView.vue'),
+      },
     ],
   },
 ]

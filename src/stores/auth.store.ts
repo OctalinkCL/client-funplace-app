@@ -87,5 +87,20 @@ export const useAuthStore = defineStore('auth', () => {
     if (!error) profile.value = data
   }
 
-  return { user, profile, loading, isAuthenticated, isAdmin, isSuperAdmin, isPasswordRecovery, isInviteSetup, initialize, login, logout, fetchProfile, setPasswordRecovery, setInviteSetup }
+  async function updateProfile(payload: {
+    full_name?: string | null
+    contact_email?: string | null
+    contact_phone?: string | null
+    contact_whatsapp?: string | null
+  }) {
+    if (!user.value) return
+    const { error } = await supabase
+      .from('profiles')
+      .update(payload)
+      .eq('id', user.value.id)
+    if (error) throw error
+    await fetchProfile()
+  }
+
+  return { user, profile, loading, isAuthenticated, isAdmin, isSuperAdmin, isPasswordRecovery, isInviteSetup, initialize, login, logout, fetchProfile, updateProfile, setPasswordRecovery, setInviteSetup }
 })

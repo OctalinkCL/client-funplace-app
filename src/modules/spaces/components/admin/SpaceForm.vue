@@ -32,7 +32,8 @@
 
         <div class="space-y-1.5">
           <Label for="capacity">Capacidad (personas)</Label>
-          <Input id="capacity" v-model.number="form.capacity" type="number" min="1" placeholder="50" />
+          <Input id="capacity" :value="form.capacity ?? undefined" type="number" min="1" placeholder="50"
+            @change="form.capacity = ($event.target as HTMLInputElement).valueAsNumber || null" />
         </div>
 
         <div class="space-y-1.5">
@@ -57,39 +58,11 @@
       <h2 class="text-base font-semibold">Ubicación</h2>
       <Separator />
 
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="space-y-1.5">
-          <Label>Región</Label>
-          <Select v-model="form.region">
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar región" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem v-for="region in REGIONS" :key="region" :value="region">
-                {{ region }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div class="space-y-1.5">
-          <Label>Ciudad</Label>
-          <Select v-model="form.city" :disabled="!form.region">
-            <SelectTrigger>
-              <SelectValue :placeholder="form.region ? 'Seleccionar ciudad' : 'Primero elige región'" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem v-for="city in availableCities" :key="city" :value="city">
-                {{ city }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div class="space-y-1.5">
-          <Label for="address">Dirección referencial</Label>
-          <Input id="address" v-model="form.address" placeholder="Av. Providencia 1234" />
-        </div>
+      <PlaceSearchInput :initial-value="form.address || undefined" @place-selected="applyPlaceData" />
+      <div v-if="form.address" class="text-xs text-muted-foreground -mt-2">
+        <span class="font-medium text-foreground">Región:</span> {{ form.region }}
+        <span class="mx-1">·</span>
+        <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
       </div>
     </section>
 

@@ -1,4 +1,4 @@
-import type { SpaceType } from '@/types'
+import type { SpaceType, PlaceResult } from '@/types'
 
 // ============================================================
 // Regiones y ciudades de Chile
@@ -39,6 +39,37 @@ export const SPACE_TYPE_LABELS: Record<SpaceType, string> = {
 export const SPACE_TYPE_LIST = (Object.entries(SPACE_TYPE_LABELS) as [SpaceType, string][]).map(
   ([key, label]) => ({ key, label }),
 )
+
+// ============================================================
+// Utilidades
+// ============================================================
+// ============================================================
+// Google Places — normalización de regiones
+// ============================================================
+const GOOGLE_REGION_MAP: Record<string, string> = {
+  'Región Metropolitana de Santiago': 'Región Metropolitana',
+  'Bío Bío': 'Biobío',
+  "Libertador General Bernardo O'Higgins": "O'Higgins",
+  'Magallanes y la Antártica Chilena': 'Magallanes',
+  'Aysén del General Carlos Ibáñez del Campo': 'Aysén',
+}
+
+export function extractPlaceData(place: PlaceResult): {
+  region: string | null
+  city: string | null
+  address: string
+  lat: number
+  lng: number
+} {
+  const get = (type: string) =>
+    place.addressComponents.find(c => c.types.includes(type))
+
+  const googleRegion = get('administrative_area_level_1')?.longText ?? null
+  const region = googleRegion ? (GOOGLE_REGION_MAP[googleRegion] ?? googleRegion) : null
+  const city = get('administrative_area_level_2')?.longText ?? null
+
+  return { region, city, address: place.formattedAddress, lat: place.lat, lng: place.lng }
+}
 
 // ============================================================
 // Utilidades

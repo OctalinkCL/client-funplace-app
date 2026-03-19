@@ -44,12 +44,14 @@
               </div>
               <div class="space-y-1.5">
                 <Label for="create-capacity">Capacidad</Label>
-                <Input id="create-capacity" v-model.number="form.capacity" type="number" min="1"
-                  placeholder="50 personas" />
+                <Input id="create-capacity" :value="form.capacity ?? undefined" type="number" min="1"
+                  placeholder="50 personas"
+                  @change="form.capacity = ($event.target as HTMLInputElement).valueAsNumber || null" />
               </div>
               <div class="space-y-1.5">
                 <Label for="create-size">Superficie (m²)</Label>
-                <Input id="create-size" v-model.number="form.size_m2" type="number" min="1" placeholder="120" />
+                <Input id="create-size" :value="form.size_m2 ?? undefined" type="number" min="1" placeholder="120"
+                  @change="form.size_m2 = ($event.target as HTMLInputElement).valueAsNumber || null" />
               </div>
             </div>
 
@@ -60,43 +62,13 @@
                 placeholder="Describe el espacio brevemente..." rows="3" />
             </div>
 
-            <!-- Región / Ciudad / Dirección -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div class="space-y-1.5">
-                <Label>Región</Label>
-                <Select v-model="form.region">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem v-for="region in REGIONS" :key="region" :value="region">
-                      {{ region }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div class="space-y-1.5">
-                <Label>Ciudad</Label>
-                <Select v-model="form.city" :disabled="!form.region">
-                  <SelectTrigger>
-                    <SelectValue :placeholder="form.region ? 'Seleccionar' : 'Elige región'" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem v-for="city in availableCities" :key="city" :value="city">
-                      {{ city }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div class="space-y-1.5">
-                <Label for="create-address">Dirección</Label>
-                <Input id="create-address" v-model="form.address" placeholder="Av. Providencia 1234" />
-              </div>
+            <!-- Ubicación -->
+            <PlaceSearchInput @place-selected="applyPlaceData" />
+            <div v-if="form.address" class="text-xs text-muted-foreground -mt-3">
+              <span class="font-medium text-foreground">Región:</span> {{ form.region }}
+              <span class="mx-1">·</span>
+              <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
             </div>
-
-            <PlaceSearchTest />
-
-            {{ form }}
 
             <!-- Error -->
             <p v-if="error" class="text-sm text-destructive">{{ error }}</p>
@@ -119,7 +91,7 @@
 import { watch } from 'vue'
 import { X } from 'lucide-vue-next'
 import { useSpaceForm } from '../../composables/useSpaceForm'
-import { SPACE_TYPE_LIST, REGIONS } from '@/constants/spaces'
+import { SPACE_TYPE_LIST } from '@/constants/spaces'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -127,7 +99,7 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
-import PlaceSearchTest from './PlaceSearchTest.vue'
+import PlaceSearchInput from './PlaceSearchInput.vue'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{
@@ -135,7 +107,7 @@ const emit = defineEmits<{
   created: [spaceId: string]
 }>()
 
-const { form, loading, error, availableCities, submit } = useSpaceForm()
+const { form, loading, error, applyPlaceData, submit } = useSpaceForm()
 
 // Reset form when modal opens
 watch(() => props.open, (val) => {
@@ -149,6 +121,8 @@ watch(() => props.open, (val) => {
     form.region = null
     form.city = null
     form.address = ''
+    form.lat = null
+    form.lng = null
     error.value = null
   }
 })

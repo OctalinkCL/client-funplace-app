@@ -1,5 +1,18 @@
 export type UserRole = 'admin' | 'superadmin'
 
+export interface PlaceResult {
+  displayName: string
+  formattedAddress: string
+  lat: number
+  lng: number
+  addressComponents: Array<{
+    longText: string
+    shortText: string
+    types: string[]
+    languageCode: string
+  }>
+}
+
 export interface AmenityRecord {
   id: string
   key: string
@@ -29,6 +42,8 @@ export interface Space {
   region: string | null
   city: string | null
   address: string | null
+  lat: number | null
+  lng: number | null
   is_published: boolean
   created_at: string
   updated_at: string
@@ -110,6 +125,8 @@ export interface CreateSpacePayload {
   region: string | null
   city: string | null
   address: string | null
+  lat: number | null
+  lng: number | null
   is_published: boolean
 }
 

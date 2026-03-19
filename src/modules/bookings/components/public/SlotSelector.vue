@@ -60,7 +60,7 @@ async function loadSlots() {
   if (!props.date) { slots.value = []; return }
   loading.value = true
   try {
-    const all = await getSlotsForDate(props.spaceId, props.date)
+    const all = await getSlotsForDate(props.spaceId, props.date, true)
     slots.value = all.filter(s => s.status === 'AVAILABLE')
   } finally {
     loading.value = false

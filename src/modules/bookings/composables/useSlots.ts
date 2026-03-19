@@ -27,7 +27,7 @@ function parseDateStr(date: string): Date {
  * Devuelve los SimpleSlot para un espacio y una fecha concreta.
  * Solo se incluyen bloques asignados al día de la semana en el horario semanal.
  */
-export async function getSlotsForDate(spaceId: string, date: string): Promise<SimpleSlot[]> {
+export async function getSlotsForDate(spaceId: string, date: string, publicOnly = false): Promise<SimpleSlot[]> {
   const schedule = await loadSchedule(spaceId)
   if (!schedule) return []
 
@@ -53,7 +53,7 @@ export async function getSlotsForDate(spaceId: string, date: string): Promise<Si
       .in('block_id', assignedBlockIds),
     supabase
       .from('bookings')
-      .select('*')
+      .select(publicOnly ? 'block_id, status' : '*')
       .eq('space_id', spaceId)
       .eq('date', date)
       .in('block_id', assignedBlockIds)

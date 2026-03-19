@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-semibold">Mis Espacios</h1>
-      <Button @click="router.push({ name: 'admin-space-new' })">Nuevo espacio</Button>
+      <Button @click="showCreateModal = true">Nuevo espacio</Button>
     </div>
 
     <!-- Loading -->
@@ -17,7 +17,7 @@
     <!-- Empty state -->
     <div v-else-if="spaces.length === 0" class="flex flex-col items-center justify-center py-20 gap-4">
       <p class="text-muted-foreground">Aún no tienes espacios creados.</p>
-      <Button @click="router.push({ name: 'admin-space-new' })">Crear tu primer espacio</Button>
+      <Button @click="showCreateModal = true">Crear tu primer espacio</Button>
     </div>
 
     <!-- Lista -->
@@ -69,11 +69,13 @@
         </CardContent>
       </Card>
     </div>
+
+    <SpaceCreateModal v-model:open="showCreateModal" @created="onSpaceCreated" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSpaces } from '../../composables/useSpaces'
 import { SPACE_TYPE_LABELS } from '@/constants/spaces'
@@ -81,14 +83,21 @@ import type { Space, SpaceType } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import SpaceCreateModal from '../../components/admin/SpaceCreateModal.vue'
 
 const router = useRouter()
 const { spaces, loading, error, fetchSpaces, deleteSpace, togglePublish } = useSpaces()
+
+const showCreateModal = ref(false)
 
 onMounted(fetchSpaces)
 
 async function handleDelete(space: Space) {
   if (!window.confirm(`¿Eliminar "${space.title}"? Esta acción no se puede deshacer.`)) return
   await deleteSpace(space.id)
+}
+
+function onSpaceCreated(id: string) {
+  router.push({ name: 'admin-space-edit', params: { id }, query: { new: '1' } })
 }
 </script>

@@ -115,7 +115,7 @@
           <Button
             v-if="booking.status === 'PENDING'"
             size="sm"
-            @click="handleStatus(booking.id, 'CONFIRMED')"
+            @click="openConfirm('Confirmar reserva', 'Se notificará al cliente que su reserva fue confirmada.', () => handleStatus(booking.id, 'CONFIRMED'))"
           >
             Confirmar
           </Button>
@@ -123,7 +123,7 @@
             variant="outline"
             size="sm"
             class="text-destructive border-destructive/30 hover:bg-destructive/5"
-            @click="handleStatus(booking.id, 'CANCELLED')"
+            @click="openConfirm('Cancelar reserva', 'Esta acción no se puede deshacer. Se notificará al cliente.', () => handleStatus(booking.id, 'CANCELLED'))"
           >
             Cancelar
           </Button>
@@ -131,6 +131,19 @@
       </div>
     </div>
   </div>
+
+  <AlertDialog :open="confirmDialog.open" @update:open="val => confirmDialog.open = val">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>{{ confirmDialog.title }}</AlertDialogTitle>
+        <AlertDialogDescription>{{ confirmDialog.description }}</AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+        <AlertDialogAction @click="executeConfirm">Confirmar</AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>
 
 <script setup lang="ts">
@@ -140,6 +153,16 @@ import { spacesService } from '@/modules/spaces/services/spaces.service'
 import { useAuthStore } from '@/stores/auth.store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import type { Space, BookingStatus } from '@/types'
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
@@ -152,6 +175,19 @@ const STATUS_ORDER: Record<BookingStatus, number> = { PENDING: 0, CONFIRMED: 1, 
 
 const authStore = useAuthStore()
 const { bookings, loading, error, fetchByAdmin, updateStatus } = useBookings()
+
+const confirmDialog = ref<{ open: boolean; title: string; description: string; action: (() => void) | null }>({
+  open: false, title: '', description: '', action: null,
+})
+
+function openConfirm(title: string, description: string, action: () => void) {
+  confirmDialog.value = { open: true, title, description, action }
+}
+
+function executeConfirm() {
+  confirmDialog.value.action?.()
+  confirmDialog.value.open = false
+}
 
 const adminSpaces = ref<Space[]>([])
 const filterSpaceId = ref('')

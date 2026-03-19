@@ -64,7 +64,8 @@ async function handleSubmit() {
   try {
     await auth.login(email.value, password.value)
     const redirect = route.query.redirect as string | undefined
-    router.push(redirect ?? { name: 'admin-bookings' })
+    const safeRedirect = redirect?.startsWith('/admin') ? redirect : undefined
+    router.push(safeRedirect ?? { name: 'admin-bookings' })
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : 'Credenciales incorrectas.'
   } finally {

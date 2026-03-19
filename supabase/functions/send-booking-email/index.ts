@@ -9,6 +9,15 @@ const corsHeaders = {
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -59,7 +68,12 @@ Deno.serve(async (req) => {
 
   const space = booking.spaces as any;
   const adminProfile = space?.profiles as any;
-  const spaceTitle = space?.title ?? "el espacio";
+  const spaceTitle = escapeHtml(space?.title ?? "el espacio");
+  const customerName = escapeHtml(booking.customer_name);
+  const customerEmail = escapeHtml(booking.customer_email);
+  const customerPhone = booking.customer_phone ? escapeHtml(booking.customer_phone) : null;
+  const customerNotes = booking.notes ? escapeHtml(booking.notes) : null;
+  const blockName = escapeHtml(booking.block_name);
   const formattedDate = new Date(
     booking.date + "T12:00:00Z",
   ).toLocaleDateString("es-CL", {
@@ -90,12 +104,12 @@ Deno.serve(async (req) => {
             <h2>Nueva solicitud de reserva</h2>
             <p><strong>Espacio:</strong> ${spaceTitle}</p>
             <p><strong>Fecha:</strong> ${formattedDate}</p>
-            <p><strong>Horario:</strong> ${booking.block_name} (${timeRange})</p>
+            <p><strong>Horario:</strong> ${blockName} (${timeRange})</p>
             <hr />
-            <p><strong>Cliente:</strong> ${booking.customer_name}</p>
-            <p><strong>Email:</strong> ${booking.customer_email}</p>
-            ${booking.customer_phone ? `<p><strong>Teléfono:</strong> ${booking.customer_phone}</p>` : ''}
-            ${booking.notes ? `<p><strong>Notas:</strong> ${booking.notes}</p>` : ''}
+            <p><strong>Cliente:</strong> ${customerName}</p>
+            <p><strong>Email:</strong> ${customerEmail}</p>
+            ${customerPhone ? `<p><strong>Teléfono:</strong> ${customerPhone}</p>` : ""}
+            ${customerNotes ? `<p><strong>Notas:</strong> ${customerNotes}</p>` : ""}
             <p>Ingresa a tu panel para confirmar o cancelar la reserva.</p>
           `,
         });
@@ -108,10 +122,10 @@ Deno.serve(async (req) => {
         subject: `Solicitud recibida — ${spaceTitle}`,
         html: `
           <h2>¡Recibimos tu solicitud!</h2>
-          <p>Hola ${booking.customer_name}, tu solicitud de reserva fue enviada correctamente.</p>
+          <p>Hola ${customerName}, tu solicitud de reserva fue enviada correctamente.</p>
           <p><strong>Espacio:</strong> ${spaceTitle}</p>
           <p><strong>Fecha:</strong> ${formattedDate}</p>
-          <p><strong>Horario:</strong> ${booking.block_name} (${timeRange})</p>
+          <p><strong>Horario:</strong> ${blockName} (${timeRange})</p>
           <hr />
           <p>El administrador revisará tu solicitud y se pondrá en contacto contigo para coordinar el pago y confirmar la reserva.</p>
         `,
@@ -125,10 +139,10 @@ Deno.serve(async (req) => {
         subject: `Reserva confirmada — ${spaceTitle}`,
         html: `
           <h2>¡Tu reserva fue confirmada!</h2>
-          <p>Hola ${booking.customer_name}, tu reserva quedó confirmada.</p>
+          <p>Hola ${customerName}, tu reserva quedó confirmada.</p>
           <p><strong>Espacio:</strong> ${spaceTitle}</p>
           <p><strong>Fecha:</strong> ${formattedDate}</p>
-          <p><strong>Horario:</strong> ${booking.block_name} (${timeRange})</p>
+          <p><strong>Horario:</strong> ${blockName} (${timeRange})</p>
           <hr />
           <p>El administrador se pondrá en contacto contigo para los detalles finales del pago.</p>
         `,
@@ -142,10 +156,10 @@ Deno.serve(async (req) => {
         subject: `Reserva cancelada — ${spaceTitle}`,
         html: `
           <h2>Tu reserva fue cancelada</h2>
-          <p>Hola ${booking.customer_name}, lamentamos informarte que tu reserva fue cancelada.</p>
+          <p>Hola ${customerName}, lamentamos informarte que tu reserva fue cancelada.</p>
           <p><strong>Espacio:</strong> ${spaceTitle}</p>
           <p><strong>Fecha:</strong> ${formattedDate}</p>
-          <p><strong>Horario:</strong> ${booking.block_name} (${timeRange})</p>
+          <p><strong>Horario:</strong> ${blockName} (${timeRange})</p>
           <hr />
           <p>Si tienes dudas, contacta directamente al administrador del espacio.</p>
         `,

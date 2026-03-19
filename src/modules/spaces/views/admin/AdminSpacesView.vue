@@ -72,6 +72,24 @@
 
     <SpaceCreateModal v-model:open="showCreateModal" @created="onSpaceCreated" />
   </div>
+
+  <AlertDialog :open="confirmDialog.open" @update:open="val => confirmDialog.open = val">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>{{ confirmDialog.title }}</AlertDialogTitle>
+        <AlertDialogDescription>{{ confirmDialog.description }}</AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+        <AlertDialogAction
+          class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          @click="executeConfirm"
+        >
+          Eliminar
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>
 
 <script setup lang="ts">
@@ -84,17 +102,43 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import SpaceCreateModal from '../../components/admin/SpaceCreateModal.vue'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const router = useRouter()
 const { spaces, loading, error, fetchSpaces, deleteSpace, togglePublish } = useSpaces()
 
 const showCreateModal = ref(false)
 
+const confirmDialog = ref<{ open: boolean; title: string; description: string; action: (() => void) | null }>({
+  open: false, title: '', description: '', action: null,
+})
+
+function openConfirm(title: string, description: string, action: () => void) {
+  confirmDialog.value = { open: true, title, description, action }
+}
+
+function executeConfirm() {
+  confirmDialog.value.action?.()
+  confirmDialog.value.open = false
+}
+
 onMounted(fetchSpaces)
 
-async function handleDelete(space: Space) {
-  if (!window.confirm(`¿Eliminar "${space.title}"? Esta acción no se puede deshacer.`)) return
-  await deleteSpace(space.id)
+function handleDelete(space: Space) {
+  openConfirm(
+    `Eliminar "${space.title}"`,
+    'Esta acción es permanente y eliminará todas las reservas y disponibilidad asociadas.',
+    () => deleteSpace(space.id),
+  )
 }
 
 function onSpaceCreated(id: string) {

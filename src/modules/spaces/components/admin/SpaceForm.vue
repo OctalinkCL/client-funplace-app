@@ -101,66 +101,6 @@
         @add-file="handleAddFile" @remove-existing="removeExistingImage" @remove-pending="removePendingFile" />
     </section>
 
-    <!-- Contacto -->
-    <section class="space-y-4">
-      <h2 class="text-base font-semibold">Contacto del espacio</h2>
-      <Separator />
-
-      <!-- Botón copiar de perfil -->
-      <div class="flex items-center gap-3">
-        <Button type="button" variant="outline" size="sm" :disabled="copyingProfile" @click="copyFromProfile">
-          {{ copyingProfile ? 'Copiando...' : 'Copiar datos de mi perfil' }}
-        </Button>
-        <p v-if="copyProfileMsg" class="text-xs" :class="copyProfileError ? 'text-destructive' : 'text-muted-foreground'">
-          {{ copyProfileMsg }}
-        </p>
-      </div>
-
-      <!-- Filas de contacto -->
-      <div class="rounded-lg border divide-y">
-        <!-- Email -->
-        <div class="flex items-center gap-3 px-4 py-3">
-          <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-            <Mail class="w-4 h-4 text-blue-500" />
-          </div>
-          <span class="w-24 text-sm shrink-0">Email</span>
-          <Input
-            v-model="form.contact_email"
-            type="email"
-            placeholder="email@ejemplo.com"
-            class="flex-1 border-0 shadow-none focus-visible:ring-0 px-0"
-          />
-        </div>
-        <!-- Teléfono -->
-        <div class="flex items-center gap-3 px-4 py-3">
-          <div class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center shrink-0">
-            <Phone class="w-4 h-4 text-green-500" />
-          </div>
-          <span class="w-24 text-sm shrink-0">Teléfono</span>
-          <Input
-            v-model="form.contact_phone"
-            type="tel"
-            placeholder="+56 9 1234 5678"
-            class="flex-1 border-0 shadow-none focus-visible:ring-0 px-0"
-          />
-        </div>
-        <!-- WhatsApp -->
-        <div class="flex items-center gap-3 px-4 py-3">
-          <div class="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
-            <MessageCircle class="w-4 h-4 text-teal-500" />
-          </div>
-          <span class="w-24 text-sm shrink-0">WhatsApp</span>
-          <Input
-            v-model="form.contact_whatsapp"
-            type="tel"
-            placeholder="+56 9 1234 5678"
-            class="flex-1 border-0 shadow-none focus-visible:ring-0 px-0"
-          />
-        </div>
-      </div>
-      <p class="text-xs text-muted-foreground">Solo se muestran al público los campos que tengan datos.</p>
-    </section>
-
     <!-- Publicación -->
     <section class="space-y-4">
       <h2 class="text-base font-semibold">Publicación</h2>
@@ -189,12 +129,9 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { Mail, Phone, MessageCircle } from 'lucide-vue-next'
 import { useSpaceForm } from '../../composables/useSpaceForm'
 import { useAmenities } from '../../composables/useAmenities'
 import { SPACE_TYPE_LIST } from '@/constants/spaces'
-import { supabase } from '@/lib/supabase'
-import { useAuthStore } from '@/stores/auth.store'
 import AmenitiesSelector from './AmenitiesSelector.vue'
 import ImageUploader from './ImageUploader.vue'
 import PlaceSearchInput from './PlaceSearchInput.vue'
@@ -212,39 +149,6 @@ const props = defineProps<{ spaceId?: string }>()
 const emit = defineEmits<{ saved: [spaceId: string] }>()
 
 const router = useRouter()
-const auth = useAuthStore()
-
-const copyingProfile = ref(false)
-const copyProfileMsg = ref('')
-const copyProfileError = ref(false)
-
-async function copyFromProfile() {
-  copyingProfile.value = true
-  copyProfileMsg.value = ''
-  copyProfileError.value = false
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('contact_email, contact_phone, contact_whatsapp')
-      .eq('id', auth.user!.id)
-      .single()
-    if (error) throw error
-    if (!data.contact_email && !data.contact_phone && !data.contact_whatsapp) {
-      copyProfileError.value = true
-      copyProfileMsg.value = 'No tienes datos de contacto en tu perfil.'
-      return
-    }
-    form.contact_email = data.contact_email ?? form.contact_email
-    form.contact_phone = data.contact_phone ?? form.contact_phone
-    form.contact_whatsapp = data.contact_whatsapp ?? form.contact_whatsapp
-    copyProfileMsg.value = 'Datos copiados.'
-  } catch {
-    copyProfileError.value = true
-    copyProfileMsg.value = 'Error al obtener datos del perfil.'
-  } finally {
-    copyingProfile.value = false
-  }
-}
 
 const {
   form, selectedAmenities, existingImages, pendingPreviews, pendingCompressionMetas,

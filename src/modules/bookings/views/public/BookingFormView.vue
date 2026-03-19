@@ -53,6 +53,8 @@
 
       <!-- Datos del cliente -->
       <form class="space-y-4" @submit.prevent="submitBooking">
+        <!-- honeypot: bots fill this, humans don't -->
+        <input v-model="honeypot" name="website" tabindex="-1" aria-hidden="true" class="absolute -left-[9999px] opacity-0" autocomplete="off" />
         <div class="space-y-1.5">
           <label class="text-sm font-medium">Nombre completo *</label>
           <Input v-model="form.name" placeholder="Juan Pérez" required />
@@ -112,6 +114,7 @@ const submitting = ref(false)
 const submitError = ref<string | null>(null)
 
 const form = reactive({ name: '', email: '', phone: '', notes: '' })
+const honeypot = ref('')
 
 const MONTHS_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 const DAYS_ES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
@@ -128,6 +131,7 @@ const formattedDate = computed(() => {
 
 async function submitBooking() {
   if (!space.value || !slot.value) return
+  if (honeypot.value) return // bot detected — silently do nothing
   submitting.value = true
   submitError.value = null
   try {

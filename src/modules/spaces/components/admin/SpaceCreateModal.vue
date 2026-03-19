@@ -76,7 +76,7 @@
             <!-- Footer -->
             <div class="flex items-center justify-end gap-3 pt-1">
               <Button type="button" variant="outline" @click="close">Cancelar</Button>
-              <Button type="submit" :disabled="loading || !form.title">
+              <Button type="submit" :disabled="loading || !form.title || !form.address">
                 {{ loading ? 'Creando...' : 'Crear espacio' }}
               </Button>
             </div>

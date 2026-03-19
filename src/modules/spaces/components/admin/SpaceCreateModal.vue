@@ -44,14 +44,11 @@
               </div>
               <div class="space-y-1.5">
                 <Label for="create-capacity">Capacidad</Label>
-                <Input id="create-capacity" :value="form.capacity ?? undefined" type="number" min="1"
-                  placeholder="50 personas"
-                  @change="form.capacity = ($event.target as HTMLInputElement).valueAsNumber || null" />
+                <Input id="create-capacity" v-model="capacityStr" type="number" min="1" placeholder="50 personas" />
               </div>
               <div class="space-y-1.5">
                 <Label for="create-size">Superficie (m²)</Label>
-                <Input id="create-size" :value="form.size_m2 ?? undefined" type="number" min="1" placeholder="120"
-                  @change="form.size_m2 = ($event.target as HTMLInputElement).valueAsNumber || null" />
+                <Input id="create-size" v-model="sizeStr" type="number" min="1" placeholder="120" />
               </div>
             </div>
 
@@ -88,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import { X } from 'lucide-vue-next'
 import { useSpaceForm } from '../../composables/useSpaceForm'
 import { SPACE_TYPE_LIST } from '@/constants/spaces'
@@ -109,6 +106,12 @@ const emit = defineEmits<{
 
 const { form, loading, error, applyPlaceData, submit } = useSpaceForm()
 
+const capacityStr = ref('')
+const sizeStr = ref('')
+
+watch(capacityStr, (v) => { form.capacity = v === '' ? null : Number(v) || null })
+watch(sizeStr, (v) => { form.size_m2 = v === '' ? null : Number(v) || null })
+
 // Reset form when modal opens
 watch(() => props.open, (val) => {
   if (val) {
@@ -123,6 +126,8 @@ watch(() => props.open, (val) => {
     form.address = ''
     form.lat = null
     form.lng = null
+    capacityStr.value = ''
+    sizeStr.value = ''
     error.value = null
   }
 })

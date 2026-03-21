@@ -25,9 +25,6 @@ export function useServiceForm(serviceId?: string) {
     service_area: '',
     price_from: null as number | null,
     is_published: false,
-    contact_email: null as string | null,
-    contact_phone: null as string | null,
-    contact_whatsapp: null as string | null,
   })
 
   const existingImages = ref<SpaceImage[]>([])
@@ -54,12 +51,6 @@ export function useServiceForm(serviceId?: string) {
     form.lng = lng
   }
 
-  function copyContactFromProfile() {
-    form.contact_email = auth.profile?.contact_email ?? null
-    form.contact_phone = auth.profile?.contact_phone ?? null
-    form.contact_whatsapp = auth.profile?.contact_whatsapp ?? null
-  }
-
   async function loadService(id: string) {
     loadingService.value = true
     try {
@@ -76,9 +67,6 @@ export function useServiceForm(serviceId?: string) {
       form.service_area = space.service_area ?? ''
       form.price_from = space.price_from
       form.is_published = space.is_published
-      form.contact_email = space.contact_email ?? null
-      form.contact_phone = space.contact_phone ?? null
-      form.contact_whatsapp = space.contact_whatsapp ?? null
       existingImages.value = space.space_images ?? []
     } finally {
       loadingService.value = false
@@ -178,9 +166,6 @@ export function useServiceForm(serviceId?: string) {
         service_area: form.service_area || null,
         price_from: form.price_from,
         is_published: form.is_published,
-        contact_email: form.contact_email || null,
-        contact_phone: form.contact_phone || null,
-        contact_whatsapp: form.contact_whatsapp || null,
       }
 
       if (isEditMode.value && serviceId) {
@@ -233,7 +218,6 @@ export function useServiceForm(serviceId?: string) {
     error,
     isEditMode,
     applyPlaceData,
-    copyContactFromProfile,
     loadService,
     addPendingFile,
     removePendingFile,

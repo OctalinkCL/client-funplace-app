@@ -6,7 +6,7 @@
       <div class="flex gap-2">
         <Button v-if="auth.hasModule('spaces')" @click="showCreateModal = true">Crear espacio</Button>
         <Button v-if="auth.hasModule('services')" variant="outline"
-          @click="router.push({ name: 'admin-service-new' })">Crear servicio</Button>
+          @click="showCreateServiceModal = true">Crear servicio</Button>
       </div>
     </div>
 
@@ -24,7 +24,7 @@
       <div class="flex gap-2">
         <Button v-if="auth.hasModule('spaces')" @click="showCreateModal = true">Crear tu primer espacio</Button>
         <Button v-if="auth.hasModule('services')" variant="outline"
-          @click="router.push({ name: 'admin-service-new' })">Crear tu primer servicio</Button>
+          @click="showCreateServiceModal = true">Crear tu primer servicio</Button>
       </div>
     </div>
 
@@ -83,6 +83,7 @@
     </div>
 
     <SpaceCreateModal v-model:open="showCreateModal" @created="onSpaceCreated" />
+    <ServiceCreateModal v-model:open="showCreateServiceModal" @created="onServiceCreated" />
   </div>
 
   <AlertDialog :open="confirmDialog.open" @update:open="val => confirmDialog.open = val">
@@ -115,6 +116,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import SpaceCreateModal from '../../components/admin/SpaceCreateModal.vue'
+import ServiceCreateModal from '../../components/admin/ServiceCreateModal.vue'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -131,6 +133,7 @@ const auth = useAuthStore()
 const { spaces, loading, error, fetchSpaces, deleteSpace, togglePublish } = useSpaces()
 
 const showCreateModal = ref(false)
+const showCreateServiceModal = ref(false)
 
 // Título y mensaje vacío dinámicos según plan
 const pageTitle = computed(() => getSidebarLabel(auth.profile?.plan))
@@ -176,5 +179,9 @@ function handleDelete(space: Space) {
 
 function onSpaceCreated(id: string) {
   router.push({ name: 'admin-space-edit', params: { id }, query: { new: '1' } })
+}
+
+function onServiceCreated(id: string) {
+  router.push({ name: 'admin-service-edit', params: { id }, query: { new: '1' } })
 }
 </script>

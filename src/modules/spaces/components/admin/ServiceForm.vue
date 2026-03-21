@@ -105,32 +105,6 @@
       />
     </section>
 
-    <!-- Contacto -->
-    <section class="space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-base font-semibold">Contacto</h2>
-        <Button type="button" variant="outline" size="sm" @click="copyContactFromProfile">
-          Copiar de mi perfil
-        </Button>
-      </div>
-      <Separator />
-
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="space-y-1.5">
-          <Label for="contact_email">Email</Label>
-          <Input id="contact_email" v-model="form.contact_email" type="email" placeholder="contacto@ejemplo.com" />
-        </div>
-        <div class="space-y-1.5">
-          <Label for="contact_phone">Teléfono</Label>
-          <Input id="contact_phone" v-model="form.contact_phone" type="tel" placeholder="+56 9 1234 5678" />
-        </div>
-        <div class="space-y-1.5">
-          <Label for="contact_whatsapp">WhatsApp</Label>
-          <Input id="contact_whatsapp" v-model="form.contact_whatsapp" type="tel" placeholder="+56 9 1234 5678" />
-        </div>
-      </div>
-    </section>
-
     <!-- Publicación -->
     <section class="space-y-4">
       <h2 class="text-base font-semibold">Publicación</h2>
@@ -181,7 +155,7 @@ const router = useRouter()
 const {
   form, existingImages, pendingPreviews, pendingCompressionMetas,
   loading, loadingService, error, isEditMode,
-  applyPlaceData, copyContactFromProfile, loadService,
+  applyPlaceData, loadService,
   addPendingFile, removePendingFile, addImageInEditMode,
   removeExistingImage, submit,
 } = useServiceForm(props.serviceId)

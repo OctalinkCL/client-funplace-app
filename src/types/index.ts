@@ -133,6 +133,7 @@ export interface CreateSpacePayload {
   admin_id: string
   title: string
   slug: string
+  kind?: SpaceKind
   space_type: SpaceType | null
   description: string | null
   capacity: number | null
@@ -142,6 +143,8 @@ export interface CreateSpacePayload {
   address: string | null
   lat: number | null
   lng: number | null
+  service_area?: string | null
+  price_from?: number | null
   is_published: boolean
   contact_email?: string | null
   contact_phone?: string | null

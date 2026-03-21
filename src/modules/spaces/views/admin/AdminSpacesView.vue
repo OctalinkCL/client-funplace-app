@@ -59,7 +59,7 @@
           <!-- Acciones -->
           <div class="flex items-center gap-1 shrink-0">
             <Button variant="ghost" size="sm"
-              @click="router.push({ name: 'admin-space-edit', params: { id: space.id } })">
+              @click="router.push({ name: space.kind === 'service' ? 'admin-service-edit' : 'admin-space-edit', params: { id: space.id } })">
               Editar
             </Button>
             <Button variant="ghost" size="sm"

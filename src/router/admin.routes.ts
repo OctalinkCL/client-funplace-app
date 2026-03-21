@@ -44,6 +44,16 @@ export const adminRoutes: RouteRecordRaw[] = [
         component: () => import('@/modules/availability/views/admin/AdminAvailabilityView.vue'),
       },
       {
+        path: 'servicios/nuevo',
+        name: 'admin-service-new',
+        component: () => import('@/modules/spaces/views/admin/AdminServiceFormView.vue'),
+      },
+      {
+        path: 'servicios/:id/editar',
+        name: 'admin-service-edit',
+        component: () => import('@/modules/spaces/views/admin/AdminServiceFormView.vue'),
+      },
+      {
         path: 'perfil',
         name: 'admin-profile',
         component: () => import('@/modules/auth/views/AdminProfileView.vue'),

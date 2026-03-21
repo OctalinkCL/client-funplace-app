@@ -39,11 +39,6 @@ export function setupGuards(router: Router) {
       return { path: '/' }
     }
 
-    const requiredModule = to.meta.module
-    if (requiredModule && !auth.hasModule(requiredModule)) {
-      return { name: 'admin-bookings' }
-    }
-
     return true
   })
 }

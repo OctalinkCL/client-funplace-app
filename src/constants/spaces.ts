@@ -1,20 +1,29 @@
 import type { SpaceType, PlaceResult } from '@/types'
 
 // ============================================================
-// Labels en español para tipos de espacio
+// Labels en español para todos los tipos (espacios + servicios)
+// Debe ser exhaustivo: incluir todos los valores de SpaceType
 // ============================================================
 export const SPACE_TYPE_LABELS: Record<SpaceType, string> = {
-  casa: 'Casa',
-  sala: 'Sala',
-  estudio: 'Estudio',
-  oficina: 'Oficina',
-  galeria: 'Galería',
-  otro: 'Otro',
+  // Espacios
+  casa:        'Casa de Cumpleaños',
+  centro:      'Centro de Eventos',
+  salon:       'Salón de Eventos',
+  // Servicios
+  catering:    'Servicios de Catering',
+  foodtruck:   'Carros de Comida',
+  inflables:   'Inflables',
+  musica:      'Música',
+  animaciones: 'Animaciones',
+  fotografia:  'Fotografía',
 }
 
-export const SPACE_TYPE_LIST = (Object.entries(SPACE_TYPE_LABELS) as [SpaceType, string][]).map(
-  ([key, label]) => ({ key, label }),
-)
+// Solo tipos de espacio — para el select en SpaceForm
+export const SPACE_TYPE_LIST: { key: SpaceType; label: string }[] = [
+  { key: 'casa',   label: 'Casa de Cumpleaños' },
+  { key: 'centro', label: 'Centro de Eventos' },
+  { key: 'salon',  label: 'Salón de Eventos' },
+]
 
 // ============================================================
 // Google Places

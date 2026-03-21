@@ -1,5 +1,7 @@
 import type { SpaceType, PlaceResult } from '@/types'
 
+export const MAX_IMAGES = 3 // ← cambiar aquí para ajustar el límite global de imágenes por espacio
+
 // ============================================================
 // Labels en español para todos los tipos (espacios + servicios)
 // Debe ser exhaustivo: incluir todos los valores de SpaceType

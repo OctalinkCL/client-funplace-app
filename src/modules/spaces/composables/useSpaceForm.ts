@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { spacesService } from '../services/spaces.service'
 import { imagesService } from '../services/images.service'
 import type { CompressionMeta } from '../services/images.service'
-import { generateSlug, extractPlaceData } from '@/constants/spaces'
+import { generateSlug, extractPlaceData, MAX_IMAGES } from '@/constants/spaces'
 import type { SpaceImage, SpaceType, PlaceResult } from '@/types'
 
 export function useSpaceForm(spaceId?: string) {
@@ -88,8 +88,8 @@ export function useSpaceForm(spaceId?: string) {
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
       return 'Solo se aceptan imágenes JPEG, PNG o WebP.'
     }
-    if (pendingFiles.value.length + existingImages.value.length >= 10) {
-      return 'Máximo 10 imágenes por espacio.'
+    if (pendingFiles.value.length + existingImages.value.length >= MAX_IMAGES) {
+      return `Máximo ${MAX_IMAGES} imágenes por espacio.`
     }
     return null
   }

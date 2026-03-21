@@ -46,7 +46,7 @@
 
     <!-- Drag & drop zone -->
     <div
-      v-if="totalCount < 10"
+      v-if="totalCount < MAX_IMAGES"
       class="relative border-2 border-dashed rounded-md transition-colors cursor-pointer"
       :class="isDragOver
         ? 'border-primary bg-primary/5'
@@ -84,7 +84,7 @@
     </div>
 
     <!-- Counter -->
-    <p class="text-xs text-muted-foreground">{{ totalCount }} / 10 imágenes</p>
+    <p class="text-xs text-muted-foreground">{{ totalCount }} / {{ MAX_IMAGES }} imágenes</p>
 
     <!-- Error -->
     <p v-if="uploadError" class="text-sm text-destructive">{{ uploadError }}</p>
@@ -96,6 +96,7 @@ import { ref, computed } from 'vue'
 import { Trash2, Loader2, ImagePlus } from 'lucide-vue-next'
 import type { SpaceImage } from '@/types'
 import type { CompressionMeta } from '../../services/images.service'
+import { MAX_IMAGES } from '@/constants/spaces'
 
 const props = defineProps<{
   existingImages: SpaceImage[]

@@ -8,6 +8,11 @@ export const publicRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
+        name: 'home',
+        component: () => import('@/modules/home/views/HomeView.vue'),
+      },
+      {
+        path: 'espacios',
         name: 'spaces-list',
         component: () => import('@/modules/spaces/views/public/SpacesListView.vue'),
       },

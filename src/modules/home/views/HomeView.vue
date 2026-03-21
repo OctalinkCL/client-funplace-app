@@ -87,35 +87,28 @@
 
       <!-- Search box -->
       <div class="max-w-3xl mx-auto bg-white border rounded-2xl shadow-sm p-4">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-          <Input v-model="searchForm.ciudad" placeholder="Ciudad" />
-          <Select v-model="searchForm.tipo">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          <!-- Región -->
+          <Select v-model="searchRegion">
             <SelectTrigger>
-              <SelectValue placeholder="Tipo de espacio" />
+              <SelectValue placeholder="Región" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="casa">Casa</SelectItem>
-              <SelectItem value="sala">Sala</SelectItem>
-              <SelectItem value="estudio">Estudio</SelectItem>
-              <SelectItem value="oficina">Oficina</SelectItem>
-              <SelectItem value="galeria">Galería</SelectItem>
+              <SelectItem v-for="r in regions" :key="r" :value="r">{{ r }}</SelectItem>
             </SelectContent>
           </Select>
-          <Input v-model="searchForm.fecha" type="date" />
+          <!-- Ciudad (deshabilitado hasta elegir región) -->
+          <Select v-model="searchCity" :disabled="!searchRegion">
+            <SelectTrigger>
+              <SelectValue placeholder="Ciudad" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="c in citiesForRegion(searchRegion)" :key="c" :value="c">{{ c }}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <!-- Quick filter pills -->
-          <button
-            class="text-xs border rounded-full px-3 py-1.5 hover:bg-neutral-950 hover:text-white hover:border-neutral-950 transition-colors text-neutral-500"
-            @click="searchForm.fecha = tomorrowDate"
-          >Mañana</button>
-          <button
-            class="text-xs border rounded-full px-3 py-1.5 hover:bg-neutral-950 hover:text-white hover:border-neutral-950 transition-colors text-neutral-500"
-          >Tarde</button>
-          <button
-            class="text-xs border rounded-full px-3 py-1.5 hover:bg-neutral-950 hover:text-white hover:border-neutral-950 transition-colors text-neutral-500"
-          >Esta semana</button>
-          <Button class="ml-auto gap-1" @click="handleSearch">
+        <div class="flex justify-end">
+          <Button class="gap-1" @click="handleSearch">
             Buscar <ArrowRight class="size-4" />
           </Button>
         </div>
@@ -440,13 +433,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { Menu, X, Star, ArrowRight } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardTitle, CardFooter } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectTrigger,
@@ -454,29 +446,24 @@ import {
   SelectItem,
   SelectValue,
 } from '@/components/ui/select'
+import { useLocationFilters } from '@/modules/spaces/composables/useLocationFilters'
 
 const router = useRouter()
+const { regions, citiesForRegion, fetchLocations } = useLocationFilters()
 
 const mobileMenuOpen = ref(false)
+const searchRegion = ref('')
+const searchCity = ref('')
 
-const searchForm = ref({
-  ciudad: '',
-  tipo: '',
-  fecha: '',
-})
+// Resetear ciudad al cambiar región
+watch(searchRegion, () => { searchCity.value = '' })
 
-// Fecha de mañana en formato YYYY-MM-DD para el pill "Mañana"
-const tomorrowDate = computed(() => {
-  const d = new Date()
-  d.setDate(d.getDate() + 1)
-  return d.toISOString().split('T')[0]
-})
+onMounted(fetchLocations)
 
 function handleSearch() {
   const query: Record<string, string> = {}
-  if (searchForm.value.ciudad) query.ciudad = searchForm.value.ciudad
-  if (searchForm.value.tipo) query.tipo = searchForm.value.tipo
-  if (searchForm.value.fecha) query.fecha = searchForm.value.fecha
+  if (searchRegion.value) query.region = searchRegion.value
+  if (searchCity.value) query.city = searchCity.value
   router.push({ name: 'spaces-list', query })
 }
 </script>

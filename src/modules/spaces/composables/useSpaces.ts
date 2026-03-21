@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { spacesService } from '../services/spaces.service'
-import type { Space } from '@/types'
+import type { Space, SpaceKind } from '@/types'
 
 export function useSpaces() {
   const auth = useAuthStore()
@@ -9,12 +9,12 @@ export function useSpaces() {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchSpaces() {
+  async function fetchSpaces(kind?: SpaceKind) {
     if (!auth.user) return
     loading.value = true
     error.value = null
     try {
-      spaces.value = await spacesService.getByAdmin(auth.user.id)
+      spaces.value = await spacesService.getByAdmin(auth.user.id, kind)
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error al cargar los espacios.'
     } finally {

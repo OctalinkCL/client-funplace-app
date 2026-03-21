@@ -2,8 +2,12 @@
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-semibold">Mis Espacios</h1>
-      <Button @click="showCreateModal = true">Nuevo espacio</Button>
+      <h1 class="text-2xl font-semibold">{{ pageTitle }}</h1>
+      <div class="flex gap-2">
+        <Button v-if="auth.hasModule('spaces')" @click="showCreateModal = true">Crear espacio</Button>
+        <Button v-if="auth.hasModule('services')" variant="outline"
+          @click="router.push({ name: 'admin-service-new' })">Crear servicio</Button>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -16,8 +20,12 @@
 
     <!-- Empty state -->
     <div v-else-if="spaces.length === 0" class="flex flex-col items-center justify-center py-20 gap-4">
-      <p class="text-muted-foreground">Aún no tienes espacios creados.</p>
-      <Button @click="showCreateModal = true">Crear tu primer espacio</Button>
+      <p class="text-muted-foreground">{{ emptyMessage }}</p>
+      <div class="flex gap-2">
+        <Button v-if="auth.hasModule('spaces')" @click="showCreateModal = true">Crear tu primer espacio</Button>
+        <Button v-if="auth.hasModule('services')" variant="outline"
+          @click="router.push({ name: 'admin-service-new' })">Crear tu primer servicio</Button>
+      </div>
     </div>
 
     <!-- Lista -->
@@ -37,10 +45,14 @@
               <Badge :variant="space.is_published ? 'default' : 'secondary'">
                 {{ space.is_published ? 'Publicado' : 'Borrador' }}
               </Badge>
+              <span v-if="space.space_type"
+                class="text-xs px-2 py-0.5 rounded-full font-medium"
+                :class="getKindBadgeClass(space.kind)">
+                {{ getTypeLabel(space.space_type) }}
+              </span>
             </div>
             <p class="text-sm text-muted-foreground mt-0.5">
-              {{ SPACE_TYPE_LABELS[space.space_type as SpaceType] ?? '' }}
-              <span v-if="space.city">· {{ space.city }}</span>
+              <span v-if="space.city">{{ space.city }}</span>
             </p>
           </div>
 
@@ -93,11 +105,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store'
 import { useSpaces } from '../../composables/useSpaces'
-import { SPACE_TYPE_LABELS } from '@/constants/spaces'
-import type { Space, SpaceType } from '@/types'
+import { getSidebarLabel, getTypeLabel, getKindBadgeClass } from '@/constants/plans'
+import type { Space, SpaceKind } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -114,9 +127,29 @@ import {
 } from '@/components/ui/alert-dialog'
 
 const router = useRouter()
+const auth = useAuthStore()
 const { spaces, loading, error, fetchSpaces, deleteSpace, togglePublish } = useSpaces()
 
 const showCreateModal = ref(false)
+
+// Título y mensaje vacío dinámicos según plan
+const pageTitle = computed(() => getSidebarLabel(auth.profile?.plan))
+const emptyMessage = computed(() => {
+  const hasSpaces = auth.hasModule('spaces')
+  const hasServices = auth.hasModule('services')
+  if (hasSpaces && hasServices) return 'Aún no tienes espacios ni servicios creados.'
+  if (hasServices) return 'Aún no tienes servicios creados.'
+  return 'Aún no tienes espacios creados.'
+})
+
+// Filtro de kind según los módulos del plan
+const kindFilter = computed<SpaceKind | undefined>(() => {
+  const hasSpaces = auth.hasModule('spaces')
+  const hasServices = auth.hasModule('services')
+  if (hasSpaces && hasServices) return undefined  // trae todo
+  if (hasServices) return 'service'
+  return 'space'
+})
 
 const confirmDialog = ref<{ open: boolean; title: string; description: string; action: (() => void) | null }>({
   open: false, title: '', description: '', action: null,
@@ -131,7 +164,7 @@ function executeConfirm() {
   confirmDialog.value.open = false
 }
 
-onMounted(fetchSpaces)
+onMounted(() => fetchSpaces(kindFilter.value))
 
 function handleDelete(space: Space) {
   openConfirm(

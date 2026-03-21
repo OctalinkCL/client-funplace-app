@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { Space, CreateSpacePayload, UpdateSpacePayload } from '@/types'
+import type { Space, SpaceKind, CreateSpacePayload, UpdateSpacePayload } from '@/types'
 
 export const spacesService = {
   async getPublished(filters?: { region?: string; city?: string }): Promise<Space[]> {
@@ -30,12 +30,16 @@ export const spacesService = {
     return data
   },
 
-  async getByAdmin(adminId: string): Promise<Space[]> {
-    const { data, error } = await supabase
+  async getByAdmin(adminId: string, kind?: SpaceKind): Promise<Space[]> {
+    let query = supabase
       .from('spaces')
       .select('*, space_images(id, url, sort_order)')
       .eq('admin_id', adminId)
       .order('created_at', { ascending: false })
+
+    if (kind) query = query.eq('kind', kind)
+
+    const { data, error } = await query
     if (error) throw error
     return data
   },

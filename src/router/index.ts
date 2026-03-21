@@ -1,4 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    guestOnly?: boolean
+    requiresRecovery?: boolean
+    module?: string
+  }
+}
 import { publicRoutes } from './public.routes'
 import { authRoutes } from './auth.routes'
 import { adminRoutes } from './admin.routes'

@@ -29,6 +29,7 @@ export interface Profile {
   contact_email: string | null
   contact_phone: string | null
   contact_whatsapp: string | null
+  plan: number | null
 }
 
 export type SpaceType = 'casa' | 'sala' | 'estudio' | 'oficina' | 'galeria' | 'otro'

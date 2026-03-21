@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/types'
+import { planHasModule } from '@/constants/plans'
 
 let _initPromise: Promise<void> | null = null
 
@@ -24,6 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!user.value)
   const isAdmin = computed(() => profile.value?.role === 'admin' || profile.value?.role === 'superadmin')
   const isSuperAdmin = computed(() => profile.value?.role === 'superadmin')
+  const hasModule = (module: string): boolean => planHasModule(profile.value?.plan, module)
 
   function initialize() {
     if (!_initPromise) {
@@ -102,5 +104,5 @@ export const useAuthStore = defineStore('auth', () => {
     await fetchProfile()
   }
 
-  return { user, profile, loading, isAuthenticated, isAdmin, isSuperAdmin, isPasswordRecovery, isInviteSetup, initialize, login, logout, fetchProfile, updateProfile, setPasswordRecovery, setInviteSetup }
+  return { user, profile, loading, isAuthenticated, isAdmin, isSuperAdmin, hasModule, isPasswordRecovery, isInviteSetup, initialize, login, logout, fetchProfile, updateProfile, setPasswordRecovery, setInviteSetup }
 })

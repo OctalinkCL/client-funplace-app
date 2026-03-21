@@ -26,6 +26,9 @@ export interface Profile {
   role: UserRole
   full_name: string | null
   created_at: string
+  contact_email: string | null
+  contact_phone: string | null
+  contact_whatsapp: string | null
 }
 
 export type SpaceType = 'casa' | 'sala' | 'estudio' | 'oficina' | 'galeria' | 'otro'
@@ -45,6 +48,9 @@ export interface Space {
   lat: number | null
   lng: number | null
   is_published: boolean
+  contact_email: string | null
+  contact_phone: string | null
+  contact_whatsapp: string | null
   created_at: string
   updated_at: string
   space_amenities?: { amenity_id: string }[]
@@ -128,6 +134,9 @@ export interface CreateSpacePayload {
   lat: number | null
   lng: number | null
   is_published: boolean
+  contact_email?: string | null
+  contact_phone?: string | null
+  contact_whatsapp?: string | null
 }
 
 export type UpdateSpacePayload = Partial<Omit<CreateSpacePayload, 'admin_id'>>

@@ -25,6 +25,9 @@ export function useSpaceForm(spaceId?: string) {
     lat: null as number | null,
     lng: null as number | null,
     is_published: false,
+    contact_email: null as string | null,
+    contact_phone: null as string | null,
+    contact_whatsapp: null as string | null,
   })
 
   const selectedAmenities = ref<string[]>([])
@@ -70,6 +73,9 @@ export function useSpaceForm(spaceId?: string) {
       form.lat = space.lat
       form.lng = space.lng
       form.is_published = space.is_published
+      form.contact_email = space.contact_email ?? null
+      form.contact_phone = space.contact_phone ?? null
+      form.contact_whatsapp = space.contact_whatsapp ?? null
       selectedAmenities.value = (space.space_amenities ?? []).map(a => a.amenity_id)
       existingImages.value = space.space_images ?? []
     } finally {
@@ -169,6 +175,9 @@ export function useSpaceForm(spaceId?: string) {
         lat: form.lat,
         lng: form.lng,
         is_published: form.is_published,
+        contact_email: form.contact_email || null,
+        contact_phone: form.contact_phone || null,
+        contact_whatsapp: form.contact_whatsapp || null,
       }
 
       if (isEditMode.value && spaceId) {

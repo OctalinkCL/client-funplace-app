@@ -17,6 +17,13 @@
       >
         Mis Espacios
       </RouterLink>
+      <RouterLink
+        to="/admin/perfil"
+        class="px-3 py-2 rounded-md text-sm hover:bg-accent"
+        active-class="bg-accent font-medium"
+      >
+        Mi Perfil
+      </RouterLink>
     </aside>
 
     <!-- Main -->

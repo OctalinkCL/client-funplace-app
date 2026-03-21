@@ -66,6 +66,39 @@
         <SpaceAmenities :space-amenities="space.space_amenities ?? []" :amenity-list="amenityList" />
       </div>
 
+      <!-- Contacto -->
+      <div v-if="hasContact" class="space-y-3">
+        <h2 class="text-lg font-semibold">¿Tienes dudas? Contáctanos</h2>
+        <div class="flex flex-wrap gap-3">
+          <a
+            v-if="space.contact_email"
+            :href="`mailto:${space.contact_email}`"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
+          >
+            <Mail class="w-4 h-4 text-blue-500 shrink-0" />
+            {{ space.contact_email }}
+          </a>
+          <a
+            v-if="space.contact_phone"
+            :href="`tel:${space.contact_phone}`"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
+          >
+            <Phone class="w-4 h-4 text-green-500 shrink-0" />
+            {{ space.contact_phone }}
+          </a>
+          <a
+            v-if="space.contact_whatsapp"
+            :href="whatsappUrl(space.contact_whatsapp)"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
+          >
+            <MessageCircle class="w-4 h-4 text-teal-500 shrink-0" />
+            Escríbenos por WhatsApp
+          </a>
+        </div>
+      </div>
+
       <Separator />
 
       <!-- Sección de reserva -->
@@ -109,6 +142,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
+import { Mail, Phone, MessageCircle } from 'lucide-vue-next'
 import { spacesService } from '../../services/spaces.service'
 import { SPACE_TYPE_LABELS } from '@/constants/spaces'
 import SpaceAmenities from '../../components/public/SpaceAmenities.vue'
@@ -133,6 +167,14 @@ const error = ref<string | null>(null)
 const activeImage = ref('')
 const selectedDate = ref('')
 const selectedSlot = ref<SimpleSlot | null>(null)
+
+const hasContact = computed(() =>
+  !!(space.value?.contact_email || space.value?.contact_phone || space.value?.contact_whatsapp)
+)
+
+function whatsappUrl(phone: string): string {
+  return `https://wa.me/${phone.replace(/[\s+\-()]/g, '')}`
+}
 
 const MONTHS_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 const DAYS_ES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']

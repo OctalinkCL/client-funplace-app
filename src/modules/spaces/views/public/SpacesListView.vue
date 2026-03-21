@@ -39,6 +39,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { spacesService } from '../../services/spaces.service'
 import SpaceCard from '../../components/public/SpaceCard.vue'
 import SpaceFilters from '../../components/public/SpaceFilters.vue'
@@ -70,6 +71,12 @@ function clearFilters() {
   filters.city = ''
 }
 
+const route = useRoute()
+
 watch(filters, fetchSpaces)
-onMounted(fetchSpaces)
+onMounted(() => {
+  if (route.query.region) filters.region = route.query.region as string
+  if (route.query.city) filters.city = route.query.city as string
+  fetchSpaces()
+})
 </script>

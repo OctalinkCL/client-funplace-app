@@ -1085,6 +1085,7 @@ Para evitar scope creep, estas features están explícitamente fuera del MVP:
 - ❌ Pasarela de pagos
 - ❌ Panel superadmin
 - ⚠️ Edge Function `send-booking-email` debe desplegarse manualmente con `supabase functions deploy send-booking-email` o desde el Dashboard de Supabase cada vez que se modifique localmente.
+- ⚠️ `FeaturedSpacesGrid.vue` (HomeView) trae todos los espacios publicados y hace `.slice(0, 3)` client-side. Cuando se defina la lógica de "destacados", agregar `limit?: number` a `spacesService.getPublished()` y aplicar `.limit(n)` en la query de Supabase para que solo viaje el número necesario por la red.
 
 ---
 

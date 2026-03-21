@@ -152,66 +152,7 @@
         </RouterLink>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        <!-- Card 1 -->
-        <Card class="overflow-hidden">
-          <div class="aspect-4/3 bg-neutral-100 relative flex items-center justify-center">
-            <span class="text-xs text-neutral-400 uppercase tracking-widest">Foto del espacio</span>
-            <Badge class="absolute top-3 left-3 bg-green-100 text-green-700 border-0 hover:bg-green-100">Disponible</Badge>
-          </div>
-          <CardContent class="p-4 pb-0 space-y-1">
-            <p class="text-xs font-medium text-neutral-400 uppercase tracking-widest">Santiago</p>
-            <CardTitle class="text-base font-semibold">Casa Jardín Ñuñoa</CardTitle>
-            <p class="text-xs text-neutral-400">Casa · Hasta 60 personas</p>
-          </CardContent>
-          <CardFooter class="px-4 py-4 flex items-center justify-between">
-            <span class="text-sm font-medium text-neutral-950">Consultar precio</span>
-            <Button size="sm" as-child>
-              <RouterLink :to="{ name: 'spaces-list' }">Ver espacio</RouterLink>
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <!-- Card 2 -->
-        <Card class="overflow-hidden">
-          <div class="aspect-4/3 bg-neutral-100 relative flex items-center justify-center">
-            <span class="text-xs text-neutral-400 uppercase tracking-widest">Foto del espacio</span>
-            <Badge class="absolute top-3 left-3 bg-amber-100 text-amber-700 border-0 hover:bg-amber-100">Pendiente conf.</Badge>
-          </div>
-          <CardContent class="p-4 pb-0 space-y-1">
-            <p class="text-xs font-medium text-neutral-400 uppercase tracking-widest">Valparaíso</p>
-            <CardTitle class="text-base font-semibold">Sala Cerro Alegre</CardTitle>
-            <p class="text-xs text-neutral-400">Sala · Hasta 30 personas</p>
-          </CardContent>
-          <CardFooter class="px-4 py-4 flex items-center justify-between">
-            <span class="text-sm font-medium text-neutral-950">Consultar precio</span>
-            <Button size="sm" as-child>
-              <RouterLink :to="{ name: 'spaces-list' }">Ver espacio</RouterLink>
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <!-- Card 3 -->
-        <Card class="overflow-hidden">
-          <div class="aspect-4/3 bg-neutral-100 relative flex items-center justify-center">
-            <span class="text-xs text-neutral-400 uppercase tracking-widest">Foto del espacio</span>
-            <Badge class="absolute top-3 left-3 bg-green-100 text-green-700 border-0 hover:bg-green-100">Disponible</Badge>
-          </div>
-          <CardContent class="p-4 pb-0 space-y-1">
-            <p class="text-xs font-medium text-neutral-400 uppercase tracking-widest">Concepción</p>
-            <CardTitle class="text-base font-semibold">Estudio Biobío</CardTitle>
-            <p class="text-xs text-neutral-400">Estudio · Hasta 15 personas</p>
-          </CardContent>
-          <CardFooter class="px-4 py-4 flex items-center justify-between">
-            <span class="text-sm font-medium text-neutral-950">Consultar precio</span>
-            <Button size="sm" as-child>
-              <RouterLink :to="{ name: 'spaces-list' }">Ver espacio</RouterLink>
-            </Button>
-          </CardFooter>
-        </Card>
-
-      </div>
+      <FeaturedSpacesGrid />
     </section>
     <!-- /ESPACIOS DESTACADOS -->
 
@@ -438,7 +379,8 @@ import { useRouter, RouterLink } from 'vue-router'
 import { Menu, X, Star, ArrowRight } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardTitle, CardFooter } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
+import FeaturedSpacesGrid from '../components/FeaturedSpacesGrid.vue'
 import {
   Select,
   SelectTrigger,

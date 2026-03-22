@@ -10,7 +10,7 @@
       >
         <!-- Logo -->
         <RouterLink :to="{ name: 'home' }" class="flex items-center gap-2">
-          <AppLogo :height="24" color="#000" />
+          <AppLogo :height="24" :color="scrolled ? '#0a0a0a' : '#fff'" />
         </RouterLink>
 
         <!-- Desktop links -->

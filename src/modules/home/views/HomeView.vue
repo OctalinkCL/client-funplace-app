@@ -1,7 +1,10 @@
 <template>
   <div class="min-h-screen bg-white">
     <!-- ── NAV ── -->
-    <nav class="fixed top-0 inset-x-0 z-50">
+    <nav
+      class="fixed top-0 inset-x-0 z-50 transition-colors duration-300"
+      :class="scrolled ? 'bg-white shadow-sm' : 'bg-transparent'"
+    >
       <div
         class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
       >
@@ -520,7 +523,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
 import { useRouter, RouterLink } from "vue-router";
 import { Menu, X, Star, ArrowRight } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
@@ -542,6 +545,7 @@ const { regions, citiesForRegion, fetchLocations } = useLocationFilters();
 const mobileMenuOpen = ref(false);
 const searchRegion = ref("");
 const searchCity = ref("");
+const scrolled = ref(false);
 
 const gradientStyle = {
   background: "radial-gradient(125% 125% at 50% 90%, #fff 40%, #7c3aed 100%)",
@@ -552,7 +556,12 @@ watch(searchRegion, () => {
   searchCity.value = "";
 });
 
-onMounted(fetchLocations);
+onMounted(() => {
+  fetchLocations();
+  const onScroll = () => { scrolled.value = window.scrollY > 40; };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onUnmounted(() => window.removeEventListener("scroll", onScroll));
+});
 
 function handleSearch() {
   const query: Record<string, string> = {};

@@ -135,6 +135,12 @@ async function submitBooking() {
   submitting.value = true
   submitError.value = null
   try {
+    const freshSlots = await getSlotsForDate(space.value.id, date, true)
+    const stillAvailable = freshSlots.find(s => s.blockId === blockId && s.status === 'AVAILABLE')
+    if (!stillAvailable) {
+      slotUnavailable.value = true
+      return
+    }
     await bookingsService.create({
       space_id: space.value.id,
       block_id: slot.value.blockId,

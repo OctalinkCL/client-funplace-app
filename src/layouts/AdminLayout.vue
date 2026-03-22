@@ -1,49 +1,98 @@
 <template>
-  <div class="min-h-screen flex">
-    <!-- Sidebar -->
-    <aside class="w-56 border-r flex flex-col gap-1 p-4 shrink-0">
-      <p class="font-semibold mb-4">Funplace Admin</p>
-      <RouterLink
-        to="/admin/reservas"
-        class="px-3 py-2 rounded-md text-sm hover:bg-accent"
-        active-class="bg-accent font-medium"
-      >
-        Reservas
-      </RouterLink>
-      <RouterLink
-        to="/admin/espacios"
-        class="px-3 py-2 rounded-md text-sm hover:bg-accent"
-        active-class="bg-accent font-medium"
-      >
-        {{ sidebarLabel }}
-      </RouterLink>
-      <RouterLink
-        to="/admin/perfil"
-        class="px-3 py-2 rounded-md text-sm hover:bg-accent"
-        active-class="bg-accent font-medium"
-      >
-        Mi Perfil
-      </RouterLink>
-    </aside>
+  <SidebarProvider>
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" as-child>
+              <RouterLink to="/admin">
+                <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <LayoutDashboard class="size-4" />
+                </div>
+                <span class="font-semibold truncate">Funplace Admin</span>
+              </RouterLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
-    <!-- Main -->
-    <div class="flex-1 flex flex-col">
-      <header class="border-b px-6 py-3 flex items-center justify-end">
-        <LogoutButton />
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem v-for="item in navItems" :key="item.to">
+                <SidebarMenuButton
+                  as-child
+                  :is-active="isActive(item.to)"
+                  :tooltip="item.label"
+                >
+                  <RouterLink :to="item.to">
+                    <component :is="item.icon" />
+                    <span>{{ item.label }}</span>
+                  </RouterLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <LogoutButton />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+
+      <SidebarRail />
+    </Sidebar>
+
+    <SidebarInset>
+      <header class="flex h-12 shrink-0 items-center gap-2 border-b px-4">
+        <SidebarTrigger class="-ml-1" />
       </header>
       <main class="flex-1 p-6">
         <RouterView />
       </main>
-    </div>
-  </div>
+    </SidebarInset>
+  </SidebarProvider>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { CalendarDays, Building2, User, LayoutDashboard } from 'lucide-vue-next'
 import LogoutButton from '@/modules/auth/components/LogoutButton.vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { getSidebarLabel } from '@/constants/plans'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
 
 const auth = useAuthStore()
+const route = useRoute()
 const sidebarLabel = computed(() => getSidebarLabel(auth.profile?.plan))
+
+const navItems = computed(() => [
+  { to: '/admin/reservas', label: 'Reservas', icon: CalendarDays },
+  { to: '/admin/espacios', label: sidebarLabel.value, icon: Building2 },
+  { to: '/admin/perfil', label: 'Mi Perfil', icon: User },
+])
+
+function isActive(path: string) {
+  return route.path.startsWith(path)
+}
 </script>

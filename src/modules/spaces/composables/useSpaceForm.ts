@@ -35,6 +35,7 @@ export function useSpaceForm(spaceId?: string) {
   const pendingFiles = ref<File[]>([])
   const pendingPreviews = ref<string[]>([])
   const pendingCompressionMetas = ref<CompressionMeta[]>([])
+  let claimedSlots = 0
   const uploadingCount = ref(0)
   const loading = ref(false)
   const loadingSpace = ref(false)
@@ -88,7 +89,7 @@ export function useSpaceForm(spaceId?: string) {
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
       return 'Solo se aceptan imágenes JPEG, PNG o WebP.'
     }
-    if (pendingFiles.value.length + existingImages.value.length >= MAX_IMAGES) {
+    if (pendingFiles.value.length + existingImages.value.length + claimedSlots >= MAX_IMAGES) {
       return `Máximo ${MAX_IMAGES} imágenes por espacio.`
     }
     return null
@@ -98,6 +99,7 @@ export function useSpaceForm(spaceId?: string) {
     const validationError = validateFile(file)
     if (validationError) return validationError
 
+    claimedSlots++
     try {
       const { blob, meta } = await imagesService.compress(file)
       const compressedFile = new File([blob], file.name, { type: 'image/jpeg' })
@@ -106,6 +108,8 @@ export function useSpaceForm(spaceId?: string) {
       pendingCompressionMetas.value.push(meta)
     } catch {
       return 'Error al procesar la imagen.'
+    } finally {
+      claimedSlots--
     }
     return null
   }

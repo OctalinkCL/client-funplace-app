@@ -122,7 +122,9 @@ function handleFiles(event: Event) {
   uploadError.value = null
   const input = event.target as HTMLInputElement
   if (!input.files) return
-  for (const file of Array.from(input.files)) {
+  const remaining = MAX_IMAGES - totalCount.value
+  const files = Array.from(input.files).slice(0, remaining)
+  for (const file of files) {
     emit('add-file', file)
   }
   if (fileInput.value) fileInput.value.value = ''
@@ -131,7 +133,8 @@ function handleFiles(event: Event) {
 function handleDrop(event: DragEvent) {
   isDragOver.value = false
   uploadError.value = null
-  const files = Array.from(event.dataTransfer?.files ?? [])
+  const remaining = MAX_IMAGES - totalCount.value
+  const files = Array.from(event.dataTransfer?.files ?? []).slice(0, remaining)
   for (const file of files) {
     emit('add-file', file)
   }

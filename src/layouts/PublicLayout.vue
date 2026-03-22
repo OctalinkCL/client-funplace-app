@@ -104,7 +104,7 @@
             <div class="flex flex-col gap-10">
               <div class="flex flex-col gap-7">
                 <a href="#">
-                  <AppLogo :height="40" color="white" />
+                  <AppLogo :height="30" color="#9f9fa0" icon-color="white" />
                 </a>
               </div>
               <div class="flex flex-col">

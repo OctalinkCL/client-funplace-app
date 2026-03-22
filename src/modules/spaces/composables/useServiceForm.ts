@@ -32,6 +32,7 @@ export function useServiceForm(serviceId?: string) {
   const pendingPreviews = ref<string[]>([])
   const pendingCompressionMetas = ref<CompressionMeta[]>([])
   const uploadingCount = ref(0)
+  const initialSnapshot = ref<{ form: Record<string, unknown> } | null>(null)
   const loading = ref(false)
   const loadingService = ref(false)
   const error = ref<string | null>(null)
@@ -68,10 +69,23 @@ export function useServiceForm(serviceId?: string) {
       form.price_from = space.price_from
       form.is_published = space.is_published
       existingImages.value = space.space_images ?? []
+      initialSnapshot.value = { form: { ...form } }
     } finally {
       loadingService.value = false
     }
   }
+
+  const isDirty = computed(() => {
+    if (!isEditMode.value) return true
+    if (!initialSnapshot.value) return false
+
+    const snap = initialSnapshot.value.form
+    for (const key of Object.keys(snap)) {
+      if ((form as Record<string, unknown>)[key] !== snap[key]) return true
+    }
+
+    return false
+  })
 
   function validateFile(file: File): string | null {
     if (file.size > 5 * 1024 * 1024) return 'La imagen no puede superar 5MB.'
@@ -217,6 +231,7 @@ export function useServiceForm(serviceId?: string) {
     loadingService,
     error,
     isEditMode,
+    isDirty,
     applyPlaceData,
     loadService,
     addPendingFile,

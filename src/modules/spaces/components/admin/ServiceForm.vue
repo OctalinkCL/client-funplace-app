@@ -123,7 +123,7 @@
     <!-- Acciones -->
     <div class="flex items-center gap-3 justify-end pt-2">
       <Button type="button" variant="outline" @click="router.back()">Cancelar</Button>
-      <Button type="submit" :disabled="loading || !form.title || !form.space_type">
+      <Button type="submit" :disabled="loading || !form.title || !form.space_type || !isDirty">
         {{ loading ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear servicio' }}
       </Button>
     </div>
@@ -154,7 +154,7 @@ const router = useRouter()
 
 const {
   form, existingImages, pendingPreviews, pendingCompressionMetas,
-  loading, loadingService, error, isEditMode,
+  loading, loadingService, error, isEditMode, isDirty,
   applyPlaceData, loadService,
   addPendingFile, removePendingFile, addImageInEditMode,
   removeExistingImage, submit,

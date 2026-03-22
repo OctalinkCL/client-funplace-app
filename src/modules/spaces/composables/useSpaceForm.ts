@@ -36,6 +36,7 @@ export function useSpaceForm(spaceId?: string) {
   const pendingPreviews = ref<string[]>([])
   const pendingCompressionMetas = ref<CompressionMeta[]>([])
   let claimedSlots = 0
+  const initialSnapshot = ref<{ form: Record<string, unknown>; amenities: string[] } | null>(null)
   const uploadingCount = ref(0)
   const loading = ref(false)
   const loadingSpace = ref(false)
@@ -79,10 +80,30 @@ export function useSpaceForm(spaceId?: string) {
       form.contact_whatsapp = space.contact_whatsapp ?? null
       selectedAmenities.value = (space.space_amenities ?? []).map(a => a.amenity_id)
       existingImages.value = space.space_images ?? []
+      initialSnapshot.value = {
+        form: { ...form },
+        amenities: [...selectedAmenities.value].sort(),
+      }
     } finally {
       loadingSpace.value = false
     }
   }
+
+  const isDirty = computed(() => {
+    if (!isEditMode.value) return true
+    if (!initialSnapshot.value) return false
+
+    const snap = initialSnapshot.value
+    for (const key of Object.keys(snap.form)) {
+      if ((form as Record<string, unknown>)[key] !== snap.form[key]) return true
+    }
+
+    const current = [...selectedAmenities.value].sort()
+    if (current.length !== snap.amenities.length) return true
+    if (current.some((id, i) => id !== snap.amenities[i])) return true
+
+    return false
+  })
 
   function validateFile(file: File): string | null {
     if (file.size > 5 * 1024 * 1024) return 'La imagen no puede superar 5MB.'
@@ -237,6 +258,7 @@ export function useSpaceForm(spaceId?: string) {
     loadingSpace,
     error,
     isEditMode,
+    isDirty,
     applyPlaceData,
     loadSpace,
     addPendingFile,

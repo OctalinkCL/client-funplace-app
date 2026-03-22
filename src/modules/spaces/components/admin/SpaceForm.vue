@@ -119,7 +119,7 @@
     <!-- Acciones -->
     <div class="flex items-center gap-3 justify-end pt-2">
       <Button type="button" variant="outline" @click="router.back()">Cancelar</Button>
-      <Button type="submit" :disabled="loading || !form.title">
+      <Button type="submit" :disabled="loading || !form.title || !isDirty">
         {{ loading ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear espacio' }}
       </Button>
     </div>
@@ -152,7 +152,7 @@ const router = useRouter()
 
 const {
   form, selectedAmenities, existingImages, pendingPreviews, pendingCompressionMetas,
-  loading, loadingSpace, error, isEditMode,
+  loading, loadingSpace, error, isEditMode, isDirty,
   loadSpace, addPendingFile, removePendingFile, addImageInEditMode,
   removeExistingImage, submit, applyPlaceData,
 } = useSpaceForm(props.spaceId)

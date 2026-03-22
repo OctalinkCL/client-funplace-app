@@ -10,20 +10,7 @@
       >
         <!-- Logo -->
         <RouterLink :to="{ name: 'home' }" class="flex items-center gap-2">
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 28 28"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect width="28" height="28" rx="6" fill="#0a0a0a" />
-            <circle cx="10" cy="14" r="3" fill="white" />
-            <circle cx="18" cy="14" r="3" fill="white" />
-          </svg>
-          <span class="font-semibold text-lg tracking-tight text-neutral-950"
-            >funplace</span
-          >
+          <AppLogo :height="24" color="#000" />
         </RouterLink>
 
         <!-- Desktop links -->
@@ -530,6 +517,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import FeaturedSpacesGrid from "../components/FeaturedSpacesGrid.vue";
+import AppLogo from "@/components/AppLogo.vue";
 import {
   Select,
   SelectTrigger,
@@ -547,9 +535,9 @@ const searchRegion = ref("");
 const searchCity = ref("");
 const scrolled = ref(false);
 
-const gradientStyle = {
-  background: "radial-gradient(125% 125% at 50% 90%, #fff 40%, #7c3aed 100%)",
-};
+// const gradientStyle = {
+//   background: "radial-gradient(125% 125% at 50% 90%, #fff 40%, #7c3aed 100%)",
+// };
 
 // Resetear ciudad al cambiar región
 watch(searchRegion, () => {
@@ -558,7 +546,9 @@ watch(searchRegion, () => {
 
 onMounted(() => {
   fetchLocations();
-  const onScroll = () => { scrolled.value = window.scrollY > 40; };
+  const onScroll = () => {
+    scrolled.value = window.scrollY > 40;
+  };
   window.addEventListener("scroll", onScroll, { passive: true });
   onUnmounted(() => window.removeEventListener("scroll", onScroll));
 });

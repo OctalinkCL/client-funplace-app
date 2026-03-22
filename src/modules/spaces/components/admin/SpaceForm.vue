@@ -61,6 +61,12 @@
           <span class="mx-1">·</span>
           <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
         </div>
+        <LocationMapPicker
+          :lat="form.lat"
+          :lng="form.lng"
+          @update:lat="form.lat = $event"
+          @update:lng="form.lng = $event"
+        />
       </template>
 
       <!-- Modo edición: mostrar dirección actual con opción de editar -->
@@ -82,6 +88,12 @@
             Cancelar
           </Button>
         </div>
+        <LocationMapPicker
+          :lat="form.lat"
+          :lng="form.lng"
+          @update:lat="form.lat = $event"
+          @update:lng="form.lng = $event"
+        />
       </template>
     </section>
 
@@ -135,6 +147,7 @@ import { SPACE_TYPE_LIST } from '@/constants/spaces'
 import AmenitiesSelector from './AmenitiesSelector.vue'
 import ImageUploader from './ImageUploader.vue'
 import PlaceSearchInput from './PlaceSearchInput.vue'
+import LocationMapPicker from '@/components/LocationMapPicker.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

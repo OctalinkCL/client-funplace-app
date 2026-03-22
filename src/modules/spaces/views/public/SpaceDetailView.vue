@@ -99,6 +99,12 @@
         </div>
       </div>
 
+      <!-- Ubicación en mapa -->
+      <div v-if="space.lat && space.lng" class="space-y-3">
+        <h2 class="text-lg font-semibold">Ubicación</h2>
+        <LocationMapPicker :lat="space.lat" :lng="space.lng" :readonly="true" />
+      </div>
+
       <Separator />
 
       <!-- Sección de reserva -->
@@ -146,6 +152,7 @@ import { Mail, Phone, MessageCircle } from 'lucide-vue-next'
 import { spacesService } from '../../services/spaces.service'
 import { SPACE_TYPE_LABELS } from '@/constants/spaces'
 import SpaceAmenities from '../../components/public/SpaceAmenities.vue'
+import LocationMapPicker from '@/components/LocationMapPicker.vue'
 import { useAmenities } from '../../composables/useAmenities'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

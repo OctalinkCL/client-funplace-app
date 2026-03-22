@@ -56,6 +56,12 @@
               <span class="mx-1">·</span>
               <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
             </div>
+            <LocationMapPicker
+              :lat="form.lat"
+              :lng="form.lng"
+              @update:lat="form.lat = $event"
+              @update:lng="form.lng = $event"
+            />
 
             <!-- Error -->
             <p v-if="error" class="text-sm text-destructive">{{ error }}</p>
@@ -87,6 +93,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 import PlaceSearchInput from './PlaceSearchInput.vue'
+import LocationMapPicker from '@/components/LocationMapPicker.vue'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{

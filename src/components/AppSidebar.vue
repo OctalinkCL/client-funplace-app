@@ -33,11 +33,7 @@
     </SidebarContent>
 
     <SidebarFooter>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <AppNavUser />
-        </SidebarMenuItem>
-      </SidebarMenu>
+      <AppNavUser />
     </SidebarFooter>
   </Sidebar>
 </template>

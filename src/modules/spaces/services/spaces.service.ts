@@ -77,6 +77,20 @@ export const spacesService = {
   },
 
   async delete(id: string): Promise<void> {
+    // 1. Obtener paths de imágenes ANTES del cascade
+    const { data: images } = await supabase
+      .from('space_images')
+      .select('storage_path')
+      .eq('space_id', id)
+
+    // 2. Borrar archivos de storage (best-effort, no bloquea si falla)
+    if (images && images.length > 0) {
+      await supabase.storage
+        .from('space-images')
+        .remove(images.map(img => img.storage_path))
+    }
+
+    // 3. Borrar espacio (cascade limpia toda la DB)
     const { error } = await supabase.from('spaces').delete().eq('id', id)
     if (error) throw error
   },

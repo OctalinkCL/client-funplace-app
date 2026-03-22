@@ -15,7 +15,7 @@
         class="px-3 py-2 rounded-md text-sm hover:bg-accent"
         active-class="bg-accent font-medium"
       >
-        Mis Espacios
+        {{ sidebarLabel }}
       </RouterLink>
       <RouterLink
         to="/admin/perfil"
@@ -39,5 +39,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import LogoutButton from '@/modules/auth/components/LogoutButton.vue'
+import { useAuthStore } from '@/stores/auth.store'
+import { getSidebarLabel } from '@/constants/plans'
+
+const auth = useAuthStore()
+const sidebarLabel = computed(() => getSidebarLabel(auth.profile?.plan))
 </script>

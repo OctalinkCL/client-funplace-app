@@ -29,9 +29,15 @@ export interface Profile {
   contact_email: string | null
   contact_phone: string | null
   contact_whatsapp: string | null
+  plan: number | null
 }
 
-export type SpaceType = 'casa' | 'sala' | 'estudio' | 'oficina' | 'galeria' | 'otro'
+export type SpaceKind = 'space' | 'service'
+export type SpaceType =
+  // Espacios (kind='space')
+  | 'casa' | 'centro' | 'salon'
+  // Servicios (kind='service')
+  | 'catering' | 'foodtruck' | 'inflables' | 'musica' | 'animaciones' | 'fotografia'
 
 export interface Space {
   id: string
@@ -39,6 +45,7 @@ export interface Space {
   title: string
   slug: string
   description: string | null
+  kind: SpaceKind
   space_type: SpaceType | null
   capacity: number | null
   size_m2: number | null
@@ -47,6 +54,8 @@ export interface Space {
   address: string | null
   lat: number | null
   lng: number | null
+  service_area: string | null
+  price_from: number | null
   is_published: boolean
   contact_email: string | null
   contact_phone: string | null
@@ -124,6 +133,7 @@ export interface CreateSpacePayload {
   admin_id: string
   title: string
   slug: string
+  kind?: SpaceKind
   space_type: SpaceType | null
   description: string | null
   capacity: number | null
@@ -133,6 +143,8 @@ export interface CreateSpacePayload {
   address: string | null
   lat: number | null
   lng: number | null
+  service_area?: string | null
+  price_from?: number | null
   is_published: boolean
   contact_email?: string | null
   contact_phone?: string | null

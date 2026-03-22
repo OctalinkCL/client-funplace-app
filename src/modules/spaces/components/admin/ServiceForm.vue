@@ -1,5 +1,5 @@
 <template>
-  <div v-if="loadingSpace" class="flex items-center justify-center py-20">
+  <div v-if="loadingService" class="flex items-center justify-center py-20">
     <p class="text-muted-foreground">Cargando...</p>
   </div>
 
@@ -10,50 +10,55 @@
       <Separator />
 
       <div class="space-y-1.5">
-        <Label for="title">Nombre del espacio *</Label>
-        <Input id="title" v-model="form.title" required placeholder="Casa LimaLimón" />
+        <Label for="title">Nombre del servicio *</Label>
+        <Input id="title" v-model="form.title" required placeholder="Ej: Catering Los Pinos" />
         <p v-if="form.slug" class="text-xs text-muted-foreground">URL: /espacios/{{ form.slug }}</p>
       </div>
 
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="space-y-1.5">
-          <Label>Tipo de espacio</Label>
-          <Select v-model="form.space_type">
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem v-for="item in SPACE_TYPE_LIST" :key="item.key" :value="item.key">
-                {{ item.label }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div class="space-y-1.5">
-          <Label for="capacity">Capacidad (personas)</Label>
-          <Input id="capacity" v-model="capacityModel" type="number" min="1" placeholder="50" />
-        </div>
-
-        <div class="space-y-1.5">
-          <Label for="size_m2">Superficie (m²)</Label>
-          <Input id="size_m2" v-model="sizeModel" type="number" min="1" placeholder="120" />
-        </div>
+      <div class="space-y-1.5">
+        <Label>Tipo de servicio *</Label>
+        <Select v-model="form.space_type">
+          <SelectTrigger>
+            <SelectValue placeholder="Seleccionar tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem v-for="item in SERVICE_TYPES" :key="item.value" :value="item.value">
+              {{ item.label }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div class="space-y-1.5">
         <Label for="description">Descripción</Label>
         <Textarea id="description" v-model="form.description"
-          placeholder="Describe el espacio, sus características y qué lo hace especial..." rows="4" />
+          placeholder="Describe el servicio, qué incluye y qué lo hace especial..." rows="4" />
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="space-y-1.5">
+          <Label for="service_area">Zona de cobertura</Label>
+          <Input id="service_area" v-model="form.service_area" placeholder="Ej: Gran Concepción" />
+          <p class="text-xs text-muted-foreground">Área geográfica donde prestas el servicio.</p>
+        </div>
+
+        <div class="space-y-1.5">
+          <Label for="price_from">Precio desde (CLP)</Label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+            <Input id="price_from" v-model="priceModel" type="number" min="0" step="1000"
+              placeholder="80000" class="pl-7" />
+          </div>
+          <p class="text-xs text-muted-foreground">Precio mínimo referencial.</p>
+        </div>
       </div>
     </section>
 
     <!-- Ubicación -->
     <section class="space-y-4">
-      <h2 class="text-base font-semibold">Ubicación</h2>
+      <h2 class="text-base font-semibold">Ubicación base</h2>
       <Separator />
 
-      <!-- Modo creación: buscador siempre visible -->
       <template v-if="!isEditMode">
         <PlaceSearchInput @place-selected="applyPlaceData" />
         <div v-if="form.address" class="text-xs text-muted-foreground -mt-2">
@@ -63,7 +68,6 @@
         </div>
       </template>
 
-      <!-- Modo edición: mostrar dirección actual con opción de editar -->
       <template v-else>
         <div v-if="!editingLocation" class="space-y-1.5">
           <p class="text-sm text-foreground">{{ form.address || 'Sin dirección' }}</p>
@@ -85,20 +89,20 @@
       </template>
     </section>
 
-    <!-- Facilidades -->
-    <section class="space-y-4">
-      <h2 class="text-base font-semibold">Facilidades</h2>
-      <Separator />
-      <AmenitiesSelector v-model="selectedAmenities" :amenities="amenities" />
-    </section>
-
     <!-- Imágenes -->
     <section class="space-y-4">
       <h2 class="text-base font-semibold">Imágenes</h2>
       <Separator />
-      <ImageUploader :existing-images="existingImages" :pending-previews="pendingPreviews"
-        :pending-compression-metas="pendingCompressionMetas" :is-edit-mode="isEditMode" :uploading="loading"
-        @add-file="handleAddFile" @remove-existing="removeExistingImage" @remove-pending="removePendingFile" />
+      <ImageUploader
+        :existing-images="existingImages"
+        :pending-previews="pendingPreviews"
+        :pending-compression-metas="pendingCompressionMetas"
+        :is-edit-mode="isEditMode"
+        :uploading="loading"
+        @add-file="handleAddFile"
+        @remove-existing="removeExistingImage"
+        @remove-pending="removePendingFile"
+      />
     </section>
 
     <!-- Publicación -->
@@ -119,8 +123,8 @@
     <!-- Acciones -->
     <div class="flex items-center gap-3 justify-end pt-2">
       <Button type="button" variant="outline" @click="router.back()">Cancelar</Button>
-      <Button type="submit" :disabled="loading || !form.title || !isDirty">
-        {{ loading ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear espacio' }}
+      <Button type="submit" :disabled="loading || !form.title || !form.space_type || !isDirty">
+        {{ loading ? 'Guardando...' : isEditMode ? 'Guardar cambios' : 'Crear servicio' }}
       </Button>
     </div>
   </form>
@@ -129,10 +133,8 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useSpaceForm } from '../../composables/useSpaceForm'
-import { useAmenities } from '../../composables/useAmenities'
-import { SPACE_TYPE_LIST } from '@/constants/spaces'
-import AmenitiesSelector from './AmenitiesSelector.vue'
+import { useServiceForm } from '../../composables/useServiceForm'
+import { SERVICE_TYPES } from '@/constants/plans'
 import ImageUploader from './ImageUploader.vue'
 import PlaceSearchInput from './PlaceSearchInput.vue'
 import { Button } from '@/components/ui/button'
@@ -145,28 +147,24 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 
-const props = defineProps<{ spaceId?: string }>()
-const emit = defineEmits<{ saved: [spaceId: string] }>()
+const props = defineProps<{ serviceId?: string }>()
+const emit = defineEmits<{ saved: [serviceId: string] }>()
 
 const router = useRouter()
 
 const {
-  form, selectedAmenities, existingImages, pendingPreviews, pendingCompressionMetas,
-  loading, loadingSpace, error, isEditMode, isDirty,
-  loadSpace, addPendingFile, removePendingFile, addImageInEditMode,
-  removeExistingImage, submit, applyPlaceData,
-} = useSpaceForm(props.spaceId)
+  form, existingImages, pendingPreviews, pendingCompressionMetas,
+  loading, loadingService, error, isEditMode, isDirty,
+  applyPlaceData, loadService,
+  addPendingFile, removePendingFile, addImageInEditMode,
+  removeExistingImage, submit,
+} = useServiceForm(props.serviceId)
 
 const editingLocation = ref(false)
 
-const capacityModel = computed({
-  get: () => form.capacity ?? undefined,
-  set: (v: string | number | undefined) => { form.capacity = Number(v) || null },
-})
-
-const sizeModel = computed({
-  get: () => form.size_m2 ?? undefined,
-  set: (v: string | number | undefined) => { form.size_m2 = Number(v) || null },
+const priceModel = computed({
+  get: () => form.price_from ?? undefined,
+  set: (v: string | number | undefined) => { form.price_from = Number(v) || null },
 })
 
 function handlePlaceSelected(place: import('@/types').PlaceResult) {
@@ -174,11 +172,8 @@ function handlePlaceSelected(place: import('@/types').PlaceResult) {
   editingLocation.value = false
 }
 
-const { amenities, fetchAmenities } = useAmenities()
-
 onMounted(() => {
-  fetchAmenities()
-  if (props.spaceId) loadSpace(props.spaceId)
+  if (props.serviceId) loadService(props.serviceId)
 })
 
 async function handleAddFile(file: File) {

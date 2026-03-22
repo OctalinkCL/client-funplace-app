@@ -42,11 +42,20 @@
           <Trash2 :size="12" />
         </button>
       </div>
+
+      <!-- Processing slots (spinner mientras comprime o sube) -->
+      <div
+        v-for="i in processingCount"
+        :key="`processing-${i}`"
+        class="aspect-square rounded-md border border-dashed flex items-center justify-center bg-muted/40"
+      >
+        <Loader2 class="animate-spin text-muted-foreground" :size="20" />
+      </div>
     </div>
 
     <!-- Drag & drop zone -->
     <div
-      v-if="totalCount < 10"
+      v-if="totalCount < MAX_IMAGES"
       class="relative border-2 border-dashed rounded-md transition-colors cursor-pointer"
       :class="isDragOver
         ? 'border-primary bg-primary/5'
@@ -84,7 +93,7 @@
     </div>
 
     <!-- Counter -->
-    <p class="text-xs text-muted-foreground">{{ totalCount }} / 10 imágenes</p>
+    <p class="text-xs text-muted-foreground">{{ totalCount }} / {{ MAX_IMAGES }} imágenes</p>
 
     <!-- Error -->
     <p v-if="uploadError" class="text-sm text-destructive">{{ uploadError }}</p>
@@ -92,10 +101,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Trash2, Loader2, ImagePlus } from 'lucide-vue-next'
 import type { SpaceImage } from '@/types'
 import type { CompressionMeta } from '../../services/images.service'
+import { MAX_IMAGES } from '@/constants/spaces'
 
 const props = defineProps<{
   existingImages: SpaceImage[]
@@ -114,14 +124,30 @@ const emit = defineEmits<{
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadError = ref<string | null>(null)
 const isDragOver = ref(false)
+const processingCount = ref(0)
 
-const totalCount = computed(() => props.existingImages.length + props.pendingPreviews.length)
+const totalCount = computed(() =>
+  props.existingImages.length + props.pendingPreviews.length + processingCount.value
+)
+
+// Cuando el padre termina de comprimir (create mode), quitar spinner
+watch(() => props.pendingPreviews.length, (newLen, oldLen) => {
+  if (newLen > oldLen) processingCount.value = Math.max(0, processingCount.value - (newLen - oldLen))
+})
+
+// Cuando el padre termina de subir (edit mode), quitar spinner
+watch(() => props.existingImages.length, (newLen, oldLen) => {
+  if (newLen > oldLen) processingCount.value = Math.max(0, processingCount.value - (newLen - oldLen))
+})
 
 function handleFiles(event: Event) {
   uploadError.value = null
   const input = event.target as HTMLInputElement
   if (!input.files) return
-  for (const file of Array.from(input.files)) {
+  const remaining = MAX_IMAGES - totalCount.value
+  const files = Array.from(input.files).slice(0, remaining)
+  processingCount.value += files.length
+  for (const file of files) {
     emit('add-file', file)
   }
   if (fileInput.value) fileInput.value.value = ''
@@ -130,7 +156,9 @@ function handleFiles(event: Event) {
 function handleDrop(event: DragEvent) {
   isDragOver.value = false
   uploadError.value = null
-  const files = Array.from(event.dataTransfer?.files ?? [])
+  const remaining = MAX_IMAGES - totalCount.value
+  const files = Array.from(event.dataTransfer?.files ?? []).slice(0, remaining)
+  processingCount.value += files.length
   for (const file of files) {
     emit('add-file', file)
   }

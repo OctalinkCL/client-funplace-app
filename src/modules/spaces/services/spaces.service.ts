@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { Space, CreateSpacePayload, UpdateSpacePayload } from '@/types'
+import type { Space, SpaceKind, CreateSpacePayload, UpdateSpacePayload } from '@/types'
 
 export const spacesService = {
   async getPublished(filters?: { region?: string; city?: string }): Promise<Space[]> {
@@ -30,12 +30,16 @@ export const spacesService = {
     return data
   },
 
-  async getByAdmin(adminId: string): Promise<Space[]> {
-    const { data, error } = await supabase
+  async getByAdmin(adminId: string, kind?: SpaceKind): Promise<Space[]> {
+    let query = supabase
       .from('spaces')
       .select('*, space_images(id, url, sort_order)')
       .eq('admin_id', adminId)
       .order('created_at', { ascending: false })
+
+    if (kind) query = query.eq('kind', kind)
+
+    const { data, error } = await query
     if (error) throw error
     return data
   },
@@ -73,6 +77,20 @@ export const spacesService = {
   },
 
   async delete(id: string): Promise<void> {
+    // 1. Obtener paths de imágenes ANTES del cascade
+    const { data: images } = await supabase
+      .from('space_images')
+      .select('storage_path')
+      .eq('space_id', id)
+
+    // 2. Borrar archivos de storage (best-effort, no bloquea si falla)
+    if (images && images.length > 0) {
+      await supabase.storage
+        .from('space-images')
+        .remove(images.map(img => img.storage_path))
+    }
+
+    // 3. Borrar espacio (cascade limpia toda la DB)
     const { error } = await supabase.from('spaces').delete().eq('id', id)
     if (error) throw error
   },

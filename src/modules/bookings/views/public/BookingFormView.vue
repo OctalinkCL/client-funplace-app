@@ -15,28 +15,16 @@
     </div>
 
     <!-- Slot no disponible -->
-    <div v-else-if="slotUnavailable" class="py-10 text-center space-y-3">
-      <p class="text-muted-foreground">Este bloque ya no está disponible.</p>
-      <RouterLink
-        :to="{ name: 'space-detail', params: { slug } }"
-        class="text-sm underline"
-      >
-        Volver a elegir fecha
-      </RouterLink>
-    </div>
+    <BookingUnavailable v-else-if="slotUnavailable" :slug="slug" />
 
     <!-- Confirmación post-envío -->
-    <div v-else-if="submitted" class="py-10 text-center space-y-4">
-      <div class="text-4xl">✅</div>
-      <h2 class="text-xl font-semibold">¡Solicitud enviada!</h2>
-      <p class="text-muted-foreground text-sm leading-relaxed">
-        Tu solicitud de reserva fue recibida. El administrador se pondrá en contacto contigo
-        por email o teléfono para coordinar el pago y confirmar la reserva.
-      </p>
-      <RouterLink to="/" class="text-sm underline text-muted-foreground">
-        Volver al inicio
-      </RouterLink>
-    </div>
+    <BookingSuccess
+      v-else-if="submitted && space && slot"
+      :space-name="space.title"
+      :date="formattedDate"
+      :block-name="slot.blockName"
+      :time-range="`${slot.startTime} – ${slot.endTime}`"
+    />
 
     <!-- Formulario -->
     <template v-else-if="space && slot">
@@ -98,6 +86,8 @@ import { bookingsService } from '../../services/bookings.service'
 import { getSlotsForDate } from '@/modules/bookings/composables/useSlots'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import BookingSuccess from '../../components/public/BookingSuccess.vue'
+import BookingUnavailable from '../../components/public/BookingUnavailable.vue'
 import type { Space, SimpleSlot } from '@/types'
 
 const route = useRoute()
@@ -135,6 +125,12 @@ async function submitBooking() {
   submitting.value = true
   submitError.value = null
   try {
+    const freshSlots = await getSlotsForDate(space.value.id, date, true)
+    const stillAvailable = freshSlots.find(s => s.blockId === blockId && s.status === 'AVAILABLE')
+    if (!stillAvailable) {
+      slotUnavailable.value = true
+      return
+    }
     await bookingsService.create({
       space_id: space.value.id,
       block_id: slot.value.blockId,

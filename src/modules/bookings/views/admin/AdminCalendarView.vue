@@ -54,22 +54,55 @@
             @click="selectDay(day)"
           >
             {{ day }}
-            <span
-              v-if="hasPending(day) && !isSelected(day)"
-              class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-orange-500"
-            />
+            <template v-if="hasPending(day) && !isSelected(day)">
+              <span
+                v-if="pendingCount(day) > 1"
+                class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-500 text-white text-[9px] font-bold flex items-center justify-center"
+              >{{ pendingCount(day) }}</span>
+              <span
+                v-else
+                class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-orange-500"
+              />
+            </template>
           </button>
         </div>
 
         <!-- Leyenda -->
-        <div class="flex flex-wrap gap-4 text-xs text-muted-foreground pt-1">
-          <span class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-green-100 border border-green-300 inline-block" />
-            Disponible
+        <div class="grid grid-cols-2 gap-x-6 gap-y-3 text-xs pt-1 sm:grid-cols-3">
+          <span class="flex items-start gap-1.5">
+            <span class="w-3 h-3 rounded-sm bg-green-100 border border-green-300 inline-block mt-0.5 shrink-0" />
+            <span>
+              <span class="font-medium text-foreground">Disponible</span>
+              <span class="block text-muted-foreground">Todos los bloques libres</span>
+            </span>
           </span>
-          <span class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-orange-100 border border-orange-300 inline-block" />
-            Con reservas pendientes
+          <span class="flex items-start gap-1.5">
+            <span class="w-3 h-3 rounded-sm bg-orange-100 border border-orange-300 inline-block mt-0.5 shrink-0" />
+            <span>
+              <span class="font-medium text-foreground">Con reservas pendientes</span>
+              <span class="block text-muted-foreground">Tienes solicitudes por confirmar</span>
+            </span>
+          </span>
+          <span class="flex items-start gap-1.5">
+            <span class="w-3 h-3 rounded-sm bg-blue-100 border border-blue-300 inline-block mt-0.5 shrink-0" />
+            <span>
+              <span class="font-medium text-foreground">Confirmado parcial</span>
+              <span class="block text-muted-foreground">Hay reservas confirmadas y bloques libres</span>
+            </span>
+          </span>
+          <span class="flex items-start gap-1.5">
+            <span class="w-3 h-3 rounded-sm bg-purple-100 border border-purple-300 inline-block mt-0.5 shrink-0" />
+            <span>
+              <span class="font-medium text-foreground">Completo (con reservas)</span>
+              <span class="block text-muted-foreground">Todos los bloques ocupados con reservas</span>
+            </span>
+          </span>
+          <span class="flex items-start gap-1.5">
+            <span class="w-3 h-3 rounded-sm bg-red-100 border border-red-300 inline-block mt-0.5 shrink-0" />
+            <span>
+              <span class="font-medium text-foreground">Bloqueado manualmente</span>
+              <span class="block text-muted-foreground">Día cerrado por ti, sin reservas</span>
+            </span>
           </span>
         </div>
       </div>
@@ -295,7 +328,9 @@ const today = new Date()
 const year = ref(today.getFullYear())
 const month = ref(today.getMonth())
 
-const pendingDates = ref<Set<string>>(new Set())
+const pendingDates = ref<Map<string, number>>(new Map())
+const confirmedDates = ref<Map<string, number>>(new Map())
+const blockedSlotDates = ref<Map<string, number>>(new Map())
 const selectedDate = ref('')
 const slots = ref<SimpleSlot[]>([])
 const loadingSlots = ref(false)
@@ -356,7 +391,40 @@ function isEnabled(day: number): boolean {
 }
 
 function hasPending(day: number): boolean {
-  return pendingDates.value.has(dateStr(day))
+  return (pendingDates.value.get(dateStr(day)) ?? 0) > 0
+}
+
+function pendingCount(day: number): number {
+  return pendingDates.value.get(dateStr(day)) ?? 0
+}
+
+function hasConfirmed(day: number): boolean {
+  return (confirmedDates.value.get(dateStr(day)) ?? 0) > 0
+}
+
+function totalBlocksForDay(day: number): number {
+  if (!schedule.value) return 0
+  const dow = new Date(year.value, month.value, day).getDay()
+  const cfg = schedule.value.day_schedule_configs?.find(d => d.day_of_week === dow)
+  return cfg?.day_block_assignments?.length ?? 0
+}
+
+function isFullyBlockedManually(day: number): boolean {
+  const total = totalBlocksForDay(day)
+  if (total === 0) return false
+  const date = dateStr(day)
+  const blocked = blockedSlotDates.value.get(date) ?? 0
+  const confirmed = confirmedDates.value.get(date) ?? 0
+  return confirmed === 0 && blocked >= total
+}
+
+function isFullyBooked(day: number): boolean {
+  const total = totalBlocksForDay(day)
+  if (total === 0) return false
+  const date = dateStr(day)
+  const blocked = blockedSlotDates.value.get(date) ?? 0
+  const confirmed = confirmedDates.value.get(date) ?? 0
+  return confirmed > 0 && (confirmed + blocked) >= total
 }
 
 function isSelected(day: number): boolean {
@@ -368,11 +436,15 @@ function dayClass(day: number): string {
   const selected = isSelected(day)
   const isT = dateStr(day) === todayStr()
   const pending = hasPending(day)
+  const confirmed = hasConfirmed(day)
 
   if (selected) return 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
   if (!enabled) return 'text-muted-foreground/40 cursor-default'
   const ring = isT ? ' ring-1 ring-primary ring-offset-1' : ''
   if (pending) return `bg-orange-50 text-orange-800 border border-orange-200 hover:bg-orange-100 cursor-pointer${ring}`
+  if (isFullyBooked(day)) return `bg-purple-50 text-purple-800 border border-purple-200 hover:bg-purple-100 cursor-pointer${ring}`
+  if (isFullyBlockedManually(day)) return `bg-red-50 text-red-800 border border-red-200 hover:bg-red-100 cursor-pointer${ring}`
+  if (confirmed) return `bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 cursor-pointer${ring}`
   return `bg-green-50 text-green-800 border border-green-200 hover:bg-green-100 cursor-pointer${ring}`
 }
 
@@ -396,9 +468,14 @@ function selectDay(day: number) {
   cancelBookingForm()
 }
 
-async function loadPendingDates() {
+function monthRange() {
   const start = `${year.value}-${String(month.value + 1).padStart(2, '0')}-01`
   const end = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(daysInMonth.value).padStart(2, '0')}`
+  return { start, end }
+}
+
+async function loadPendingDates() {
+  const { start, end } = monthRange()
   const { data } = await supabase
     .from('bookings')
     .select('date')
@@ -406,7 +483,42 @@ async function loadPendingDates() {
     .eq('status', 'PENDING')
     .gte('date', start)
     .lte('date', end)
-  pendingDates.value = new Set((data ?? []).map((r: { date: string }) => r.date))
+  const map = new Map<string, number>()
+  for (const r of (data ?? [])) {
+    map.set(r.date, (map.get(r.date) ?? 0) + 1)
+  }
+  pendingDates.value = map
+}
+
+async function loadConfirmedDates() {
+  const { start, end } = monthRange()
+  const { data } = await supabase
+    .from('bookings')
+    .select('date')
+    .eq('space_id', spaceId)
+    .eq('status', 'CONFIRMED')
+    .gte('date', start)
+    .lte('date', end)
+  const map = new Map<string, number>()
+  for (const r of (data ?? [])) {
+    map.set(r.date, (map.get(r.date) ?? 0) + 1)
+  }
+  confirmedDates.value = map
+}
+
+async function loadBlockedDates() {
+  const { start, end } = monthRange()
+  const { data } = await supabase
+    .from('blocked_slots')
+    .select('date')
+    .eq('space_id', spaceId)
+    .gte('date', start)
+    .lte('date', end)
+  const map = new Map<string, number>()
+  for (const r of (data ?? [])) {
+    map.set(r.date, (map.get(r.date) ?? 0) + 1)
+  }
+  blockedSlotDates.value = map
 }
 
 async function loadSlotsForDate(date: string) {
@@ -434,7 +546,7 @@ async function blockSlot(slot: SimpleSlot) {
       date: selectedDate.value,
       block_id: slot.blockId,
     })
-    await refreshDay()
+    await Promise.all([refreshDay(), loadBlockedDates()])
   } finally {
     actionLoading.value = null
   }
@@ -445,7 +557,7 @@ async function unblockSlot(slot: SimpleSlot) {
   actionLoading.value = slot.blockId
   try {
     await supabase.from('blocked_slots').delete().eq('id', slot.blockedSlotId)
-    await refreshDay()
+    await Promise.all([refreshDay(), loadBlockedDates()])
   } finally {
     actionLoading.value = null
   }
@@ -457,7 +569,7 @@ async function updateBookingStatus(slot: SimpleSlot, status: BookingStatus) {
   try {
     await bookingsService.updateStatus(slot.booking.id, status)
     await refreshDay()
-    await loadPendingDates()
+    await Promise.all([loadPendingDates(), loadConfirmedDates(), loadBlockedDates()])
   } finally {
     actionLoading.value = null
   }
@@ -496,7 +608,7 @@ async function submitAdminBooking(slot: SimpleSlot) {
     })
     cancelBookingForm()
     await refreshDay()
-    await loadPendingDates()
+    await Promise.all([loadPendingDates(), loadConfirmedDates(), loadBlockedDates()])
   } catch (e) {
     bookingError.value = e instanceof Error ? e.message : 'Error al crear la reserva.'
   } finally {
@@ -508,7 +620,7 @@ watch([year, month], async () => {
   selectedDate.value = ''
   slots.value = []
   cancelBookingForm()
-  await loadPendingDates()
+  await Promise.all([loadPendingDates(), loadConfirmedDates(), loadBlockedDates()])
 })
 
 watch(selectedDate, (date) => {
@@ -532,6 +644,8 @@ onMounted(async () => {
       availabilityService.getBySpaceId(spaceId),
       spacesService.getById(spaceId).then(sp => { spaceName.value = sp.title }).catch(() => {}),
       loadPendingDates(),
+      loadConfirmedDates(),
+      loadBlockedDates(),
     ])
     schedule.value = s
   } finally {

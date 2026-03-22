@@ -95,21 +95,62 @@
     </main>
 
     <!-- ── FOOTER ── -->
-    <footer class="border-t px-4 sm:px-6 lg:px-8 py-6">
-      <div
-        class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4"
-      >
-        <RouterLink :to="{ name: 'home' }" class="flex items-center gap-2">
-          <AppLogo :height="20" color="#0a0a0a" />
-        </RouterLink>
-        <div class="flex items-center gap-4 text-xs text-neutral-400">
-          <a href="#" class="hover:text-neutral-950 transition-colors"
-            >Privacidad</a
+    <footer class="bg-black pt-20 pb-10 text-white">
+      <div class="container mx-auto px-4 sm:px-0">
+        <div class="flex flex-col gap-7">
+          <div
+            class="flex flex-col gap-18 lg:flex-row lg:justify-between lg:items-end"
           >
-          <a href="#" class="hover:text-neutral-950 transition-colors"
-            >Términos</a
-          >
-          <span>© 2026 Funplace</span>
+            <div class="flex flex-col gap-10">
+              <div class="flex flex-col gap-7">
+                <a href="#">
+                  <AppLogo :height="40" color="white" />
+                </a>
+              </div>
+              <div class="flex flex-col">
+                <p class="text-white/60">Escribenos a:</p>
+                <a href="mailto:[EMAIL_ADDRESS]" class="text-white text-2xl">
+                  hola@funplace.cl
+                </a>
+              </div>
+            </div>
+            <div class="grid gap-2">
+              <h3 class="text-xl font-semibold">Quick Links</h3>
+              <ul class="flex gap-6">
+                <li>
+                  <RouterLink
+                    :to="{ name: 'home' }"
+                    class="text-white/60 hover:text-white transition-colors"
+                    >Home</RouterLink
+                  >
+                </li>
+                <li>
+                  <RouterLink
+                    :to="{ name: 'spaces-list' }"
+                    class="text-white/60 hover:text-white transition-colors"
+                    >Explorar</RouterLink
+                  >
+                </li>
+                <li>
+                  <RouterLink
+                    :to="{ name: 'login' }"
+                    class="text-white/60 hover:text-white transition-colors"
+                    >Ingresar</RouterLink
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="border-t border-white/15"></div>
+          <div class="text-center text-sm text-white/60">
+            Designed by
+            <a href="https://octalink.cl" class="text-white hover:underline"
+              >Octalink</a
+            >, Powered by
+            <a href="https://funplace.cl" class="text-white hover:underline"
+              >Funplace</a
+            >
+          </div>
         </div>
       </div>
     </footer>
@@ -133,7 +174,7 @@ watch(
   (name) => {
     scrolled.value = name !== "home" || window.scrollY > 40;
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const onScroll = () => {

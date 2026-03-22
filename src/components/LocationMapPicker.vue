@@ -1,6 +1,6 @@
 <template>
   <div v-if="lat !== null && lng !== null" class="space-y-1.5">
-    <p class="text-xs text-muted-foreground">
+    <p v-if="!readonly" class="text-xs text-muted-foreground">
       Mueve el mapa para ajustar la ubicación exacta del marcador.
     </p>
     <div class="relative rounded-md overflow-hidden border" style="height: 300px">
@@ -24,7 +24,7 @@
         </svg>
       </div>
     </div>
-    <p class="text-xs text-muted-foreground tabular-nums">
+    <p v-if="!readonly" class="text-xs text-muted-foreground tabular-nums">
       Coordenadas: {{ displayLat }}, {{ displayLng }}
     </p>
   </div>
@@ -38,6 +38,7 @@ import 'leaflet/dist/leaflet.css'
 const props = defineProps<{
   lat: number | null
   lng: number | null
+  readonly?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -62,7 +63,12 @@ async function initMap() {
   map = L.map(mapContainer.value, {
     center: [props.lat, props.lng],
     zoom: 16,
-    zoomControl: true,
+    zoomControl: !props.readonly,
+    dragging: !props.readonly,
+    scrollWheelZoom: !props.readonly,
+    doubleClickZoom: !props.readonly,
+    touchZoom: !props.readonly,
+    keyboard: !props.readonly,
   })
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -70,14 +76,17 @@ async function initMap() {
     maxZoom: 19,
   }).addTo(map)
 
-  map.on('moveend', () => {
-    if (isExternalUpdate || !map) return
-    const center = map.getCenter()
-    displayLat.value = center.lat.toFixed(6)
-    displayLng.value = center.lng.toFixed(6)
-    emit('update:lat', center.lat)
-    emit('update:lng', center.lng)
-  })
+  // Solo registrar moveend en modo edición
+  if (!props.readonly) {
+    map.on('moveend', () => {
+      if (isExternalUpdate || !map) return
+      const center = map.getCenter()
+      displayLat.value = center.lat.toFixed(6)
+      displayLng.value = center.lng.toFixed(6)
+      emit('update:lat', center.lat)
+      emit('update:lng', center.lng)
+    })
+  }
 }
 
 onMounted(async () => {

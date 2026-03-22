@@ -71,24 +71,24 @@
         <h2 class="text-lg font-semibold">¿Tienes dudas? Contáctanos</h2>
         <div class="flex flex-wrap gap-3">
           <a
-            v-if="space.contact_email"
-            :href="`mailto:${space.contact_email}`"
+            v-if="contactEmail"
+            :href="`mailto:${contactEmail}`"
             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
           >
             <Mail class="w-4 h-4 text-blue-500 shrink-0" />
-            {{ space.contact_email }}
+            {{ contactEmail }}
           </a>
           <a
-            v-if="space.contact_phone"
-            :href="`tel:${space.contact_phone}`"
+            v-if="contactPhone"
+            :href="`tel:${contactPhone}`"
             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
           >
             <Phone class="w-4 h-4 text-green-500 shrink-0" />
-            {{ space.contact_phone }}
+            {{ contactPhone }}
           </a>
           <a
-            v-if="space.contact_whatsapp"
-            :href="whatsappUrl(space.contact_whatsapp)"
+            v-if="contactWhatsapp"
+            :href="whatsappUrl(contactWhatsapp)"
             target="_blank"
             rel="noopener noreferrer"
             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
@@ -167,10 +167,10 @@ const error = ref<string | null>(null)
 const activeImage = ref('')
 const selectedDate = ref('')
 const selectedSlot = ref<SimpleSlot | null>(null)
-
-const hasContact = computed(() =>
-  !!(space.value?.contact_email || space.value?.contact_phone || space.value?.contact_whatsapp)
-)
+const contactEmail = computed(() => space.value?.contact_email || space.value?.profiles?.contact_email || null)
+const contactPhone = computed(() => space.value?.contact_phone || space.value?.profiles?.contact_phone || null)
+const contactWhatsapp = computed(() => space.value?.contact_whatsapp || space.value?.profiles?.contact_whatsapp || null)
+const hasContact = computed(() => !!(contactEmail.value || contactPhone.value || contactWhatsapp.value))
 
 function whatsappUrl(phone: string): string {
   return `https://wa.me/${phone.replace(/[\s+\-()]/g, '')}`

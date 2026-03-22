@@ -101,23 +101,25 @@
     <!-- /NAV -->
 
     <!-- HERO-2 -->
-    <div class="min-h-screen w-full relative">
-      <div class="absolute inset-0 z-0" :style="gradientStyle"></div>
-      <!-- Your Content -->
-      <div class="relative z-10 px-[32px] pt-[136px] lg:max-w-4xl lg:mx-auto">
+    <div class="w-full bg-linear-to-t from-white to-indigo-500 relative pb-18">
+      <div
+        class="relative z-10 px-[32px] pt-[136px] lg:max-w-4xl lg:mx-auto lg:pt-[216px]"
+      >
         <div class="text-center">
-          <h1 class="text-4xl font-semibold">
+          <h1 class="text-4xl font-semibold lg:text-7xl lg:font-bold">
             El espacio perfecto para tu próximo evento
           </h1>
-          <p class="text-lg mt-2">
+          <p class="text-lg mt-2 lg:text-2xl">
             Explora casas, salas y estudios disponibles para arriendo. Sin
             intermediarios, sin complicaciones.
           </p>
         </div>
-        <Card class="p-2 mt-2">
-          <div class="bg-red-200 grid">
-            <Select v-model="searchRegion" class="w-full">
-              <SelectTrigger>
+        <Card
+          class="p-2 mt-6 border-4 border-indigo-500/60 shadow-none lg:mt-12"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-2">
+            <Select v-model="searchRegion">
+              <SelectTrigger class="w-full h-12! md:col-span-2">
                 <SelectValue placeholder="Región" />
               </SelectTrigger>
               <SelectContent>
@@ -127,7 +129,7 @@
               </SelectContent>
             </Select>
             <Select v-model="searchCity" :disabled="!searchRegion">
-              <SelectTrigger>
+              <SelectTrigger class="w-full h-12! md:col-span-2">
                 <SelectValue placeholder="Ciudad" />
               </SelectTrigger>
               <SelectContent>
@@ -139,42 +141,19 @@
                 >
               </SelectContent>
             </Select>
-            <Button class="gap-1" @click="handleSearch">
-              Buscar <ArrowRight class="size-4" />
+            <Button
+              class="gap-1 w-full h-12 cursor-pointer"
+              @click="handleSearch"
+            >
+              ¡Vamos!
             </Button>
           </div>
         </Card>
       </div>
     </div>
 
-    <!-- ── HERO ── -->
-    <section class="pt-36 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <!-- Stats bar -->
-      <div
-        class="max-w-3xl mx-auto mt-10 grid grid-cols-2 md:grid-cols-4 border rounded-xl overflow-hidden"
-      >
-        <div class="px-6 py-5 text-center">
-          <p class="text-2xl font-semibold text-neutral-950">48</p>
-          <p class="text-xs text-neutral-400 mt-0.5">Espacios activos</p>
-        </div>
-        <div class="px-6 py-5 text-center border-l">
-          <p class="text-2xl font-semibold text-neutral-950">3</p>
-          <p class="text-xs text-neutral-400 mt-0.5">Ciudades</p>
-        </div>
-        <div class="px-6 py-5 text-center border-t md:border-t-0 md:border-l">
-          <p class="text-2xl font-semibold text-neutral-950">+200</p>
-          <p class="text-xs text-neutral-400 mt-0.5">Eventos realizados</p>
-        </div>
-        <div class="px-6 py-5 text-center border-t md:border-t-0 border-l">
-          <p class="text-2xl font-semibold text-neutral-950">&lt;4h</p>
-          <p class="text-xs text-neutral-400 mt-0.5">Tiempo de respuesta</p>
-        </div>
-      </div>
-    </section>
-    <!-- /HERO -->
-
     <!-- ── ESPACIOS DESTACADOS ── -->
-    <section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-red-400">
       <div class="flex items-end justify-between mb-10">
         <div>
           <p

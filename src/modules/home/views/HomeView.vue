@@ -1,56 +1,6 @@
 <template>
   <div class="min-h-screen bg-white">
-    <!-- HERO -->
-    <div class="w-full bg-linear-to-t from-white to-indigo-500 relative pb-18">
-      <div
-        class="relative z-10 px-[32px] pt-[136px] lg:max-w-4xl lg:mx-auto lg:pt-[216px]"
-      >
-        <div class="text-center">
-          <h1 class="text-4xl font-semibold lg:text-7xl lg:font-bold">
-            El espacio perfecto para tu próximo evento
-          </h1>
-          <p class="text-lg mt-2 lg:text-2xl">
-            Explora casas, salas y estudios disponibles para arriendo. Sin
-            intermediarios, sin complicaciones.
-          </p>
-        </div>
-        <Card
-          class="p-2 mt-6 border-4 border-indigo-500/60 shadow-none lg:mt-12"
-        >
-          <div class="grid grid-cols-1 md:grid-cols-5 gap-2">
-            <Select v-model="searchRegion">
-              <SelectTrigger class="w-full h-12! md:col-span-2">
-                <SelectValue placeholder="Región" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem v-for="r in regions" :key="r" :value="r">{{
-                  r
-                }}</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select v-model="searchCity" :disabled="!searchRegion">
-              <SelectTrigger class="w-full h-12! md:col-span-2">
-                <SelectValue placeholder="Ciudad" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="c in citiesForRegion(searchRegion)"
-                  :key="c"
-                  :value="c"
-                  >{{ c }}</SelectItem
-                >
-              </SelectContent>
-            </Select>
-            <Button
-              class="gap-1 w-full h-12 cursor-pointer"
-              @click="handleSearch"
-            >
-              ¡Vamos!
-            </Button>
-          </div>
-        </Card>
-      </div>
-    </div>
+    <HeroSearch />
 
     <!-- ── ESPACIOS DESTACADOS ── -->
     <section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-red-400">
@@ -103,8 +53,7 @@
               disponibilidad en tiempo real.
             </p>
             <div class="mt-auto">
-              <Badge
-                class="bg-white/10 text-white/50 border-0 hover:bg-white/10"
+              <Badge class="bg-white/10 text-white/50 border-0 hover:bg-white/10"
                 >Explorar</Badge
               >
             </div>
@@ -121,8 +70,7 @@
               registro, sin fricción.
             </p>
             <div class="mt-auto">
-              <Badge
-                class="bg-white/10 text-white/50 border-0 hover:bg-white/10"
+              <Badge class="bg-white/10 text-white/50 border-0 hover:bg-white/10"
                 >Solicitar</Badge
               >
             </div>
@@ -139,8 +87,7 @@
               confirmado, el espacio es tuyo.
             </p>
             <div class="mt-auto">
-              <Badge
-                class="bg-green-950 text-green-400 border-0 hover:bg-green-950"
+              <Badge class="bg-green-950 text-green-400 border-0 hover:bg-green-950"
                 >Confirmado</Badge
               >
             </div>
@@ -168,15 +115,9 @@
         <Card>
           <CardContent class="p-6 flex flex-col gap-4">
             <div class="flex gap-0.5">
-              <Star
-                v-for="i in 5"
-                :key="i"
-                class="size-4 fill-yellow-400 text-yellow-400"
-              />
+              <Star v-for="i in 5" :key="i" class="size-4 fill-yellow-400 text-yellow-400" />
             </div>
-            <p
-              class="text-sm text-neutral-500 font-light leading-relaxed flex-1"
-            >
+            <p class="text-sm text-neutral-500 font-light leading-relaxed flex-1">
               "Encontramos la casa perfecta para el cumpleaños de nuestra hija.
               El proceso fue súper fácil y el anfitrión respondió muy rápido."
             </p>
@@ -188,9 +129,7 @@
               </div>
               <div>
                 <p class="text-sm font-medium text-neutral-950">María Paula</p>
-                <p class="text-xs text-neutral-400">
-                  Evento familiar · Santiago
-                </p>
+                <p class="text-xs text-neutral-400">Evento familiar · Santiago</p>
               </div>
             </div>
           </CardContent>
@@ -200,15 +139,9 @@
         <Card>
           <CardContent class="p-6 flex flex-col gap-4">
             <div class="flex gap-0.5">
-              <Star
-                v-for="i in 5"
-                :key="i"
-                class="size-4 fill-yellow-400 text-yellow-400"
-              />
+              <Star v-for="i in 5" :key="i" class="size-4 fill-yellow-400 text-yellow-400" />
             </div>
-            <p
-              class="text-sm text-neutral-500 font-light leading-relaxed flex-1"
-            >
+            <p class="text-sm text-neutral-500 font-light leading-relaxed flex-1">
               "Usé Funplace para organizar un taller corporativo. La sala era
               exactamente como en las fotos y la reserva fue en minutos."
             </p>
@@ -220,9 +153,7 @@
               </div>
               <div>
                 <p class="text-sm font-medium text-neutral-950">Jorge Rivas</p>
-                <p class="text-xs text-neutral-400">
-                  Taller corporativo · Valparaíso
-                </p>
+                <p class="text-xs text-neutral-400">Taller corporativo · Valparaíso</p>
               </div>
             </div>
           </CardContent>
@@ -232,18 +163,11 @@
         <Card>
           <CardContent class="p-6 flex flex-col gap-4">
             <div class="flex gap-0.5">
-              <Star
-                v-for="i in 5"
-                :key="i"
-                class="size-4 fill-yellow-400 text-yellow-400"
-              />
+              <Star v-for="i in 5" :key="i" class="size-4 fill-yellow-400 text-yellow-400" />
             </div>
-            <p
-              class="text-sm text-neutral-500 font-light leading-relaxed flex-1"
-            >
+            <p class="text-sm text-neutral-500 font-light leading-relaxed flex-1">
               "Excelente plataforma. Sin registros complicados, solo elegí el
-              espacio, llené el formulario y al día siguiente tenía
-              confirmación."
+              espacio, llené el formulario y al día siguiente tenía confirmación."
             </p>
             <div class="flex items-center gap-3">
               <div
@@ -252,12 +176,8 @@
                 CL
               </div>
               <div>
-                <p class="text-sm font-medium text-neutral-950">
-                  Catalina Lara
-                </p>
-                <p class="text-xs text-neutral-400">
-                  Lanzamiento de producto · Concepción
-                </p>
+                <p class="text-sm font-medium text-neutral-950">Catalina Lara</p>
+                <p class="text-xs text-neutral-400">Lanzamiento de producto · Concepción</p>
               </div>
             </div>
           </CardContent>
@@ -267,24 +187,15 @@
     <!-- /TESTIMONIOS -->
 
     <!-- ── PARA ANFITRIONES ── -->
-    <section
-      id="anfitriones"
-      class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
-    >
+    <section id="anfitriones" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
         <!-- Izquierda: CTA -->
-        <div
-          class="bg-neutral-100 rounded-2xl p-10 flex flex-col justify-between gap-8"
-        >
+        <div class="bg-neutral-100 rounded-2xl p-10 flex flex-col justify-between gap-8">
           <div>
-            <p
-              class="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-3"
-            >
+            <p class="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-3">
               Anfitriones
             </p>
-            <h2
-              class="text-3xl font-semibold tracking-tighter text-neutral-950 mb-4"
-            >
+            <h2 class="text-3xl font-semibold tracking-tighter text-neutral-950 mb-4">
               ¿Tienes un espacio que no usas?
             </h2>
             <p class="text-sm text-neutral-500 font-light leading-relaxed">
@@ -300,58 +211,38 @@
         <!-- Derecha: beneficios -->
         <div class="flex flex-col divide-y">
           <div class="py-6 flex gap-4">
-            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5"
-              >01</span
-            >
+            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5">01</span>
             <div>
-              <p class="text-sm font-semibold text-neutral-950 mb-1">
-                Control total
-              </p>
+              <p class="text-sm font-semibold text-neutral-950 mb-1">Control total</p>
               <p class="text-sm text-neutral-500 font-light">
-                Tú defines los horarios, bloqueas fechas y confirmas cada
-                reserva.
+                Tú defines los horarios, bloqueas fechas y confirmas cada reserva.
               </p>
             </div>
           </div>
           <div class="py-6 flex gap-4">
-            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5"
-              >02</span
-            >
+            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5">02</span>
             <div>
-              <p class="text-sm font-semibold text-neutral-950 mb-1">
-                Sin comisiones ocultas
-              </p>
+              <p class="text-sm font-semibold text-neutral-950 mb-1">Sin comisiones ocultas</p>
               <p class="text-sm text-neutral-500 font-light">
-                La plataforma es gratuita durante el lanzamiento. Sin cobros por
-                reserva.
+                La plataforma es gratuita durante el lanzamiento. Sin cobros por reserva.
               </p>
             </div>
           </div>
           <div class="py-6 flex gap-4">
-            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5"
-              >03</span
-            >
+            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5">03</span>
             <div>
-              <p class="text-sm font-semibold text-neutral-950 mb-1">
-                Panel de gestión
-              </p>
+              <p class="text-sm font-semibold text-neutral-950 mb-1">Panel de gestión</p>
               <p class="text-sm text-neutral-500 font-light">
-                Visualiza todas tus reservas, pendientes y confirmadas, en un
-                solo lugar.
+                Visualiza todas tus reservas, pendientes y confirmadas, en un solo lugar.
               </p>
             </div>
           </div>
           <div class="py-6 flex gap-4">
-            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5"
-              >04</span
-            >
+            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5">04</span>
             <div>
-              <p class="text-sm font-semibold text-neutral-950 mb-1">
-                Contacto directo
-              </p>
+              <p class="text-sm font-semibold text-neutral-950 mb-1">Contacto directo</p>
               <p class="text-sm text-neutral-500 font-light">
-                El cliente te contacta a ti. Sin intermediarios ni mensajería
-                interna.
+                El cliente te contacta a ti. Sin intermediarios ni mensajería interna.
               </p>
             </div>
           </div>
@@ -371,14 +262,11 @@
         >
       </h2>
       <p class="text-base text-neutral-500 font-light mb-8 max-w-md mx-auto">
-        Explora espacios disponibles ahora mismo en Santiago, Valparaíso y
-        Concepción.
+        Explora espacios disponibles ahora mismo en Santiago, Valparaíso y Concepción.
       </p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <Button size="lg" as-child>
-          <RouterLink :to="{ name: 'spaces-list' }"
-            >Explorar espacios</RouterLink
-          >
+          <RouterLink :to="{ name: 'spaces-list' }">Explorar espacios</RouterLink>
         </Button>
         <Button size="lg" variant="outline">Listar mi espacio</Button>
       </div>
@@ -388,38 +276,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
-import { useRouter, RouterLink } from "vue-router";
+import { RouterLink } from "vue-router";
 import { Star, ArrowRight } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import FeaturedSpacesGrid from "../components/FeaturedSpacesGrid.vue";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
-import { useLocationFilters } from "@/modules/spaces/composables/useLocationFilters";
-
-const router = useRouter();
-const { regions, citiesForRegion, fetchLocations } = useLocationFilters();
-
-const searchRegion = ref("");
-const searchCity = ref("");
-
-watch(searchRegion, () => {
-  searchCity.value = "";
-});
-
-onMounted(fetchLocations);
-
-function handleSearch() {
-  const query: Record<string, string> = {};
-  if (searchRegion.value) query.region = searchRegion.value;
-  if (searchCity.value) query.city = searchCity.value;
-  router.push({ name: "spaces-list", query });
-}
+import HeroSearch from "../components/HeroSearch.vue";
 </script>

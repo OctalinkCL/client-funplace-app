@@ -35,7 +35,7 @@
     <SidebarFooter>
       <SidebarMenu>
         <SidebarMenuItem>
-          <LogoutButton />
+          <AppNavUser />
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarFooter>
@@ -46,7 +46,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { CalendarDays, Building2, User, LayoutDashboard } from 'lucide-vue-next'
-import LogoutButton from '@/modules/auth/components/LogoutButton.vue'
+import AppNavUser from '@/components/AppNavUser.vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { getSidebarLabel } from '@/constants/plans'
 import {

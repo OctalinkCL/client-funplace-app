@@ -64,6 +64,11 @@ export interface Space {
   updated_at: string
   space_amenities?: { amenity_id: string }[]
   space_images?: SpaceImage[]
+  profiles?: {
+    contact_email: string | null
+    contact_phone: string | null
+    contact_whatsapp: string | null
+  } | null
 }
 
 export interface SpaceImage {

@@ -21,7 +21,7 @@ export const spacesService = {
   async getBySlug(slug: string): Promise<Space> {
     const { data, error } = await supabase
       .from('spaces')
-      .select('*, space_amenities(amenity_id), space_images(*)')
+      .select('*, space_amenities(amenity_id), space_images(*), profiles!admin_id(contact_email,contact_phone,contact_whatsapp)')
       .eq('slug', slug)
       .eq('is_published', true)
       .order('sort_order', { referencedTable: 'space_images', ascending: true })

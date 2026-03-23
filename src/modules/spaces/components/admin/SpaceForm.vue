@@ -15,15 +15,29 @@
         <p v-if="form.slug" class="text-xs text-muted-foreground">URL: /espacios/{{ form.slug }}</p>
       </div>
 
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="space-y-1.5">
-          <Label>Tipo de espacio</Label>
+          <Label>Categoría</Label>
+          <Select v-model="form.kind" @update:model-value="form.space_type = null">
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="item in SPACE_KIND_LIST" :key="item.key" :value="item.key">
+                {{ item.label }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div class="space-y-1.5">
+          <Label>Tipo</Label>
           <Select v-model="form.space_type">
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar tipo" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem v-for="item in SPACE_TYPE_LIST" :key="item.key" :value="item.key">
+              <SelectItem v-for="item in spaceTypeOptions" :key="item.key" :value="item.key">
                 {{ item.label }}
               </SelectItem>
             </SelectContent>
@@ -143,7 +157,7 @@ import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSpaceForm } from '../../composables/useSpaceForm'
 import { useAmenities } from '../../composables/useAmenities'
-import { SPACE_TYPE_LIST } from '@/constants/spaces'
+import { SPACE_KIND_LIST, SPACE_TYPE_LIST, SERVICE_TYPE_LIST } from '@/constants/spaces'
 import AmenitiesSelector from './AmenitiesSelector.vue'
 import ImageUploader from './ImageUploader.vue'
 import PlaceSearchInput from './PlaceSearchInput.vue'
@@ -171,6 +185,10 @@ const {
 } = useSpaceForm(props.spaceId)
 
 const editingLocation = ref(false)
+
+const spaceTypeOptions = computed(() =>
+  form.kind === 'service' ? SERVICE_TYPE_LIST : SPACE_TYPE_LIST
+)
 
 const capacityModel = computed({
   get: () => form.capacity ?? undefined,

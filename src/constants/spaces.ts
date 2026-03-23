@@ -1,4 +1,4 @@
-import type { SpaceType, PlaceResult } from '@/types'
+import type { SpaceType, SpaceKind, PlaceResult } from '@/types'
 
 export const MAX_IMAGES = 3 // ← cambiar aquí para ajustar el límite global de imágenes por espacio
 
@@ -20,11 +20,25 @@ export const SPACE_TYPE_LABELS: Record<SpaceType, string> = {
   fotografia:  'Fotografía',
 }
 
-// Solo tipos de espacio — para el select en SpaceForm
+export const SPACE_KIND_LIST: { key: SpaceKind; label: string }[] = [
+  { key: 'space',   label: 'Espacio físico' },
+  { key: 'service', label: 'Servicio' },
+]
+
+// Tipos por kind — para el select en SpaceForm (filtrado según kind seleccionado)
 export const SPACE_TYPE_LIST: { key: SpaceType; label: string }[] = [
   { key: 'casa',   label: 'Casa de Cumpleaños' },
   { key: 'centro', label: 'Centro de Eventos' },
   { key: 'salon',  label: 'Salón de Eventos' },
+]
+
+export const SERVICE_TYPE_LIST: { key: SpaceType; label: string }[] = [
+  { key: 'catering',    label: 'Servicios de Catering' },
+  { key: 'foodtruck',   label: 'Carros de Comida' },
+  { key: 'inflables',   label: 'Inflables' },
+  { key: 'musica',      label: 'Música' },
+  { key: 'animaciones', label: 'Animaciones' },
+  { key: 'fotografia',  label: 'Fotografía' },
 ]
 
 // ============================================================

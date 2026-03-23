@@ -3,23 +3,8 @@
     <HeroSearch />
 
     <section class="lg:pb-[60px]">
-      <div class="container mx-auto px-4 sm:px-0 grid gap-9">
-        <header class="flex justify-between items-center">
-          <h3 class="text-2xl font-semibold">Espacios Destacados</h3>
-          <RouterLink :to="{ name: 'spaces-list' }" class="hidden lg:block">
-            <Button class="w-full rounded-full cursor-pointer" variant="outline"
-              >Ver todos</Button
-            >
-          </RouterLink>
-        </header>
+      <div class="container mx-auto px-4 sm:px-0">
         <FeaturedSpacesGrid />
-        <RouterLink :to="{ name: 'spaces-list' }" class="text-center lg:hidden">
-          <Button
-            class="w-full h-10 rounded-full cursor-pointer"
-            variant="outline"
-            >Ver todos</Button
-          >
-        </RouterLink>
       </div>
     </section>
 

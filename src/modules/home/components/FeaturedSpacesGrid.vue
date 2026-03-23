@@ -9,7 +9,10 @@
   </div>
 
   <!-- Espacios reales -->
-  <div v-else-if="spaces.length" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+  <div
+    v-else-if="spaces.length"
+    class="grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch"
+  >
     <SpaceCard v-for="space in spaces" :key="space.id" :space="space" />
   </div>
 </template>
@@ -27,7 +30,7 @@ onMounted(async () => {
   loading.value = true;
   try {
     const all = await spacesService.getPublished();
-    spaces.value = all.slice(0, 3);
+    spaces.value = all.slice(0, 4);
   } catch {
     // falla silenciosamente — la sección simplemente no renderiza
   } finally {

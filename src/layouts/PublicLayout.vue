@@ -2,7 +2,7 @@
   <div class="min-h-screen flex flex-col">
     <!-- ── NAV ── -->
     <nav
-      class="fixed top-0 inset-x-0 z-50 transition-colors duration-300"
+      class="sticky top-0 inset-x-0 z-50 transition-colors duration-300"
       :class="scrolled ? 'bg-white shadow-sm' : 'bg-transparent'"
     >
       <div
@@ -10,7 +10,7 @@
       >
         <!-- Logo -->
         <RouterLink :to="{ name: 'home' }" class="flex items-center gap-2">
-          <AppLogo :height="24" :color="scrolled ? '#0a0a0a' : '#fff'" />
+          <AppLogo :height="24" color="black" icon-color="indigo" />
         </RouterLink>
 
         <!-- Desktop links -->

@@ -2,7 +2,7 @@
   <div class="min-h-screen flex flex-col">
     <!-- ── NAV ── -->
     <nav
-      class="sticky top-0 inset-x-0 z-50 transition-colors duration-300"
+      class="sticky top-0 inset-x-0 z-[9999] transition-colors duration-300"
       :class="scrolled ? 'bg-white shadow-sm' : 'bg-transparent'"
     >
       <div

@@ -46,7 +46,7 @@ onMounted(async () => {
   loading.value = true;
   try {
     const [spaces, services] = await Promise.all([
-      spacesService.getFeaturedSpaces({ kind: "space", limit: 1 }),
+      spacesService.getFeaturedSpaces({ kind: "space", limit: 4 }),
       spacesService.getFeaturedSpaces({ kind: "service", limit: 4 }),
     ]);
     espacios.value = spaces;

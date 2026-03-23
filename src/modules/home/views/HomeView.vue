@@ -202,21 +202,10 @@
             Explora espacios disponibles ahora mismo en Concepción y todas las
             regiones del país.
           </p>
-          <div class="flex justify-center">
-            <Button
-              size="lg"
-              class="h-12 px-12 rounded-full bg-violet-700 hover:bg-violet-800 transition-all duration-300"
-              as-child
-            >
-              <RouterLink :to="{ name: 'spaces-list' }"
-                >Explorar espacios</RouterLink
-              >
-            </Button>
-          </div>
         </div>
         <div>
           <img
-            src="https://framerusercontent.com/images/3uvceqytCHwJDIfhFyK75EuwCys.png?width=3840&height=2223"
+            src="https://images.pexels.com/photos/7100331/pexels-photo-7100331.jpeg"
             alt="dashboard"
             class="rounded-t-lg"
           />

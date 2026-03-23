@@ -10,7 +10,7 @@
         class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         @change="onRegionChange(($event.target as HTMLSelectElement).value)"
       >
-        <option value="">Todas las regiones</option>
+        <option value="" disabled>Selecciona una región</option>
         <option v-for="r in regions" :key="r" :value="r">{{ r }}</option>
       </select>
     </div>
@@ -31,14 +31,6 @@
       </select>
     </div>
 
-    <!-- Limpiar -->
-    <button
-      v-if="region || city"
-      class="text-sm text-muted-foreground hover:text-foreground underline h-9"
-      @click="$emit('clear')"
-    >
-      Limpiar filtros
-    </button>
   </div>
 </template>
 
@@ -54,7 +46,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:region': [value: string]
   'update:city': [value: string]
-  'clear': []
 }>()
 
 const { regions, citiesForRegion, loading, fetchLocations } = useLocationFilters()

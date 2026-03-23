@@ -2,7 +2,7 @@
   <div class="min-h-screen flex flex-col">
     <!-- ── NAV ── -->
     <nav
-      class="sticky top-0 inset-x-0 z-[9999] transition-colors duration-300"
+      class="sticky top-0 inset-x-0 z-500 transition-colors duration-300"
       :class="scrolled ? 'bg-white shadow-sm' : 'bg-transparent'"
     >
       <div
@@ -13,29 +13,23 @@
           <AppLogo :height="24" color="black" icon-color="indigo" />
         </RouterLink>
 
-        <!-- Desktop links -->
-        <div class="hidden md:flex items-center gap-6 text-sm text-neutral-500">
-          <RouterLink
-            :to="{ name: 'spaces-list' }"
-            class="hover:text-neutral-950 transition-colors"
-            >Explorar</RouterLink
-          >
-          <a href="#ciudades" class="hover:text-neutral-950 transition-colors"
-            >Ciudades</a
-          >
-          <a
-            href="#anfitriones"
-            class="hover:text-neutral-950 transition-colors"
-            >Anfitriones</a
-          >
-        </div>
-
         <!-- Desktop CTAs -->
         <div class="hidden md:flex items-center gap-2">
-          <Button variant="ghost" as-child>
+          <Button
+            variant="outline"
+            class="h-10 rounded-full cursor-pointer text-base font-medium"
+            as-child
+          >
+            <a
+              href="https://wa.me/56932393772?text=Hola, quiero registrar mi negocio en Funplace"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Registra tu Negocio</a
+            >
+          </Button>
+          <Button class="h-10 rounded-full text-base font-medium" as-child>
             <RouterLink :to="{ name: 'login' }">Ingresar</RouterLink>
           </Button>
-          <Button>Listar espacio</Button>
         </div>
 
         <!-- Mobile hamburger -->

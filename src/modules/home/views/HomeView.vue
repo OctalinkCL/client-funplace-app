@@ -53,7 +53,8 @@
               disponibilidad en tiempo real.
             </p>
             <div class="mt-auto">
-              <Badge class="bg-white/10 text-white/50 border-0 hover:bg-white/10"
+              <Badge
+                class="bg-white/10 text-white/50 border-0 hover:bg-white/10"
                 >Explorar</Badge
               >
             </div>
@@ -70,7 +71,8 @@
               registro, sin fricción.
             </p>
             <div class="mt-auto">
-              <Badge class="bg-white/10 text-white/50 border-0 hover:bg-white/10"
+              <Badge
+                class="bg-white/10 text-white/50 border-0 hover:bg-white/10"
                 >Solicitar</Badge
               >
             </div>
@@ -87,7 +89,8 @@
               confirmado, el espacio es tuyo.
             </p>
             <div class="mt-auto">
-              <Badge class="bg-green-950 text-green-400 border-0 hover:bg-green-950"
+              <Badge
+                class="bg-green-950 text-green-400 border-0 hover:bg-green-950"
                 >Confirmado</Badge
               >
             </div>
@@ -115,9 +118,15 @@
         <Card>
           <CardContent class="p-6 flex flex-col gap-4">
             <div class="flex gap-0.5">
-              <Star v-for="i in 5" :key="i" class="size-4 fill-yellow-400 text-yellow-400" />
+              <Star
+                v-for="i in 5"
+                :key="i"
+                class="size-4 fill-yellow-400 text-yellow-400"
+              />
             </div>
-            <p class="text-sm text-neutral-500 font-light leading-relaxed flex-1">
+            <p
+              class="text-sm text-neutral-500 font-light leading-relaxed flex-1"
+            >
               "Encontramos la casa perfecta para el cumpleaños de nuestra hija.
               El proceso fue súper fácil y el anfitrión respondió muy rápido."
             </p>
@@ -129,7 +138,9 @@
               </div>
               <div>
                 <p class="text-sm font-medium text-neutral-950">María Paula</p>
-                <p class="text-xs text-neutral-400">Evento familiar · Santiago</p>
+                <p class="text-xs text-neutral-400">
+                  Evento familiar · Santiago
+                </p>
               </div>
             </div>
           </CardContent>
@@ -139,9 +150,15 @@
         <Card>
           <CardContent class="p-6 flex flex-col gap-4">
             <div class="flex gap-0.5">
-              <Star v-for="i in 5" :key="i" class="size-4 fill-yellow-400 text-yellow-400" />
+              <Star
+                v-for="i in 5"
+                :key="i"
+                class="size-4 fill-yellow-400 text-yellow-400"
+              />
             </div>
-            <p class="text-sm text-neutral-500 font-light leading-relaxed flex-1">
+            <p
+              class="text-sm text-neutral-500 font-light leading-relaxed flex-1"
+            >
               "Usé Funplace para organizar un taller corporativo. La sala era
               exactamente como en las fotos y la reserva fue en minutos."
             </p>
@@ -153,7 +170,9 @@
               </div>
               <div>
                 <p class="text-sm font-medium text-neutral-950">Jorge Rivas</p>
-                <p class="text-xs text-neutral-400">Taller corporativo · Valparaíso</p>
+                <p class="text-xs text-neutral-400">
+                  Taller corporativo · Valparaíso
+                </p>
               </div>
             </div>
           </CardContent>
@@ -163,11 +182,18 @@
         <Card>
           <CardContent class="p-6 flex flex-col gap-4">
             <div class="flex gap-0.5">
-              <Star v-for="i in 5" :key="i" class="size-4 fill-yellow-400 text-yellow-400" />
+              <Star
+                v-for="i in 5"
+                :key="i"
+                class="size-4 fill-yellow-400 text-yellow-400"
+              />
             </div>
-            <p class="text-sm text-neutral-500 font-light leading-relaxed flex-1">
+            <p
+              class="text-sm text-neutral-500 font-light leading-relaxed flex-1"
+            >
               "Excelente plataforma. Sin registros complicados, solo elegí el
-              espacio, llené el formulario y al día siguiente tenía confirmación."
+              espacio, llené el formulario y al día siguiente tenía
+              confirmación."
             </p>
             <div class="flex items-center gap-3">
               <div
@@ -176,8 +202,12 @@
                 CL
               </div>
               <div>
-                <p class="text-sm font-medium text-neutral-950">Catalina Lara</p>
-                <p class="text-xs text-neutral-400">Lanzamiento de producto · Concepción</p>
+                <p class="text-sm font-medium text-neutral-950">
+                  Catalina Lara
+                </p>
+                <p class="text-xs text-neutral-400">
+                  Lanzamiento de producto · Concepción
+                </p>
               </div>
             </div>
           </CardContent>
@@ -187,15 +217,24 @@
     <!-- /TESTIMONIOS -->
 
     <!-- ── PARA ANFITRIONES ── -->
-    <section id="anfitriones" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <section
+      id="anfitriones"
+      class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
+    >
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
         <!-- Izquierda: CTA -->
-        <div class="bg-neutral-100 rounded-2xl p-10 flex flex-col justify-between gap-8">
+        <div
+          class="bg-neutral-100 rounded-2xl p-10 flex flex-col justify-between gap-8"
+        >
           <div>
-            <p class="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-3">
+            <p
+              class="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-3"
+            >
               Anfitriones
             </p>
-            <h2 class="text-3xl font-semibold tracking-tighter text-neutral-950 mb-4">
+            <h2
+              class="text-3xl font-semibold tracking-tighter text-neutral-950 mb-4"
+            >
               ¿Tienes un espacio que no usas?
             </h2>
             <p class="text-sm text-neutral-500 font-light leading-relaxed">
@@ -211,38 +250,58 @@
         <!-- Derecha: beneficios -->
         <div class="flex flex-col divide-y">
           <div class="py-6 flex gap-4">
-            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5">01</span>
+            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5"
+              >01</span
+            >
             <div>
-              <p class="text-sm font-semibold text-neutral-950 mb-1">Control total</p>
+              <p class="text-sm font-semibold text-neutral-950 mb-1">
+                Control total
+              </p>
               <p class="text-sm text-neutral-500 font-light">
-                Tú defines los horarios, bloqueas fechas y confirmas cada reserva.
+                Tú defines los horarios, bloqueas fechas y confirmas cada
+                reserva.
               </p>
             </div>
           </div>
           <div class="py-6 flex gap-4">
-            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5">02</span>
+            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5"
+              >02</span
+            >
             <div>
-              <p class="text-sm font-semibold text-neutral-950 mb-1">Sin comisiones ocultas</p>
+              <p class="text-sm font-semibold text-neutral-950 mb-1">
+                Sin comisiones ocultas
+              </p>
               <p class="text-sm text-neutral-500 font-light">
-                La plataforma es gratuita durante el lanzamiento. Sin cobros por reserva.
+                La plataforma es gratuita durante el lanzamiento. Sin cobros por
+                reserva.
               </p>
             </div>
           </div>
           <div class="py-6 flex gap-4">
-            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5">03</span>
+            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5"
+              >03</span
+            >
             <div>
-              <p class="text-sm font-semibold text-neutral-950 mb-1">Panel de gestión</p>
+              <p class="text-sm font-semibold text-neutral-950 mb-1">
+                Panel de gestión
+              </p>
               <p class="text-sm text-neutral-500 font-light">
-                Visualiza todas tus reservas, pendientes y confirmadas, en un solo lugar.
+                Visualiza todas tus reservas, pendientes y confirmadas, en un
+                solo lugar.
               </p>
             </div>
           </div>
           <div class="py-6 flex gap-4">
-            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5">04</span>
+            <span class="text-xs font-mono text-neutral-400 w-6 shrink-0 pt-0.5"
+              >04</span
+            >
             <div>
-              <p class="text-sm font-semibold text-neutral-950 mb-1">Contacto directo</p>
+              <p class="text-sm font-semibold text-neutral-950 mb-1">
+                Contacto directo
+              </p>
               <p class="text-sm text-neutral-500 font-light">
-                El cliente te contacta a ti. Sin intermediarios ni mensajería interna.
+                El cliente te contacta a ti. Sin intermediarios ni mensajería
+                interna.
               </p>
             </div>
           </div>
@@ -251,27 +310,122 @@
     </section>
     <!-- /PARA ANFITRIONES -->
 
-    <!-- ── CTA FINAL ── -->
-    <section class="py-24 px-4 sm:px-6 lg:px-8 text-center max-w-4xl mx-auto">
-      <h2 class="tracking-tighter mb-6 leading-tight">
-        <span class="block text-4xl md:text-5xl font-semibold text-neutral-950"
-          >Tu próximo evento,</span
-        >
-        <span class="block text-4xl md:text-5xl font-light text-neutral-400"
-          >empieza aquí</span
-        >
-      </h2>
-      <p class="text-base text-neutral-500 font-light mb-8 max-w-md mx-auto">
-        Explora espacios disponibles ahora mismo en Santiago, Valparaíso y Concepción.
-      </p>
-      <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <Button size="lg" as-child>
-          <RouterLink :to="{ name: 'spaces-list' }">Explorar espacios</RouterLink>
-        </Button>
-        <Button size="lg" variant="outline">Listar mi espacio</Button>
+    <section>
+      <div
+        class="container mx-auto px-2 sm:0 grid lg:grid-cols-2 gap-9 lg:gap-20"
+      >
+        <Card class="shadow-none border-0 bg-gray-100">
+          <CardContent class="flex flex-col gap-4">
+            <Badge variant="outline" class="bg-white">Para tu negocio</Badge>
+            <h3 class="text-2xl/6 lg:text-4xl font-bold">
+              Tus clientes no quieren esperar tu respuesta para reservar
+            </h3>
+            <p>
+              Ya sea tu casa de cumpleaños, tu carro de comida o tu show de
+              magia — publica tu disponibilidad real en Funplace y deja que tus
+              clientes reserven solos. Sin WhatsApp, sin dobles reservas, sin
+              clientes perdidos.
+            </p>
+
+            <footer class="mt-auto">
+              <Button class="h-10 rounded-full">Publicar mi espacio</Button>
+            </footer>
+          </CardContent>
+        </Card>
+        <ul>
+          <li>ldsljldskj</li>
+        </ul>
       </div>
     </section>
-    <!-- /CTA FINAL -->
+
+    <section class="pt-[90px]">
+      <div class="container mx-auto px-4 sm:px-0 grid gap-12">
+        <div class="grid gap-3 text-center lg:max-w-3xl lg:mx-auto">
+          <h3 class="text-3xl lg:text-5xl font-bold">
+            Deja de perder reservas por WhatsApp
+          </h3>
+          <p class="text-lg text-black/60 font-medium lg:text-xl">
+            Tus clientes ven tu disponibilidad real y reservan solos. Tú solo
+            confirmas.
+          </p>
+        </div>
+        <div class="flex flex-col gap-4 lg:grid lg:grid-cols-3">
+          <PlanItems
+            title="Espacios"
+            subtitle="Para casas de cumpleaños, salones y centros de eventos."
+            price="39.990"
+            :features="[
+              'Página de reserva para tus clientes',
+              'Calendario con disponibilidad real',
+              'Bloques horarios personalizados',
+              'Confirmación y cancelación manual',
+              'Bloqueo de fechas específicas',
+            ]"
+            message="Hola, me interesa el Plan Espacios para gestionar las reservas de mi local. ¿Me pueden dar más información?"
+          />
+          <PlanItems
+            title="Servicios"
+            subtitle="Para food trucks, animadores, magos, inflables y fotógrafos."
+            price="29.900"
+            :features="[
+              'Agenda con disponibilidad real',
+              'Bloques horarios personalizados',
+              'Confirmación y cancelación manual',
+              'Bloqueo de fechas específicas',
+              'Agendamientos ilimitados',
+            ]"
+            message="Hola, me interesa el Plan Servicios para gestionar mis agendamientos. ¿Me pueden dar más información?"
+          />
+          <PlanItems
+            title="Emprendedor"
+            subtitle="Para quienes tienen su espacio y además ofrecen servicios."
+            price="49.900"
+            :features="[
+              'Espacios + servicios en una cuenta',
+              'Página de reserva para cada uno',
+              'Reservas y agendamientos ilimitados',
+              'Oferta de todos tus servicios',
+              'Soporte preferente',
+            ]"
+            message="Hola, me interesa el Plan Emprendedor para gestionar mi espacio y servicios. ¿Me pueden dar más información?"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="bg-linear-to-t from-violet-200 from-60% to-white pt-[120px]"
+    >
+      <div class="container mx-auto px-4 sm:px-0 grid gap-12">
+        <div class="flex flex-col gap-5 text-center lg:max-w-3xl mx-auto">
+          <h3 class="text-4xl font-bold lg:text-6xl">
+            Tu próximo evento, empieza aquí
+          </h3>
+          <p class="text-base text-black/60 lg:text-2xl">
+            Explora espacios disponibles ahora mismo en Concepción y todas las
+            regiones del país.
+          </p>
+          <div class="flex justify-center">
+            <Button
+              size="lg"
+              class="h-12 px-12 rounded-full bg-violet-700 hover:bg-violet-800 transition-all duration-300"
+              as-child
+            >
+              <RouterLink :to="{ name: 'spaces-list' }"
+                >Explorar espacios</RouterLink
+              >
+            </Button>
+          </div>
+        </div>
+        <div>
+          <img
+            src="https://framerusercontent.com/images/3uvceqytCHwJDIfhFyK75EuwCys.png?width=3840&height=2223"
+            alt="dashboard"
+            class="rounded-t-lg"
+          />
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -283,4 +437,5 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import FeaturedSpacesGrid from "../components/FeaturedSpacesGrid.vue";
 import HeroSearch from "../components/HeroSearch.vue";
+import PlanItems from "../components/PlanItems.vue";
 </script>

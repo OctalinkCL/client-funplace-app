@@ -114,6 +114,20 @@ export const spacesService = {
     return data as { region: string; city: string | null }[]
   },
 
+  async getFeaturedSpaces(params: { kind: SpaceKind; limit: number }): Promise<Space[]> {
+    const { data, error } = await supabase
+      .from('spaces')
+      .select('*, space_images(id, url, sort_order)')
+      .eq('is_published', true)
+      .eq('kind', params.kind)
+      .order('is_featured', { ascending: false })
+      .order('created_at', { ascending: false })
+      .order('sort_order', { referencedTable: 'space_images', ascending: true })
+      .limit(params.limit)
+    if (error) throw error
+    return data
+  },
+
   async setAmenities(spaceId: string, amenityIds: string[]): Promise<void> {
     const { error: deleteError } = await supabase
       .from('space_amenities')

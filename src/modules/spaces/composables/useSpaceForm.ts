@@ -4,7 +4,7 @@ import { spacesService } from '../services/spaces.service'
 import { imagesService } from '../services/images.service'
 import type { CompressionMeta } from '../services/images.service'
 import { generateSlug, extractPlaceData, MAX_IMAGES } from '@/constants/spaces'
-import type { SpaceImage, SpaceType, PlaceResult } from '@/types'
+import type { SpaceImage, SpaceKind, SpaceType, PlaceResult } from '@/types'
 
 export function useSpaceForm(spaceId?: string) {
   const auth = useAuthStore()
@@ -15,6 +15,7 @@ export function useSpaceForm(spaceId?: string) {
   const form = reactive({
     title: '',
     slug: '',
+    kind: 'space' as SpaceKind,
     space_type: null as SpaceType | null,
     description: '',
     capacity: null as number | null,
@@ -64,6 +65,7 @@ export function useSpaceForm(spaceId?: string) {
       const space = await spacesService.getById(id)
       form.title = space.title
       form.slug = space.slug
+      form.kind = space.kind
       form.space_type = space.space_type
       form.description = space.description ?? ''
       form.capacity = space.capacity
@@ -190,6 +192,7 @@ export function useSpaceForm(spaceId?: string) {
       const payload = {
         title: form.title,
         slug: form.slug,
+        kind: form.kind,
         space_type: form.space_type,
         description: form.description || null,
         capacity: form.capacity,

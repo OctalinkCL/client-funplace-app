@@ -57,6 +57,7 @@ export interface Space {
   service_area: string | null
   price_from: number | null
   is_published: boolean
+  is_featured: boolean
   contact_email: string | null
   contact_phone: string | null
   contact_whatsapp: string | null
@@ -151,6 +152,7 @@ export interface CreateSpacePayload {
   service_area?: string | null
   price_from?: number | null
   is_published: boolean
+  is_featured?: boolean
   contact_email?: string | null
   contact_phone?: string | null
   contact_whatsapp?: string | null

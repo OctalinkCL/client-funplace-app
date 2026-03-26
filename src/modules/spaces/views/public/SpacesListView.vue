@@ -10,11 +10,16 @@
       :city="filters.city"
       @update:region="filters.region = $event"
       @update:city="filters.city = $event"
-      @clear="clearFilters"
     />
 
+    <!-- Sin región seleccionada -->
+    <div v-if="!filters.region" class="py-20 text-center text-muted-foreground">
+      <MapPin class="mx-auto mb-3 h-8 w-8 opacity-40" />
+      <p>Selecciona una región para ver los espacios disponibles</p>
+    </div>
+
     <!-- Loading -->
-    <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-else-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
         v-for="n in 6"
         :key="n"
@@ -40,6 +45,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { MapPin } from 'lucide-vue-next'
 import { spacesService } from '../../services/spaces.service'
 import SpaceCard from '../../components/public/SpaceCard.vue'
 import SpaceFilters from '../../components/public/SpaceFilters.vue'
@@ -66,17 +72,16 @@ async function fetchSpaces() {
   }
 }
 
-function clearFilters() {
-  filters.region = ''
-  filters.city = ''
-}
 
 const route = useRoute()
 
-watch(filters, fetchSpaces)
+watch(filters, () => {
+  if (!filters.region) { spaces.value = []; return }
+  fetchSpaces()
+})
 onMounted(() => {
   if (route.query.region) filters.region = route.query.region as string
   if (route.query.city) filters.city = route.query.city as string
-  fetchSpaces()
+  if (filters.region) fetchSpaces()
 })
 </script>

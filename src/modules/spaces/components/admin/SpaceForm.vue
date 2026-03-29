@@ -67,48 +67,44 @@
       <h2 class="text-base font-semibold">Ubicación</h2>
       <Separator />
 
-      <!-- Modo creación: buscador siempre visible -->
-      <template v-if="!isEditMode">
-        <PlaceSearchInput @place-selected="applyPlaceData" />
-        <div v-if="form.address" class="text-xs text-muted-foreground -mt-2">
-          <span class="font-medium text-foreground">Región:</span> {{ form.region }}
-          <span class="mx-1">·</span>
-          <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
+      <!-- Región / Ciudad -->
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="space-y-1.5">
+          <Label>Región</Label>
+          <Select v-model="form.region" @update:modelValue="onRegionChange">
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona región" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="r in CHILE_REGIONS" :key="r.name" :value="r.name">
+                {{ r.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <LocationMapPicker
-          :lat="form.lat"
-          :lng="form.lng"
-          @update:lat="form.lat = $event"
-          @update:lng="form.lng = $event"
-        />
-      </template>
+        <div class="space-y-1.5">
+          <Label>Ciudad / Comuna</Label>
+          <Select v-model="form.city" :disabled="!form.region">
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona ciudad" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="c in communesForSelectedRegion" :key="c" :value="c">
+                {{ c }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-      <!-- Modo edición: mostrar dirección actual con opción de editar -->
-      <template v-else>
-        <div v-if="!editingLocation" class="space-y-1.5">
-          <p class="text-sm text-foreground">{{ form.address || 'Sin dirección' }}</p>
-          <div v-if="form.region || form.city" class="text-xs text-muted-foreground">
-            <span class="font-medium text-foreground">Región:</span> {{ form.region }}
-            <span class="mx-1">·</span>
-            <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
-          </div>
-          <Button type="button" variant="outline" size="sm" @click="editingLocation = true">
-            Editar dirección
-          </Button>
-        </div>
-        <div v-else class="space-y-2">
-          <PlaceSearchInput @place-selected="handlePlaceSelected" />
-          <Button type="button" variant="ghost" size="sm" @click="editingLocation = false">
-            Cancelar
-          </Button>
-        </div>
-        <LocationMapPicker
-          :lat="form.lat"
-          :lng="form.lng"
-          @update:lat="form.lat = $event"
-          @update:lng="form.lng = $event"
-        />
-      </template>
+      <!-- Dirección -->
+      <PlaceSearchInput @place-selected="applyPlaceData" />
+      <LocationMapPicker
+        :lat="form.lat"
+        :lng="form.lng"
+        @update:lat="form.lat = $event"
+        @update:lng="form.lng = $event"
+      />
     </section>
 
     <!-- Facilidades -->
@@ -153,11 +149,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSpaceForm } from '../../composables/useSpaceForm'
 import { useAmenities } from '../../composables/useAmenities'
 import { SPACE_KIND_LIST, SPACE_TYPE_LIST, SERVICE_TYPE_LIST } from '@/constants/spaces'
+import { CHILE_REGIONS } from '@/constants/regions'
 import AmenitiesSelector from './AmenitiesSelector.vue'
 import ImageUploader from './ImageUploader.vue'
 import PlaceSearchInput from './PlaceSearchInput.vue'
@@ -184,7 +181,9 @@ const {
   removeExistingImage, submit, applyPlaceData,
 } = useSpaceForm(props.spaceId)
 
-const editingLocation = ref(false)
+const communesForSelectedRegion = computed(() =>
+  CHILE_REGIONS.find(r => r.name === form.region)?.communes ?? []
+)
 
 const spaceTypeOptions = computed(() =>
   form.kind === 'service' ? SERVICE_TYPE_LIST : SPACE_TYPE_LIST
@@ -200,9 +199,8 @@ const sizeModel = computed({
   set: (v: string | number | undefined) => { form.size_m2 = Number(v) || null },
 })
 
-function handlePlaceSelected(place: import('@/types').PlaceResult) {
-  applyPlaceData(place)
-  editingLocation.value = false
+function onRegionChange() {
+  form.city = null
 }
 
 const { amenities, fetchAmenities } = useAmenities()

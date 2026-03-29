@@ -44,9 +44,7 @@ export function useServiceForm(serviceId?: string) {
   })
 
   function applyPlaceData(place: PlaceResult) {
-    const { region, city, address, lat, lng } = extractPlaceData(place)
-    form.region = region
-    form.city = city
+    const { address, lat, lng } = extractPlaceData(place)
     form.address = address
     form.lat = lat
     form.lng = lng

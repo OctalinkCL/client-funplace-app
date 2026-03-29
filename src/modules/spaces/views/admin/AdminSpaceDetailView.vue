@@ -5,79 +5,48 @@
     </div>
 
     <template v-else-if="space">
+      <!-- Banner post-creación -->
+      <div
+        v-if="isNew"
+        class="mb-6 flex items-center justify-between gap-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
+      >
+        <p>
+          <span class="font-medium">{{ space.kind === 'service' ? 'Servicio creado.' : 'Espacio creado.' }}</span>
+          Completá los detalles para poder publicarlo.
+        </p>
+        <button type="button" class="shrink-0 text-green-600 hover:text-green-800" @click="isNew = false">
+          <X class="w-4 h-4" />
+        </button>
+      </div>
+
       <!-- Header -->
-      <div class="flex items-start justify-between mb-6 gap-4">
+      <div class="flex items-start justify-between mb-8 gap-4">
         <div>
           <h1 class="text-2xl font-semibold">{{ space.title }}</h1>
           <p class="text-sm text-muted-foreground mt-1">
-            {{ SPACE_TYPE_LABELS[space.space_type as SpaceType] ?? '' }}
-            <span v-if="space.city">· {{ space.city }}</span>
+            {{ space.kind === 'service' ? 'Servicio' : 'Espacio' }}
+            <span v-if="space.city"> · {{ space.city }}</span>
           </p>
         </div>
-        <div class="flex gap-2 shrink-0">
-          <Button variant="outline" @click="router.push({ name: 'admin-space-edit', params: { id: space.id } })">
-            Editar
-          </Button>
-          <Button variant="outline" @click="router.push({ name: 'admin-availability', params: { id: space.id } })">
-            Disponibilidad
-          </Button>
-        </div>
+        <Button
+          v-if="space.kind === 'space'"
+          variant="outline"
+          @click="router.push({ name: 'admin-availability', params: { id: space.id } })"
+        >
+          Disponibilidad
+        </Button>
       </div>
 
-      <Card>
-        <CardContent class="p-6 space-y-4">
-          <!-- Status -->
-          <div class="flex items-center gap-2">
-            <Badge :variant="space.is_published ? 'default' : 'secondary'">
-              {{ space.is_published ? 'Publicado' : 'Borrador' }}
-            </Badge>
-          </div>
-
-          <!-- Descripción -->
-          <p v-if="space.description" class="text-sm">{{ space.description }}</p>
-
-          <!-- Datos -->
-          <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
-            <div v-if="space.capacity">
-              <p class="text-muted-foreground">Capacidad</p>
-              <p>{{ space.capacity }} personas</p>
-            </div>
-            <div v-if="space.size_m2">
-              <p class="text-muted-foreground">Superficie</p>
-              <p>{{ space.size_m2 }} m²</p>
-            </div>
-            <div v-if="space.address">
-              <p class="text-muted-foreground">Dirección</p>
-              <p>{{ space.address }}</p>
-            </div>
-          </div>
-
-          <!-- Amenities -->
-          <div v-if="space.space_amenities?.length">
-            <p class="text-sm text-muted-foreground mb-2">Facilidades</p>
-            <div class="flex flex-wrap gap-2">
-              <Badge
-                v-for="a in space.space_amenities"
-                :key="a.amenity"
-                variant="secondary"
-              >
-                {{ AMENITY_LABELS[a.amenity] }}
-              </Badge>
-            </div>
-          </div>
-
-          <!-- Imágenes -->
-          <div v-if="space.space_images?.length" class="grid grid-cols-3 gap-2 sm:grid-cols-4">
-            <div
-              v-for="img in space.space_images"
-              :key="img.id"
-              class="aspect-square rounded-md overflow-hidden"
-            >
-              <img :src="img.url" :alt="space.title" class="w-full h-full object-cover" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <!-- Secciones -->
+      <div class="divide-y divide-border">
+        <BasicInfoSection :space="space" @updated="space = $event" />
+        <PriceSection :space="space" @updated="space = $event" />
+        <LocationSection :space="space" @updated="space = $event" />
+        <CoverageSection v-if="space.kind === 'service'" :space="space" @updated="space = $event" />
+        <AmenitiesSection v-if="space.kind === 'space'" :space="space" @updated="space = $event" />
+        <PhotosSection :space="space" />
+        <PublishSection :space="space" @updated="space = $event" />
+      </div>
     </template>
 
     <p v-else class="text-muted-foreground">Espacio no encontrado.</p>
@@ -87,18 +56,24 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { X } from 'lucide-vue-next'
 import { spacesService } from '../../services/spaces.service'
-import { SPACE_TYPE_LABELS, AMENITY_LABELS } from '@/constants/spaces'
-import type { Space, SpaceType } from '@/types'
+import type { Space } from '@/types'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import BasicInfoSection from '../../components/admin/sections/BasicInfoSection.vue'
+import PriceSection from '../../components/admin/sections/PriceSection.vue'
+import LocationSection from '../../components/admin/sections/LocationSection.vue'
+import CoverageSection from '../../components/admin/sections/CoverageSection.vue'
+import AmenitiesSection from '../../components/admin/sections/AmenitiesSection.vue'
+import PhotosSection from '../../components/admin/sections/PhotosSection.vue'
+import PublishSection from '../../components/admin/sections/PublishSection.vue'
 
 const route = useRoute()
 const router = useRouter()
 
 const space = ref<Space | null>(null)
 const loading = ref(false)
+const isNew = ref(route.query.new === '1')
 
 onMounted(async () => {
   loading.value = true

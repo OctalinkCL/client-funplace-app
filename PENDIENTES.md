@@ -13,8 +13,8 @@
 ## 🟠 Alto
 
 - [x] **Auth** — Verificar que `autoRefreshToken: true` esté en `createClient`. Ya era el default del SDK — ahora declarado explícitamente en `src/lib/supabase.ts`.
-- [ ] **Bookings / Public** — `BookingFormView` acepta fechas pasadas vía `?date=` en URL. Fix: validar `date >= hoy` antes de procesar; redirigir al detalle del espacio si es inválida.
-- [ ] **Bookings / Public** — `?blockId=` y `?date=` no se validan al cargar la vista. UUID inválido o fecha malformada pasan sin detectarse. Fix: validar formato UUID y parsear fecha; redirigir si es inválido.
+- [x] **Bookings / Public** — `BookingFormView` acepta fechas pasadas vía `?date=` en URL. Fix: validar `date >= hoy` en `onMounted`.
+- [x] **Bookings / Public** — `?blockId=` y `?date=` no se validan. Ya estaba resuelto: `isValidDate` + `isValidUUID` en `onMounted`.
 - [ ] **Edge Function** — `send-booking-email` sin autenticación: cualquiera con la URL puede invocarla y disparar emails a terceros. Fix: verificar JWT en el request o agregar un shared secret en los headers.
 
 ## 🟡 Medio

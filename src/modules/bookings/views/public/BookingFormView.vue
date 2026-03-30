@@ -160,6 +160,12 @@ onMounted(async () => {
     slotUnavailable.value = true
     return
   }
+  const [y, m, d] = date.split('-').map(Number)
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  if (new Date(y, m - 1, d) < today) {
+    slotUnavailable.value = true
+    return
+  }
   loading.value = true
   try {
     space.value = await spacesService.getBySlug(slug)

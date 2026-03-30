@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
   );
   const adminEmail = adminUser?.user?.email;
 
-  const FROM = "Funplace <hola@octalink.cl>";
+  const FROM = "Funplace <noreply@octalink.cl>";
 
   try {
     if (event === "created") {

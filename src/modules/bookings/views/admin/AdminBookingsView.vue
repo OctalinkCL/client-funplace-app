@@ -128,6 +128,15 @@
             Cancelar
           </Button>
         </div>
+        <div v-else class="flex gap-2 pt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            @click="openConfirm('Reactivar reserva', 'Se volverá a poner como pendiente. Solo es posible si el horario sigue libre.', () => handleStatus(booking.id, 'PENDING'))"
+          >
+            Reactivar
+          </Button>
+        </div>
       </div>
     </div>
   </div>

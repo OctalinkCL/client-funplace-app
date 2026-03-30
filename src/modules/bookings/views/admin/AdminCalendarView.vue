@@ -270,6 +270,18 @@
                 >
                   Cancelar
                 </Button>
+
+                <!-- CANCELLED: reactivar -->
+                <Button
+                  v-if="slot.status === 'CANCELLED'"
+                  variant="outline"
+                  size="sm"
+                  class="h-7 text-xs"
+                  :disabled="actionLoading === slot.blockId"
+                  @click="openConfirm('Reactivar reserva', 'Se volverá a poner como pendiente. Solo es posible si el horario sigue libre.', () => updateBookingStatus(slot, 'PENDING'))"
+                >
+                  Reactivar
+                </Button>
               </div>
             </div>
           </div>

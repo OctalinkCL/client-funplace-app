@@ -7,12 +7,12 @@
 
 ## 🔴 Crítico
 
-- [ ] **Bookings / DB** — Sin constraint único en `bookings(space_id, block_id, date)`: overbooking posible con tráfico concurrente. Fix: índice único parcial excluyendo `status = 'CANCELLED'` + capturar error `23505` en frontend con mensaje claro.
-- [ ] **Bookings / Service** — `updateStatus()` acepta cualquier transición de estado (ej. `CANCELLED → CONFIRMED`). Fix: validar máquina de estados (`PENDING→CONFIRMED`, `PENDING→CANCELLED`, `CONFIRMED→CANCELLED`; resto = error).
+- [x] **Bookings / DB** — Sin constraint único en `bookings(space_id, block_id, date)`: overbooking posible con tráfico concurrente. Fix: índice único parcial excluyendo `status = 'CANCELLED'` + capturar error `23505` en frontend con mensaje claro.
+- [x] **Bookings / Service** — `updateStatus()` acepta cualquier transición de estado (ej. `CANCELLED → CONFIRMED`). Fix: máquina de estados + chequeo de conflicto para reactivar + botón "Reactivar" en ambas vistas admin.
 
 ## 🟠 Alto
 
-- [ ] **Auth** — Verificar que `autoRefreshToken: true` esté en `createClient`. Si no está, tokens expiran en 1h y la sesión se rompe silenciosamente sin redirigir al login.
+- [x] **Auth** — Verificar que `autoRefreshToken: true` esté en `createClient`. Ya era el default del SDK — ahora declarado explícitamente en `src/lib/supabase.ts`.
 - [ ] **Bookings / Public** — `BookingFormView` acepta fechas pasadas vía `?date=` en URL. Fix: validar `date >= hoy` antes de procesar; redirigir al detalle del espacio si es inválida.
 - [ ] **Bookings / Public** — `?blockId=` y `?date=` no se validan al cargar la vista. UUID inválido o fecha malformada pasan sin detectarse. Fix: validar formato UUID y parsear fecha; redirigir si es inválido.
 - [ ] **Edge Function** — `send-booking-email` sin autenticación: cualquiera con la URL puede invocarla y disparar emails a terceros. Fix: verificar JWT en el request o agregar un shared secret en los headers.

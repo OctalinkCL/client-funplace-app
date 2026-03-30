@@ -1,15 +1,16 @@
 import { supabase } from '@/lib/supabase'
 import type { Booking, BookingStatus, CreateBookingPayload } from '@/types'
 
-async function sendBookingEmail(bookingId: string, event: 'created' | 'confirmed' | 'cancelled') {
+async function sendBookingEmail(bookingId: string, event: 'created' | 'confirmed' | 'cancelled'): Promise<boolean> {
   try {
     await supabase.functions.invoke('send-booking-email', {
       body: { bookingId, event },
       headers: { 'x-internal-secret': import.meta.env.VITE_INTERNAL_SECRET },
     })
+    return true
   } catch (err) {
-    // fire-and-forget: email failure must not block the main operation
     console.error('Email notification failed:', err)
+    return false
   }
 }
 
@@ -65,8 +66,10 @@ export const bookingsService = {
       .eq('id', bookingId)
     if (error) throw error
 
+    let emailSent = true
     if (status === 'CONFIRMED' || status === 'CANCELLED') {
-      sendBookingEmail(bookingId, status === 'CONFIRMED' ? 'confirmed' : 'cancelled')
+      emailSent = await sendBookingEmail(bookingId, status === 'CONFIRMED' ? 'confirmed' : 'cancelled')
     }
+    return { emailSent }
   },
 }

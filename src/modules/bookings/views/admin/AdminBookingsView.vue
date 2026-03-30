@@ -5,6 +5,11 @@
       <h1 class="text-2xl font-semibold">Reservas</h1>
     </div>
 
+    <!-- Warning email -->
+    <p v-if="emailWarning" class="mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+      {{ emailWarning }}
+    </p>
+
     <!-- Métricas -->
     <div v-if="!loading" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
       <div
@@ -183,7 +188,7 @@ const STATUS_LABELS: Record<BookingStatus, string> = {
 const STATUS_ORDER: Record<BookingStatus, number> = { PENDING: 0, CONFIRMED: 1, CANCELLED: 2 }
 
 const authStore = useAuthStore()
-const { bookings, loading, error, fetchByAdmin, updateStatus } = useBookings()
+const { bookings, loading, error, emailWarning, fetchByAdmin, updateStatus } = useBookings()
 
 const confirmDialog = ref<{ open: boolean; title: string; description: string; action: (() => void) | null }>({
   open: false, title: '', description: '', action: null,

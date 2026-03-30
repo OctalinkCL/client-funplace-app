@@ -19,15 +19,15 @@
 
 ## 🟡 Medio
 
-- [ ] **Spaces / Form** — `capacity` y `size_m2` aceptan valores negativos o cero. Fix: `min="1"` en inputs + validación en `useSpaceForm.ts` antes del submit.
-- [ ] **Spaces / Service** — Error de slug duplicado (`23505`) llega como mensaje genérico al usuario. Fix: capturar en `spaces.service.ts` y mostrar "Ya existe un espacio con ese nombre, usa un título diferente".
-- [ ] **Bookings / Admin** — Fallo de `sendBookingEmail()` es silencioso. Fix: mostrar warning al admin "La reserva se actualizó pero no se pudo enviar el email de notificación".
+- [x] **Spaces / Form** — `capacity` y `size_m2` validados en `useSpaceForm.ts` y `BasicInfoSection.vue`. Inputs ya tenían `min="1"`.
+- [x] **Spaces / Service** — Error de slug duplicado ya capturado en `useSpaceForm.ts` líneas 74-75.
+- [x] **Bookings / Admin** — Fallo de `sendBookingEmail()` es silencioso. Fix: mostrar warning al admin "La reserva se actualizó pero no se pudo enviar el email de notificación".
 - [ ] **Availability / DB** — Sin constraint `end_time > start_time` en `time_blocks`. Fix: `ALTER TABLE time_blocks ADD CONSTRAINT time_blocks_valid_range CHECK (end_time > start_time)`.
-- [ ] **Auth** — Redirect param en login solo chequea prefijo `/admin`. Fix: usar `URL` API para validar que `origin === window.location.origin` y que el pathname empiece con `/admin`.
+- [x] **Auth** — Redirect param en login solo chequea prefijo `/admin`. Fix: usar `URL` API para validar que `origin === window.location.origin` y que el pathname empiece con `/admin`.
 
 ## 🟢 Bajo
 
-- [ ] **Auth** — `SetupAccountView` solo requiere 8 caracteres sin validación de complejidad. Fix: mínimo 1 número + 1 mayúscula (también configurable en Supabase Dashboard → Auth Settings).
+- [x] **Auth** — `SetupAccountView` solo requiere 8 caracteres sin validación de complejidad. Fix: mínimo 1 número + 1 mayúscula (también configurable en Supabase Dashboard → Auth Settings).
 
 ---
 

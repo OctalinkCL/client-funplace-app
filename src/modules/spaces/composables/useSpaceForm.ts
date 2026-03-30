@@ -47,6 +47,14 @@ export function useSpaceForm() {
       error.value = 'El nombre del espacio es obligatorio.'
       return null
     }
+    if (form.capacity !== null && form.capacity < 1) {
+      error.value = 'La capacidad debe ser mayor a 0.'
+      return null
+    }
+    if (form.size_m2 !== null && form.size_m2 < 1) {
+      error.value = 'La superficie debe ser mayor a 0.'
+      return null
+    }
     loading.value = true
     try {
       const space = await spacesService.create({

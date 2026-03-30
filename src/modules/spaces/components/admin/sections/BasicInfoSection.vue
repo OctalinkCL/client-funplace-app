@@ -143,6 +143,14 @@ function cancel() {
 
 async function save() {
   if (!local.value.title.trim()) return
+  if (local.value.capacity !== null && local.value.capacity < 1) {
+    error.value = 'La capacidad debe ser mayor a 0.'
+    return
+  }
+  if (local.value.size_m2 !== null && local.value.size_m2 < 1) {
+    error.value = 'La superficie debe ser mayor a 0.'
+    return
+  }
   loading.value = true
   error.value = null
   try {

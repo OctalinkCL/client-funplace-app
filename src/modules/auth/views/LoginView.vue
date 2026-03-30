@@ -64,7 +64,13 @@ async function handleSubmit() {
   try {
     await auth.login(email.value, password.value)
     const redirect = route.query.redirect as string | undefined
-    const safeRedirect = redirect?.startsWith('/admin') ? redirect : undefined
+    function isSafeRedirect(r: string): boolean {
+      try {
+        const url = new URL(r, window.location.origin)
+        return url.origin === window.location.origin && url.pathname.startsWith('/admin')
+      } catch { return false }
+    }
+    const safeRedirect = redirect && isSafeRedirect(redirect) ? redirect : undefined
     router.push(safeRedirect ?? { name: 'admin-bookings' })
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : 'Credenciales incorrectas.'

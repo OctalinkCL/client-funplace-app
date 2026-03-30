@@ -22,7 +22,7 @@
 - [x] **Spaces / Form** — `capacity` y `size_m2` validados en `useSpaceForm.ts` y `BasicInfoSection.vue`. Inputs ya tenían `min="1"`.
 - [x] **Spaces / Service** — Error de slug duplicado ya capturado en `useSpaceForm.ts` líneas 74-75.
 - [x] **Bookings / Admin** — Fallo de `sendBookingEmail()` es silencioso. Fix: mostrar warning al admin "La reserva se actualizó pero no se pudo enviar el email de notificación".
-- [ ] **Availability / DB** — Sin constraint `end_time > start_time` en `time_blocks`. Fix: `ALTER TABLE time_blocks ADD CONSTRAINT time_blocks_valid_range CHECK (end_time > start_time)`.
+- [x] **Availability / DB** — Sin constraint `end_time > start_time` en `time_blocks`. Fix: `ALTER TABLE time_blocks ADD CONSTRAINT time_blocks_valid_range CHECK (end_time > start_time)`.
 - [x] **Auth** — Redirect param en login solo chequea prefijo `/admin`. Fix: usar `URL` API para validar que `origin === window.location.origin` y que el pathname empiece con `/admin`.
 
 ## 🟢 Bajo

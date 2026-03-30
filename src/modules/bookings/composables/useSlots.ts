@@ -43,32 +43,43 @@ export async function getSlotsForDate(spaceId: string, date: string, publicOnly 
   const blocks = (schedule.time_blocks ?? []).filter(b => assignedBlockIds.includes(b.id))
   if (blocks.length === 0) return []
 
-  // Consulta paralela: blocked_slots y bookings activas para este día
-  const [{ data: blockedSlots }, { data: activeBookings }] = await Promise.all([
+  // Consulta paralela: blocked_slots y bookings para este día
+  // En vista admin (publicOnly=false) traemos también las CANCELLED para permitir reactivar
+  let bookingsQuery = supabase
+    .from('bookings')
+    .select(publicOnly ? 'block_id, status' : '*')
+    .eq('space_id', spaceId)
+    .eq('date', date)
+    .in('block_id', assignedBlockIds)
+
+  if (publicOnly) bookingsQuery = bookingsQuery.neq('status', 'CANCELLED')
+
+  const [{ data: blockedSlots }, { data: allBookings }] = await Promise.all([
     supabase
       .from('blocked_slots')
       .select('*')
       .eq('space_id', spaceId)
       .eq('date', date)
       .in('block_id', assignedBlockIds),
-    supabase
-      .from('bookings')
-      .select(publicOnly ? 'block_id, status' : '*')
-      .eq('space_id', spaceId)
-      .eq('date', date)
-      .in('block_id', assignedBlockIds)
-      .neq('status', 'CANCELLED'),
+    bookingsQuery,
   ])
 
   return blocks
     .sort((a, b) => a.sort_order - b.sort_order)
     .map(block => {
-      const booking = activeBookings?.find(bk => bk.block_id === block.id)
+      // En admin: priorizar reserva activa sobre cancelada
+      const activeBooking = allBookings?.find(bk => bk.block_id === block.id && bk.status !== 'CANCELLED')
+      const cancelledBooking = !activeBooking
+        ? allBookings?.find(bk => bk.block_id === block.id && bk.status === 'CANCELLED')
+        : undefined
+      const booking = activeBooking ?? cancelledBooking
       const blocked = blockedSlots?.find(bs => bs.block_id === block.id)
 
       let status: SlotStatus
-      if (booking) {
-        status = booking.status as SlotStatus // 'PENDING' | 'CONFIRMED'
+      if (activeBooking) {
+        status = activeBooking.status as SlotStatus // 'PENDING' | 'CONFIRMED'
+      } else if (cancelledBooking) {
+        status = 'CANCELLED'
       } else if (blocked) {
         status = 'BLOCKED'
       } else {

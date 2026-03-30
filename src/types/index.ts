@@ -173,7 +173,7 @@ export interface CreateBookingPayload {
   notes?: string | null
 }
 
-export type SlotStatus = 'AVAILABLE' | 'BLOCKED' | 'PENDING' | 'CONFIRMED'
+export type SlotStatus = 'AVAILABLE' | 'BLOCKED' | 'PENDING' | 'CONFIRMED' | 'CANCELLED'
 
 export interface SimpleSlot {
   blockId: string

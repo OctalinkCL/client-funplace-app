@@ -144,8 +144,12 @@ async function submitBooking() {
       notes: form.notes || null,
     })
     submitted.value = true
-  } catch (e) {
-    submitError.value = e instanceof Error ? e.message : 'Error al enviar la solicitud. Intenta de nuevo.'
+  } catch (e: any) {
+    if (e?.code === '23505') {
+      slotUnavailable.value = true
+    } else {
+      submitError.value = 'Error al enviar la solicitud. Intenta de nuevo.'
+    }
   } finally {
     submitting.value = false
   }

@@ -5,6 +5,7 @@ async function sendBookingEmail(bookingId: string, event: 'created' | 'confirmed
   try {
     await supabase.functions.invoke('send-booking-email', {
       body: { bookingId, event },
+      headers: { 'x-internal-secret': import.meta.env.VITE_INTERNAL_SECRET },
     })
   } catch (err) {
     // fire-and-forget: email failure must not block the main operation

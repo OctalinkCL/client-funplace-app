@@ -28,13 +28,20 @@
             <span v-if="space.city"> · {{ space.city }}</span>
           </p>
         </div>
-        <Button
-          v-if="space.kind === 'space'"
-          variant="outline"
-          @click="router.push({ name: 'admin-availability', params: { id: space.id } })"
-        >
-          Disponibilidad
-        </Button>
+        <div v-if="space.kind === 'space'" class="flex gap-2">
+          <Button
+            variant="outline"
+            @click="router.push({ name: 'admin-calendar', params: { spaceId: space.id } })"
+          >
+            Calendario
+          </Button>
+          <Button
+            variant="outline"
+            @click="router.push({ name: 'admin-availability', params: { id: space.id } })"
+          >
+            Disponibilidad
+          </Button>
+        </div>
       </div>
 
       <!-- Secciones -->

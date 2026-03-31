@@ -4,7 +4,7 @@ import { Resend } from "https://esm.sh/resend@4";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
@@ -35,6 +35,11 @@ Deno.serve(async (req) => {
       status: 405,
       headers: corsHeaders,
     });
+  }
+
+  const secret = req.headers.get("x-internal-secret");
+  if (!secret || secret !== Deno.env.get("INTERNAL_SECRET")) {
+    return new Response("Unauthorized", { status: 401, headers: corsHeaders });
   }
 
   const { bookingId, event } = (await req.json()) as {
@@ -90,7 +95,7 @@ Deno.serve(async (req) => {
   );
   const adminEmail = adminUser?.user?.email;
 
-  const FROM = "Funplace <hola@octalink.cl>";
+  const FROM = "Funplace <noreply@octalink.cl>";
 
   try {
     if (event === "created") {

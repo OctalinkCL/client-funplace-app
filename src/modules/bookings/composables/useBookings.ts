@@ -6,6 +6,7 @@ export function useBookings() {
   const bookings = ref<Booking[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const emailWarning = ref<string | null>(null)
 
   async function fetchByAdmin() {
     loading.value = true
@@ -20,15 +21,18 @@ export function useBookings() {
   }
 
   async function updateStatus(bookingId: string, status: BookingStatus) {
+    emailWarning.value = null
     try {
-      await bookingsService.updateStatus(bookingId, status)
-      // Actualizar local sin refetch
+      const { emailSent } = await bookingsService.updateStatus(bookingId, status)
       const i = bookings.value.findIndex(b => b.id === bookingId)
       if (i !== -1) bookings.value[i] = { ...bookings.value[i], status }
+      if (!emailSent) {
+        emailWarning.value = 'Reserva actualizada. No se pudo enviar el email de notificación al cliente.'
+      }
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error al actualizar la reserva.'
     }
   }
 
-  return { bookings, loading, error, fetchByAdmin, updateStatus }
+  return { bookings, loading, error, emailWarning, fetchByAdmin, updateStatus }
 }

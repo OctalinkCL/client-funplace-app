@@ -144,8 +144,12 @@ async function submitBooking() {
       notes: form.notes || null,
     })
     submitted.value = true
-  } catch (e) {
-    submitError.value = e instanceof Error ? e.message : 'Error al enviar la solicitud. Intenta de nuevo.'
+  } catch (e: any) {
+    if (e?.code === '23505') {
+      slotUnavailable.value = true
+    } else {
+      submitError.value = 'Error al enviar la solicitud. Intenta de nuevo.'
+    }
   } finally {
     submitting.value = false
   }
@@ -153,6 +157,12 @@ async function submitBooking() {
 
 onMounted(async () => {
   if (!date || !blockId || !isValidDate(date) || !isValidUUID(blockId)) {
+    slotUnavailable.value = true
+    return
+  }
+  const [y, m, d] = date.split('-').map(Number)
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  if (new Date(y, m - 1, d) < today) {
     slotUnavailable.value = true
     return
   }

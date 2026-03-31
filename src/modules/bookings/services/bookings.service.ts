@@ -1,14 +1,16 @@
 import { supabase } from '@/lib/supabase'
 import type { Booking, BookingStatus, CreateBookingPayload } from '@/types'
 
-async function sendBookingEmail(bookingId: string, event: 'created' | 'confirmed' | 'cancelled') {
+async function sendBookingEmail(bookingId: string, event: 'created' | 'confirmed' | 'cancelled'): Promise<boolean> {
   try {
     await supabase.functions.invoke('send-booking-email', {
       body: { bookingId, event },
+      headers: { 'x-internal-secret': import.meta.env.VITE_INTERNAL_SECRET },
     })
+    return true
   } catch (err) {
-    // fire-and-forget: email failure must not block the main operation
     console.error('Email notification failed:', err)
+    return false
   }
 }
 
@@ -35,14 +37,39 @@ export const bookingsService = {
   },
 
   async updateStatus(bookingId: string, status: BookingStatus): Promise<void> {
+    const { data: current, error: fetchError } = await supabase
+      .from('bookings')
+      .select('status, space_id, block_id, date')
+      .eq('id', bookingId)
+      .single()
+    if (fetchError || !current) throw new Error('Reserva no encontrada.')
+
+    if (current.status === 'CANCELLED' && status === 'CONFIRMED') {
+      throw new Error('No se puede confirmar una reserva cancelada directamente. Primero reactívala.')
+    }
+
+    if (current.status === 'CANCELLED' && status === 'PENDING') {
+      const { data: conflict } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('space_id', current.space_id)
+        .eq('block_id', current.block_id)
+        .eq('date', current.date)
+        .neq('status', 'CANCELLED')
+        .maybeSingle()
+      if (conflict) throw new Error('Este horario ya tiene una reserva activa. No se puede reactivar.')
+    }
+
     const { error } = await supabase
       .from('bookings')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', bookingId)
     if (error) throw error
 
+    let emailSent = true
     if (status === 'CONFIRMED' || status === 'CANCELLED') {
-      sendBookingEmail(bookingId, status === 'CONFIRMED' ? 'confirmed' : 'cancelled')
+      emailSent = await sendBookingEmail(bookingId, status === 'CONFIRMED' ? 'confirmed' : 'cancelled')
     }
+    return { emailSent }
   },
 }

@@ -119,6 +119,11 @@
           </div>
           <Separator />
 
+          <!-- Warning email -->
+          <p v-if="emailWarning" class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+            {{ emailWarning }}
+          </p>
+
           <!-- Loading slots -->
           <div v-if="loadingSlots" class="space-y-2">
             <div v-for="n in 2" :key="n" class="h-20 rounded-lg bg-muted animate-pulse" />
@@ -270,6 +275,18 @@
                 >
                   Cancelar
                 </Button>
+
+                <!-- CANCELLED: reactivar -->
+                <Button
+                  v-if="slot.status === 'CANCELLED'"
+                  variant="outline"
+                  size="sm"
+                  class="h-7 text-xs"
+                  :disabled="actionLoading === slot.blockId"
+                  @click="openConfirm('Reactivar reserva', 'Se volverá a poner como pendiente. Solo es posible si el horario sigue libre.', () => updateBookingStatus(slot, 'PENDING'))"
+                >
+                  Reactivar
+                </Button>
               </div>
             </div>
           </div>
@@ -335,6 +352,7 @@ const selectedDate = ref('')
 const slots = ref<SimpleSlot[]>([])
 const loadingSlots = ref(false)
 const actionLoading = ref<string | null>(null)
+const emailWarning = ref<string | null>(null)
 
 // Diálogo de confirmación
 const confirmDialog = ref<{ open: boolean; title: string; description: string; action: (() => void) | null }>({
@@ -566,10 +584,14 @@ async function unblockSlot(slot: SimpleSlot) {
 async function updateBookingStatus(slot: SimpleSlot, status: BookingStatus) {
   if (!slot.booking) return
   actionLoading.value = slot.blockId
+  emailWarning.value = null
   try {
-    await bookingsService.updateStatus(slot.booking.id, status)
+    const { emailSent } = await bookingsService.updateStatus(slot.booking.id, status)
     await refreshDay()
     await Promise.all([loadPendingDates(), loadConfirmedDates(), loadBlockedDates()])
+    if (!emailSent) {
+      emailWarning.value = 'Reserva actualizada. No se pudo enviar el email de notificación al cliente.'
+    }
   } finally {
     actionLoading.value = null
   }

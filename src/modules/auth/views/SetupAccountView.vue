@@ -79,8 +79,8 @@ async function handleSubmit() {
     return
   }
 
-  if (!/[A-Z]/.test(password.value) || !/[0-9]/.test(password.value)) {
-    error.value = 'La contraseña debe tener al menos 1 mayúscula y 1 número.'
+  if (password.value.length < 8 || !/[A-Z]/.test(password.value) || !/[0-9]/.test(password.value)) {
+    error.value = 'La contraseña debe tener al menos 8 caracteres, 1 mayúscula y 1 número.'
     return
   }
 

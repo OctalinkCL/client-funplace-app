@@ -3,12 +3,15 @@
     <p v-if="!readonly" class="text-xs text-muted-foreground">
       Mueve el mapa para ajustar la ubicación exacta del marcador.
     </p>
-    <div class="relative rounded-md overflow-hidden border" style="height: 300px">
+    <div
+      class="relative rounded-md overflow-hidden border"
+      style="height: 300px"
+    >
       <div ref="mapContainer" class="w-full h-full" />
       <!-- Pin fijo en el centro del mapa (estilo Uber) -->
       <div
         class="absolute inset-0 flex items-center justify-center pointer-events-none"
-        style="padding-bottom: 28px; z-index: 1000;"
+        style="padding-bottom: 28px; z-index: 1000"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -19,7 +22,9 @@
           stroke="white"
           stroke-width="1"
         >
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+          <path
+            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+          />
           <circle cx="12" cy="9" r="2.5" fill="white" stroke="none" />
         </svg>
       </div>
@@ -31,34 +36,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
-import type { Map as LeafletMap } from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+import { ref, watch, onMounted, onUnmounted } from "vue";
+import type { Map as LeafletMap } from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 const props = defineProps<{
-  lat: number | null
-  lng: number | null
-  readonly?: boolean
-}>()
+  lat: number | null;
+  lng: number | null;
+  readonly?: boolean;
+}>();
 
 const emit = defineEmits<{
-  'update:lat': [value: number]
-  'update:lng': [value: number]
-}>()
+  "update:lat": [value: number];
+  "update:lng": [value: number];
+}>();
 
-const mapContainer = ref<HTMLElement | null>(null)
-let map: LeafletMap | null = null
+const mapContainer = ref<HTMLElement | null>(null);
+let map: LeafletMap | null = null;
 
 // Flag para evitar emitir cuando movemos el mapa programáticamente
-let isExternalUpdate = false
+let isExternalUpdate = false;
 
-const displayLat = ref(props.lat?.toFixed(6) ?? '')
-const displayLng = ref(props.lng?.toFixed(6) ?? '')
+const displayLat = ref(props.lat?.toFixed(6) ?? "");
+const displayLng = ref(props.lng?.toFixed(6) ?? "");
 
 async function initMap() {
-  if (!mapContainer.value || props.lat === null || props.lng === null) return
+  if (!mapContainer.value || props.lat === null || props.lng === null) return;
 
-  const L = (await import('leaflet')).default
+  const L = (await import("leaflet")).default;
 
   map = L.map(mapContainer.value, {
     center: [props.lat, props.lng],
@@ -69,62 +74,66 @@ async function initMap() {
     doubleClickZoom: !props.readonly,
     touchZoom: !props.readonly,
     keyboard: !props.readonly,
-  })
+  });
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 19,
-  }).addTo(map)
+  L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    {
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+    },
+  ).addTo(map);
 
   // Solo registrar moveend en modo edición
   if (!props.readonly) {
-    map.on('moveend', () => {
-      if (isExternalUpdate || !map) return
-      const center = map.getCenter()
-      displayLat.value = center.lat.toFixed(6)
-      displayLng.value = center.lng.toFixed(6)
-      emit('update:lat', center.lat)
-      emit('update:lng', center.lng)
-    })
+    map.on("moveend", () => {
+      if (isExternalUpdate || !map) return;
+      const center = map.getCenter();
+      displayLat.value = center.lat.toFixed(6);
+      displayLng.value = center.lng.toFixed(6);
+      emit("update:lat", center.lat);
+      emit("update:lng", center.lng);
+    });
   }
 }
 
 onMounted(async () => {
   if (props.lat !== null && props.lng !== null) {
-    await initMap()
+    await initMap();
   }
-})
+});
 
 // flush: 'post' garantiza que el watch corre DESPUÉS de que Vue actualizó el DOM,
 // por lo que mapContainer.value ya existe cuando initMap() lo necesita.
 watch(
   () => [props.lat, props.lng] as [number | null, number | null],
   async ([newLat, newLng]) => {
-    if (newLat === null || newLng === null) return
+    if (newLat === null || newLng === null) return;
 
-    displayLat.value = newLat.toFixed(6)
-    displayLng.value = newLng.toFixed(6)
+    displayLat.value = newLat.toFixed(6);
+    displayLng.value = newLng.toFixed(6);
 
     if (!map) {
       // Primera vez que tenemos coordenadas — DOM ya actualizado con flush 'post'
-      await initMap()
-      return
+      await initMap();
+      return;
     }
 
     // Ya existe el mapa — volar al nuevo centro sin emitir
-    isExternalUpdate = true
-    map.setView([newLat, newLng], 16)
+    isExternalUpdate = true;
+    map.setView([newLat, newLng], 16);
     setTimeout(() => {
-      isExternalUpdate = false
-    }, 300)
+      isExternalUpdate = false;
+    }, 300);
   },
-  { flush: 'post' },
-)
+  { flush: "post" },
+);
 
 onUnmounted(() => {
   if (map) {
-    map.remove()
-    map = null
+    map.remove();
+    map = null;
   }
-})
+});
 </script>

@@ -70,13 +70,13 @@
       </select>
     </div>
 
+    <!-- Error -->
+    <p v-if="error" class="mb-4 text-sm text-destructive bg-destructive/5 border border-destructive/20 rounded-lg px-4 py-3">{{ error }}</p>
+
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-20">
       <p class="text-muted-foreground">Cargando...</p>
     </div>
-
-    <!-- Error -->
-    <p v-else-if="error" class="text-sm text-destructive">{{ error }}</p>
 
     <!-- Empty -->
     <div v-else-if="filteredBookings.length === 0" class="py-20 text-center">

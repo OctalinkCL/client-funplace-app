@@ -21,6 +21,7 @@ export function useBookings() {
   }
 
   async function updateStatus(bookingId: string, status: BookingStatus) {
+    error.value = null
     emailWarning.value = null
     try {
       const { emailSent } = await bookingsService.updateStatus(bookingId, status)

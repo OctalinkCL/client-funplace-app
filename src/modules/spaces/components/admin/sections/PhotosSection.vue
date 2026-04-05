@@ -27,10 +27,11 @@
         :class="{ 'opacity-50 pointer-events-none': uploadingCount > 0 }"
       >
         <ImagePlus class="w-4 h-4" />
-        {{ uploadingCount > 0 ? 'Subiendo...' : 'Agregar foto' }}
+        {{ uploadingCount > 0 ? 'Subiendo...' : 'Agregar fotos' }}
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp"
+          multiple
           class="sr-only"
           :disabled="uploadingCount > 0"
           @change="handleFileInput"
@@ -57,9 +58,11 @@ const { images, uploadingCount, error, addImage, removeImage } = useSpaceImages(
 )
 
 function handleFileInput(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (file) addImage(file)
-  ;(event.target as HTMLInputElement).value = ''
+  const input = event.target as HTMLInputElement
+  const files = Array.from(input.files ?? [])
+  const remaining = MAX_IMAGES - images.value.length
+  files.slice(0, remaining).forEach(file => addImage(file))
+  input.value = ''
 }
 
 async function handleRemove(img: SpaceImage) {

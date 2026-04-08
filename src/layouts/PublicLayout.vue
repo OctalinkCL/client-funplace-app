@@ -8,7 +8,7 @@ import {
 </script>
 
 <template>
-  <SidebarProvider>
+  <SidebarProvider :default-open="false">
     <PublicSidebar />
     <SidebarInset>
       <main>

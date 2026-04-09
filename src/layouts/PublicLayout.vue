@@ -11,10 +11,8 @@ import {
   <SidebarProvider :default-open="false">
     <PublicSidebar />
     <SidebarInset>
-      <main>
-        <SidebarTrigger />
-        <RouterView />
-      </main>
+      <SidebarTrigger />
+      <div class="container-wrap grow"><RouterView /></div>
     </SidebarInset>
   </SidebarProvider>
 </template>

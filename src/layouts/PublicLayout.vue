@@ -9,7 +9,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
     <PublicSidebar />
     <SidebarInset>
       <PublicHeader />
-      <div class="container-wrap grow"><RouterView /></div>
+      <div class="grow"><RouterView /></div>
     </SidebarInset>
   </SidebarProvider>
 </template>

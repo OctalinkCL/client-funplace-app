@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div id="page-home">
     <HeroSearch />
 
     <section class="lg:pb-[60px]">

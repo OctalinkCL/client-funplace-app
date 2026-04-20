@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import AppLogo from "@/components/layouts/AppLogo.vue";
+import UserAvatar from "@/components/shared/UserAvatar.vue";
 import { useMediaQuery } from "@vueuse/core";
 import { useAuthStore } from "@/stores/auth.store";
-import { UserRoundIcon } from "lucide-vue-next";
-
-// ComponentsUI
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const isMobile = useMediaQuery("(max-width: 768px)");
 const store = useAuthStore();
@@ -38,19 +33,14 @@ const store = useAuthStore();
           </RouterLink>
           <!-- user -->
           <div class="ml-auto">
-            <Avatar v-if="store.isAuthenticated" as-child>
-              <RouterLink to="/admin/reservas">
-                <AvatarImage src="https://github.com/radix-ui.png" />
-                <AvatarFallback>CN</AvatarFallback>
-              </RouterLink>
-            </Avatar>
-            <Button v-else class="rounded-full" as-child>
-              <RouterLink to="/auth/login">Inciar Sesión</RouterLink>
-            </Button>
+            <RouterLink
+              :to="store.isAuthenticated ? '/admin/reservas' : '/auth/login'"
+              as-child
+            >
+              <UserAvatar :size="isMobile ? 32 : 40" />
+            </RouterLink>
           </div>
         </div>
-
-        {{ store.user }}
       </div>
     </div>
   </header>

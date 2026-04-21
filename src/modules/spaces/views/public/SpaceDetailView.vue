@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter, RouterLink } from "vue-router";
-import { Mail, Phone, MessageCircle } from "lucide-vue-next";
+import { Mail, Phone, MessageCircle, User } from "lucide-vue-next";
 import { spacesService } from "../../services/spaces.service";
 import { SPACE_TYPE_LABELS } from "@/constants/spaces";
 import SpaceAmenities from "../../components/public/SpaceAmenities.vue";
@@ -41,6 +41,9 @@ const contactWhatsapp = computed(
     space.value?.contact_whatsapp ||
     space.value?.profiles?.contact_whatsapp ||
     null,
+);
+const contactName = computed(
+  () => space.value?.profiles?.full_name || null,
 );
 const hasContact = computed(
   () => !!(contactEmail.value || contactPhone.value || contactWhatsapp.value),
@@ -228,6 +231,10 @@ onMounted(async () => {
             <!-- Contacto -->
             <div v-if="hasContact" class="space-y-3">
               <h2 class="text-lg font-semibold">¿Tienes dudas? Contáctanos</h2>
+              <div v-if="contactName" class="flex items-center gap-2 text-sm text-muted-foreground">
+                <User class="w-4 h-4 shrink-0" />
+                {{ contactName }}
+              </div>
               <div class="flex flex-wrap gap-3">
                 <a
                   v-if="contactEmail"

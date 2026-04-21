@@ -69,6 +69,7 @@ export interface Space {
     contact_email: string | null
     contact_phone: string | null
     contact_whatsapp: string | null
+    full_name: string | null
   } | null
 }
 

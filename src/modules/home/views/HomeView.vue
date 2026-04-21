@@ -1,6 +1,39 @@
+<script setup lang="ts">
+import { SearchIcon, SendIcon, PartyPopperIcon } from "lucide-vue-next";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import FeaturedSpacesGrid from "../components/FeaturedSpacesGrid.vue";
+import HeroSearch from "../components/HeroSearch.vue";
+import PlanItems from "../components/PlanItems.vue";
+import ProcessItem from "../components/ProcessItem.vue";
+</script>
+
 <template>
   <div id="page-home">
-    <HeroSearch />
+    <!-- Hero -->
+    <section
+      class="bg-zinc-50 flex items-center pt-6 pb-12 | md:pt-12 md:pb-24"
+    >
+      <div class="grid gap-6 mx-auto px-4 md:max-w-4xl md:gap-9">
+        <!-- tag_title_subtitle -->
+        <div class="flex flex-col items-center text-center gap-3 lg:gap-6">
+          <Badge class="bg-white text-black px-1 lg:text-base">
+            <Badge class="bg-lime-300 text-black lg:text-sm">Nuevo</Badge>
+            <span class="pl-2 pr-2">Haz crecer tu negocio</span>
+          </Badge>
+          <h3 class="font-heading text-4xl font-semibold | lg:text-7xl">
+            El lugar perfecto para cada cumpleaños
+          </h3>
+          <p class="text-neutral-500 text-md | lg:text-xl lg:px-18">
+            Encuentra el lugar ideal para tu fiesta, evento o celebración. Desde
+            salones de cumpleaños hasta espacios para eventos corporativos,
+            tenemos opciones para todos los gustos y necesidades.
+          </p>
+        </div>
+        <!-- finder -->
+        <HeroSearch />
+      </div>
+    </section>
 
     <section class="lg:pb-[60px]">
       <div class="container mx-auto px-4 sm:px-0">
@@ -214,15 +247,3 @@
     </section>
   </div>
 </template>
-
-<script setup lang="ts">
-import { RouterLink } from "vue-router";
-import { SearchIcon, SendIcon, PartyPopperIcon } from "lucide-vue-next";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import FeaturedSpacesGrid from "../components/FeaturedSpacesGrid.vue";
-import HeroSearch from "../components/HeroSearch.vue";
-import PlanItems from "../components/PlanItems.vue";
-import ProcessItem from "../components/ProcessItem.vue";
-</script>

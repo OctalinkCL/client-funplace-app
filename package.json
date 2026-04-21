@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
+    "@fontsource-variable/space-grotesk": "^5.2.10",
     "@supabase/supabase-js": "^2.99.2",
     "@tailwindcss/vite": "^4.2.1",
     "@vueuse/core": "^14.2.1",

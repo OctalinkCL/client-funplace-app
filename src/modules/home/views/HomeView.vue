@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import FeaturedSpacesGrid from "../components/FeaturedSpacesGrid.vue";
 import HeroSearch from "../components/HeroSearch.vue";
@@ -112,104 +113,100 @@ import HeroSearch from "../components/HeroSearch.vue";
       </div>
     </section>
 
-    <section>
+    <!-- business -->
+    <section class="mb-12 lg:mb-18">
       <div
-        class="container mx-auto px-4 sm:px-0 grid lg:grid-cols-2 gap-9 lg:gap-20"
+        class="container-wrap flex flex-col md:flex-row gap-6 md:gap-12 md:items-start"
       >
-        <Card class="shadow-none border-0 bg-gray-100">
-          <CardContent class="flex flex-col gap-4">
-            <Badge variant="outline" class="bg-white">Para tu negocio</Badge>
-            <h3 class="text-2xl/6 lg:text-4xl font-bold">
-              Tus clientes no quieren esperar tu respuesta para reservar
-            </h3>
-            <p>
-              Ya sea tu casa de cumpleaños, tu carro de comida o tu show de
-              magia — publica tu disponibilidad real en Funplace y deja que tus
-              clientes reserven solos. Sin WhatsApp, sin dobles reservas, sin
-              clientes perdidos.
-            </p>
-          </CardContent>
-        </Card>
-        <ul class="grid gap-6">
-          <li class="flex gap-5 items-start">
-            <div
-              class="bg-gray-200 rounded size-9 flex items-center justify-center shrink-0"
+        <div class="grid gap-4">
+          <Badge variant="outline" class="font-mono">Por qué Funplace</Badge>
+          <h3 class="font-heading text-3xl md:text-5xl font-semibold">
+            Los clientes no quieren
+            <span class="text-violet-600">esperar</span> para reservar.
+          </h3>
+          <p class="text-neutral-700 md:text-lg md:pr-12">
+            Un 60% de los arriendos de espacios se pierden porque la respuesta
+            llega tarde. Funplace resuelve eso.
+          </p>
+          <div>
+            <Button size="lg" class="rounded-full bg-violet-600 px-12"
+              >Publica tu espacio</Button
             >
-              <span class="text-base font-semibold">01</span>
-            </div>
-            <div class="grid gap-1">
-              <h6 class="text-lg font-semibold">
-                Disponibilidad en tiempo real
-              </h6>
-              <p class="text-neutral-500 font-medium">
-                Tus clientes ven qué fechas y horarios están libres. Sin
-                preguntar, sin esperar respuesta.
-              </p>
-            </div>
-          </li>
-          <li class="flex gap-5 items-start">
-            <div
-              class="bg-gray-200 rounded size-9 flex items-center justify-center shrink-0"
-            >
-              <span class="text-base font-semibold">02</span>
-            </div>
-            <div class="grid gap-1">
-              <h6 class="text-lg font-semibold">Evita dobles reservas</h6>
-              <p class="text-neutral-500 font-medium">
-                Cuando alguien reserva un bloque, se bloquea automáticamente
-                para todos los demás.
-              </p>
-            </div>
-          </li>
-          <li class="flex gap-5 items-start">
-            <div
-              class="bg-gray-200 rounded size-9 flex items-center justify-center shrink-0"
-            >
-              <span class="text-base font-semibold">03</span>
-            </div>
-            <div class="grid gap-1">
-              <h6 class="text-lg font-semibold">Tú confirmas, tú decides</h6>
-              <p class="text-neutral-500 font-medium">
-                Cada solicitud pasa por ti antes de hacerse efectiva. Nada se
-                agenda sin tu aprobación.
-              </p>
-            </div>
-          </li>
-          <li class="flex gap-5 items-start">
-            <div
-              class="bg-gray-200 rounded size-9 flex items-center justify-center shrink-0"
-            >
-              <span class="text-base font-semibold">04</span>
-            </div>
-            <div class="grid gap-1">
-              <h6 class="text-lg font-semibold">
-                Un link profesional, no un chat
-              </h6>
-              <p class="text-neutral-500 font-medium">
-                Tus clientes reservan en 30 segundos desde un link que puedes
-                compartir en cualquier red social.
-              </p>
-            </div>
-          </li>
-          <li class="flex gap-5 items-start">
-            <div
-              class="bg-gray-200 rounded size-9 flex items-center justify-center shrink-0"
-            >
-              <span class="text-base font-semibold">05</span>
-            </div>
-            <div class="grid gap-1">
-              <h6 class="text-lg font-semibold">Cliente siempre informado</h6>
-              <p class="text-neutral-500 font-medium">
-                Recibe una notificación por correo con cada actualización de su
-                reserva. Sin tener que preguntar "¿me confirmaron?"
-              </p>
-            </div>
-          </li>
-        </ul>
+          </div>
+        </div>
+        <div>
+          <ul class="grid gap-4">
+            <li class="flex gap-6 border-b pb-4">
+              <h5 class="font-mono text-neutral-400">01</h5>
+              <div>
+                <h6 class="font-heading text-xl font-semibold">
+                  Disponibilidad transparente
+                </h6>
+                <p class="text-neutral-600 md:text-lg">
+                  Tu calendario sincronizado. Los clientes ven lo que está libre
+                  sin preguntar.
+                </p>
+              </div>
+            </li>
+            <li class="flex gap-6 border-b pb-4">
+              <h5 class="font-mono text-neutral-400">02</h5>
+              <div>
+                <h6 class="font-heading text-xl font-semibold">
+                  Más visibilidad
+                </h6>
+                <p class="text-neutral-600 md:text-lg">
+                  Tu espacio aparece en búsquedas filtradas — llega a quien
+                  realmente quiere arrendar.
+                </p>
+              </div>
+            </li>
+            <li class="flex gap-6 border-b pb-4">
+              <h5 class="font-mono text-neutral-400">03</h5>
+              <div>
+                <h6 class="font-heading text-xl font-semibold">
+                  Tu confirmas, tu decides
+                </h6>
+                <p class="text-neutral-600 md:text-lg">
+                  No hay cobros por reserva. Tú decides si aceptas o rechazas
+                  cada solicitud. Nada se confirma si tú no lo apruebas.
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </section>
 
-    <section class="pt-[90px]">
+    <!-- CTA -->
+    <section class="mb-12 lg:mb-18">
+      <div class="container-wrap">
+        <Card class="bg-zinc-50 border-0 shadow-none">
+          <CardContent class="text-center py-6 md:py-12">
+            <h5 class="font-mono text-neutral-400 text-sm">Vamos por más</h5>
+            <h3 class="font-heading text-3xl md:text-5xl font-semibold">
+              ¿Listo para llenar tu agenda?
+            </h3>
+            <p class="text-neutral-700 md:text-lg mt-4">
+              Crea tu perfil en minutos y empieza a recibir reservas.
+            </p>
+            <div
+              class="flex flex-col md:flex-row gap-4 md:gap-6 justify-center pt-6 md:pt-8"
+            >
+              <Button size="lg" class="rounded-full bg-violet-600 px-12"
+                ><a href="https://wa.me/56998433651"
+                  >Hablemos por WhatsApp</a
+                ></Button
+              >
+              <!-- <Button size="lg" class="rounded-full bg-violet-600 px-12"
+                ><a href="/">Busca tu espacio</a></Button
+              > -->
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+
+    <section v-if="false">
       <div class="container mx-auto px-4 sm:px-0 grid gap-12">
         <div class="grid gap-3 text-center lg:max-w-3xl lg:mx-auto">
           <h3 class="text-3xl lg:text-5xl font-bold">
@@ -265,6 +262,7 @@ import HeroSearch from "../components/HeroSearch.vue";
     </section>
 
     <section
+      v-if="false"
       class="bg-linear-to-t from-violet-200 from-60% to-white pt-[120px]"
     >
       <div class="container mx-auto px-4 sm:px-0 grid gap-12">

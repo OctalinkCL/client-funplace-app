@@ -10,6 +10,14 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
     <SidebarInset>
       <PublicHeader />
       <div class="grow"><RouterView /></div>
+
+      <footer class="bg-zinc-800 py-12">
+        <div class="container-wrap">
+          <p class="text-white text-xs md:text-sm text-center">
+            © 2026 Funplace. Todos los derechos reservados.
+          </p>
+        </div>
+      </footer>
     </SidebarInset>
   </SidebarProvider>
 </template>

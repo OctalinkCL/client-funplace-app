@@ -10,7 +10,7 @@ import ProcessItem from "../components/ProcessItem.vue";
 
 <template>
   <div id="page-home">
-    <!-- Hero -->
+    <!-- hero -->
     <section
       class="bg-zinc-50 flex items-center pt-6 pb-12 | md:pt-12 md:pb-24"
     >
@@ -35,13 +35,22 @@ import ProcessItem from "../components/ProcessItem.vue";
       </div>
     </section>
 
-    <section class="lg:pb-[60px]">
-      <div class="container mx-auto px-4 sm:px-0">
+    <!-- featured_spaces -->
+    <section class="py-12 lg:pt-18">
+      <div class="container-wrap grid gap-4 lg:gap-6">
+        <header>
+          <p class="text-sm font-medium text-violet-700 lg:text-base">
+            Partamos por algo
+          </p>
+          <h3 class="font-heading text-2xl font-semibold lg:text-3xl">
+            Los más destacados
+          </h3>
+        </header>
         <FeaturedSpacesGrid />
       </div>
     </section>
 
-    <section class="py-15">
+    <section>
       <div class="container mx-auto px-4 sm:px-0">
         <Card class="shadow-none border-0 bg-black text-white">
           <CardContent class="grid gap-9">

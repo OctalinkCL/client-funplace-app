@@ -14,6 +14,7 @@ import AvailabilityCalendar from "@/modules/bookings/components/public/Availabil
 import SlotSelector from "@/modules/bookings/components/public/SlotSelector.vue";
 import { clearSlotsCache } from "@/modules/bookings/composables/useSlots";
 import type { Space, SimpleSlot } from "@/types";
+import { Card } from "@/components/ui/card";
 
 const route = useRoute();
 const router = useRouter();
@@ -116,178 +117,193 @@ onMounted(async () => {
   }
 });
 </script>
+
 <template>
   <div id="space-detail-view">
-    <!-- old -->
-    <!-- Loading -->
-    <div v-if="loading" class="space-y-4">
-      <div class="rounded-xl bg-muted animate-pulse aspect-video" />
-      <div class="h-8 bg-muted animate-pulse rounded w-1/2" />
-    </div>
+    <div class="container-wrap py-4">
+      <div class="grid gap-4 md:grid-cols-6">
+        <!-- contnet -->
+        <div class="md:col-span-4">
+          <!-- Loading -->
+          <div v-if="loading" class="space-y-4">
+            <div class="rounded-xl bg-muted animate-pulse aspect-video" />
+            <div class="h-8 bg-muted animate-pulse rounded w-1/2" />
+          </div>
 
-    <!-- Error / No encontrado -->
-    <div v-else-if="error" class="py-20 text-center">
-      <p class="text-muted-foreground">{{ error }}</p>
-      <RouterLink to="/" class="text-sm underline mt-2 inline-block"
-        >Volver al listado</RouterLink
-      >
-    </div>
+          <!-- Error / No encontrado -->
+          <div v-else-if="error" class="py-20 text-center">
+            <p class="text-muted-foreground">{{ error }}</p>
+            <RouterLink to="/" class="text-sm underline mt-2 inline-block"
+              >Volver al listado</RouterLink
+            >
+          </div>
 
-    <template v-else-if="space">
-      <!-- Galería de imágenes -->
-      <div
-        v-if="space.space_images && space.space_images.length > 0"
-        class="space-y-2"
-      >
-        <div class="rounded-xl overflow-hidden aspect-video bg-muted">
-          <img
-            :src="activeImage"
-            :alt="space.title"
-            class="w-full h-full object-cover"
-          />
+          <template v-else-if="space">
+            <!-- Galería de imágenes -->
+            <div
+              v-if="space.space_images && space.space_images.length > 0"
+              class="space-y-2"
+            >
+              <div class="rounded-xl overflow-hidden aspect-video bg-muted">
+                <img
+                  :src="activeImage"
+                  :alt="space.title"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div
+                v-if="space.space_images.length > 1"
+                class="flex gap-2 overflow-x-auto pb-1"
+              >
+                <button
+                  v-for="img in space.space_images"
+                  :key="img.id"
+                  class="shrink-0 w-20 h-14 rounded-md overflow-hidden border-2 transition-colors"
+                  :class="
+                    activeImage === img.url
+                      ? 'border-primary'
+                      : 'border-transparent'
+                  "
+                  @click="activeImage = img.url"
+                >
+                  <img
+                    :src="img.url"
+                    :alt="space.title"
+                    class="w-full h-full object-cover"
+                  />
+                </button>
+              </div>
+            </div>
+            <div
+              v-else
+              class="rounded-xl bg-muted aspect-video flex items-center justify-center text-muted-foreground"
+            >
+              Sin imágenes
+            </div>
+
+            <!-- Info principal -->
+            <div class="space-y-2">
+              <div class="flex items-start gap-3 flex-wrap">
+                <h1 class="text-3xl font-semibold flex-1">{{ space.title }}</h1>
+                <Badge v-if="space.space_type" variant="secondary">
+                  {{ SPACE_TYPE_LABELS[space.space_type] ?? space.space_type }}
+                </Badge>
+              </div>
+              <p class="text-muted-foreground">
+                {{ [space.city, space.region].filter(Boolean).join(", ") }}
+              </p>
+              <div class="flex gap-4 text-sm text-muted-foreground flex-wrap">
+                <span v-if="space.capacity"
+                  >👥 Hasta {{ space.capacity }} personas</span
+                >
+                <span v-if="space.size_m2">📐 {{ space.size_m2 }} m²</span>
+                <span v-if="space.address">📍 {{ space.address }}</span>
+              </div>
+            </div>
+
+            <Separator />
+
+            <!-- Descripción -->
+            <div v-if="space.description" class="space-y-2">
+              <h2 class="text-lg font-semibold">Descripción</h2>
+              <p
+                class="text-muted-foreground leading-relaxed whitespace-pre-line"
+              >
+                {{ space.description }}
+              </p>
+            </div>
+
+            <!-- Facilidades -->
+            <div
+              v-if="space.space_amenities && space.space_amenities.length > 0"
+              class="space-y-3"
+            >
+              <h2 class="text-lg font-semibold">Facilidades</h2>
+              <SpaceAmenities
+                :space-amenities="space.space_amenities ?? []"
+                :amenity-list="amenityList"
+              />
+            </div>
+
+            <!-- Contacto -->
+            <div v-if="hasContact" class="space-y-3">
+              <h2 class="text-lg font-semibold">¿Tienes dudas? Contáctanos</h2>
+              <div class="flex flex-wrap gap-3">
+                <a
+                  v-if="contactEmail"
+                  :href="`mailto:${contactEmail}`"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
+                >
+                  <Mail class="w-4 h-4 text-blue-500 shrink-0" />
+                  {{ contactEmail }}
+                </a>
+                <a
+                  v-if="contactPhone"
+                  :href="`tel:${contactPhone}`"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
+                >
+                  <Phone class="w-4 h-4 text-green-500 shrink-0" />
+                  {{ contactPhone }}
+                </a>
+                <a
+                  v-if="contactWhatsapp"
+                  :href="whatsappUrl(contactWhatsapp)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
+                >
+                  <MessageCircle class="w-4 h-4 text-teal-500 shrink-0" />
+                  Escríbenos por WhatsApp
+                </a>
+              </div>
+            </div>
+
+            <!-- Ubicación en mapa -->
+            <div v-if="space.lat && space.lng" class="space-y-3">
+              <h2 class="text-lg font-semibold">Ubicación</h2>
+              <LocationMapPicker
+                :lat="space.lat"
+                :lng="space.lng"
+                :readonly="true"
+              />
+            </div>
+          </template>
         </div>
-        <div
-          v-if="space.space_images.length > 1"
-          class="flex gap-2 overflow-x-auto pb-1"
-        >
-          <button
-            v-for="img in space.space_images"
-            :key="img.id"
-            class="shrink-0 w-20 h-14 rounded-md overflow-hidden border-2 transition-colors"
-            :class="
-              activeImage === img.url ? 'border-primary' : 'border-transparent'
-            "
-            @click="activeImage = img.url"
-          >
-            <img
-              :src="img.url"
-              :alt="space.title"
-              class="w-full h-full object-cover"
-            />
-          </button>
-        </div>
-      </div>
-      <div
-        v-else
-        class="rounded-xl bg-muted aspect-video flex items-center justify-center text-muted-foreground"
-      >
-        Sin imágenes
-      </div>
+        <!-- availability -->
+        <div class="md:col-span-2">
+          <!-- loading -->
+          <div v-if="loading">
+            <div class="rounded-xl bg-muted animate-pulse aspect-video" />
+          </div>
 
-      <!-- Info principal -->
-      <div class="space-y-2">
-        <div class="flex items-start gap-3 flex-wrap">
-          <h1 class="text-3xl font-semibold flex-1">{{ space.title }}</h1>
-          <Badge v-if="space.space_type" variant="secondary">
-            {{ SPACE_TYPE_LABELS[space.space_type] ?? space.space_type }}
-          </Badge>
-        </div>
-        <p class="text-muted-foreground">
-          {{ [space.city, space.region].filter(Boolean).join(", ") }}
-        </p>
-        <div class="flex gap-4 text-sm text-muted-foreground flex-wrap">
-          <span v-if="space.capacity"
-            >👥 Hasta {{ space.capacity }} personas</span
-          >
-          <span v-if="space.size_m2">📐 {{ space.size_m2 }} m²</span>
-          <span v-if="space.address">📍 {{ space.address }}</span>
-        </div>
-      </div>
+          <!-- hola -->
+          <div v-if="space">
+            <Card class="shadow-none p-2">
+              <AvailabilityCalendar
+                :space-id="space.id"
+                :selected-date="selectedDate"
+                @select-date="onDateSelect"
+              />
+            </Card>
 
-      <Separator />
+            <div v-if="selectedDate" class="min-w-60 space-y-4">
+              <p class="text-sm text-muted-foreground">
+                {{ formatSelectedDate }}
+              </p>
+              <SlotSelector
+                :space-id="space.id"
+                :date="selectedDate"
+                :selected-block-id="selectedSlot?.blockId"
+                @select-slot="onSlotSelect"
+              />
 
-      <!-- Descripción -->
-      <div v-if="space.description" class="space-y-2">
-        <h2 class="text-lg font-semibold">Descripción</h2>
-        <p class="text-muted-foreground leading-relaxed whitespace-pre-line">
-          {{ space.description }}
-        </p>
-      </div>
-
-      <!-- Facilidades -->
-      <div
-        v-if="space.space_amenities && space.space_amenities.length > 0"
-        class="space-y-3"
-      >
-        <h2 class="text-lg font-semibold">Facilidades</h2>
-        <SpaceAmenities
-          :space-amenities="space.space_amenities ?? []"
-          :amenity-list="amenityList"
-        />
-      </div>
-
-      <!-- Contacto -->
-      <div v-if="hasContact" class="space-y-3">
-        <h2 class="text-lg font-semibold">¿Tienes dudas? Contáctanos</h2>
-        <div class="flex flex-wrap gap-3">
-          <a
-            v-if="contactEmail"
-            :href="`mailto:${contactEmail}`"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
-          >
-            <Mail class="w-4 h-4 text-blue-500 shrink-0" />
-            {{ contactEmail }}
-          </a>
-          <a
-            v-if="contactPhone"
-            :href="`tel:${contactPhone}`"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
-          >
-            <Phone class="w-4 h-4 text-green-500 shrink-0" />
-            {{ contactPhone }}
-          </a>
-          <a
-            v-if="contactWhatsapp"
-            :href="whatsappUrl(contactWhatsapp)"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm hover:bg-muted transition-colors"
-          >
-            <MessageCircle class="w-4 h-4 text-teal-500 shrink-0" />
-            Escríbenos por WhatsApp
-          </a>
-        </div>
-      </div>
-
-      <!-- Ubicación en mapa -->
-      <div v-if="space.lat && space.lng" class="space-y-3">
-        <h2 class="text-lg font-semibold">Ubicación</h2>
-        <LocationMapPicker :lat="space.lat" :lng="space.lng" :readonly="true" />
-      </div>
-
-      <Separator />
-
-      <!-- Sección de reserva -->
-      <div class="space-y-6">
-        <h2 class="text-lg font-semibold">Reservar</h2>
-
-        <div class="grid gap-8 md:grid-cols-[1fr_auto]">
-          <!-- Calendario -->
-          <AvailabilityCalendar
-            :space-id="space.id"
-            :selected-date="selectedDate"
-            @select-date="onDateSelect"
-          />
-
-          <!-- Selector de bloques -->
-          <div v-if="selectedDate" class="min-w-60 space-y-4">
-            <p class="text-sm text-muted-foreground">
-              {{ formatSelectedDate }}
-            </p>
-            <SlotSelector
-              :space-id="space.id"
-              :date="selectedDate"
-              :selected-block-id="selectedSlot?.blockId"
-              @select-slot="onSlotSelect"
-            />
-
-            <Button v-if="selectedSlot" class="w-full" @click="goToBooking">
-              Reservar este bloque →
-            </Button>
+              <Button v-if="selectedSlot" class="w-full" @click="goToBooking">
+                Reservar este bloque →
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </template>
-    <!-- ./old -->
+    </div>
   </div>
 </template>

@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { SearchIcon, SendIcon, PartyPopperIcon } from "lucide-vue-next";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import FeaturedSpacesGrid from "../components/FeaturedSpacesGrid.vue";
 import HeroSearch from "../components/HeroSearch.vue";
-import PlanItems from "../components/PlanItems.vue";
-import ProcessItem from "../components/ProcessItem.vue";
 </script>
 
 <template>
@@ -50,37 +47,72 @@ import ProcessItem from "../components/ProcessItem.vue";
       </div>
     </section>
 
-    <section>
-      <div class="container mx-auto px-4 sm:px-0">
+    <!-- process_items -->
+    <section class="mb-12 lg:mb-18">
+      <div class="container-wrap">
         <Card class="shadow-none border-0 bg-black text-white">
-          <CardContent class="grid gap-9">
-            <h3 class="text-xl/6 lg:text-3xl font-bold">Reservar es simple</h3>
-            <div class="grid gap-9 lg:grid-cols-3 lg:gap-12">
-              <ProcessItem
-                :icon="SearchIcon"
-                title="Explora y elige"
-                subtitle="Filtra por ciudad, tipo y fecha. Revisa fotos, amenities y disponibilidad en tiempo real."
-                badge="Buscando.."
-              />
-              <ProcessItem
-                :icon="SendIcon"
-                title="Envía tu solicitud"
-                subtitle="Selecciona el bloque horario y completa el formulario. Sin registro, sin fricción."
-                badge="Reservado"
-              />
-              <ProcessItem
-                :icon="PartyPopperIcon"
-                title="Coordina y confirma"
-                subtitle="El anfitrión te contacta para coordinar. Una vez confirmado, el espacio es tuyo."
-                badge="Confirmado"
-              />
-            </div>
+          <CardContent>
+            <!-- top -->
+            <header
+              class="grid gap-2 border-b border-neutral-700 pb-4 md:pb-8 md:pt-6"
+            >
+              <Badge
+                variant="outline"
+                class="border-neutral-700 text-neutral-300 font-mono"
+                >Así Funciona</Badge
+              >
+              <h3 class="font-heading text-2xl md:text-5xl">
+                Reservar es
+                <span class="text-violet-600 font-semibold">Fun</span>
+              </h3>
+            </header>
+            <!-- items -->
+            <ul
+              class="grid md:grid-cols-3 pt-4 md:pt-12 gap-6 md:gap-12 pb-6 md:pb-12"
+            >
+              <li class="grid gap-2">
+                <p class="font-mono text-xs text-violet-300 font-medium">
+                  01 / ELIGE
+                </p>
+                <h5 class="font-heading font-semibold text-2xl">
+                  Explora solo donde te interesa.
+                </h5>
+                <p class="text-neutral-400">
+                  Ubicación, capacidad, facilidades. Solo lo que nos importa
+                  para encontrar el lugar perfecto.
+                </p>
+              </li>
+              <li class="grid gap-2">
+                <p class="font-mono text-xs text-violet-300 font-medium">
+                  02 / RESERVA
+                </p>
+                <h5 class="font-heading font-semibold text-2xl">
+                  Ves la disponibilidad real.
+                </h5>
+                <p class="text-neutral-400">
+                  Calendario actualizado. Si está verde, está disponible. Sin
+                  sorpresas.
+                </p>
+              </li>
+              <li class="grid gap-2">
+                <p class="font-mono text-xs text-violet-300 font-medium">
+                  03 / DISFRUTA
+                </p>
+                <h5 class="font-heading font-semibold text-2xl">
+                  La fiesta es tuya.
+                </h5>
+                <p class="text-neutral-400">
+                  Reserva inmediata, el lugar recibe notificación y te
+                  contactará. Sin complicaciones.
+                </p>
+              </li>
+            </ul>
           </CardContent>
         </Card>
       </div>
     </section>
 
-    <section class="lg:py-[60px]">
+    <section>
       <div
         class="container mx-auto px-4 sm:px-0 grid lg:grid-cols-2 gap-9 lg:gap-20"
       >

@@ -8,8 +8,9 @@
       style="height: 300px"
     >
       <div ref="mapContainer" class="w-full h-full" />
-      <!-- Pin fijo en el centro del mapa (estilo Uber) -->
+      <!-- Pin CSS centrado: solo en modo edición (estilo Uber) -->
       <div
+        v-if="!readonly"
         class="absolute inset-0 flex items-center justify-center pointer-events-none"
         style="padding-bottom: 28px; z-index: 1000"
       >
@@ -39,8 +40,20 @@
       rel="noopener noreferrer"
       class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
       </svg>
       Ver en Google Maps
     </a>
@@ -49,8 +62,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from "vue";
-import type { Map as LeafletMap } from "leaflet";
-import "leaflet/dist/leaflet.css";
+import type { Map as MaplibreMap, Marker } from "maplibre-gl";
 
 const props = defineProps<{
   lat: number | null;
@@ -64,10 +76,8 @@ const emit = defineEmits<{
 }>();
 
 const mapContainer = ref<HTMLElement | null>(null);
-let map: LeafletMap | null = null;
-
-// Flag para evitar emitir cuando movemos el mapa programáticamente
-let isExternalUpdate = false;
+let map: MaplibreMap | null = null;
+let marker: Marker | null = null;
 
 const displayLat = ref(props.lat?.toFixed(6) ?? "");
 const displayLng = ref(props.lng?.toFixed(6) ?? "");
@@ -75,32 +85,41 @@ const displayLng = ref(props.lng?.toFixed(6) ?? "");
 async function initMap() {
   if (!mapContainer.value || props.lat === null || props.lng === null) return;
 
-  const L = (await import("leaflet")).default;
+  const maplibregl = (await import("maplibre-gl")).default;
+  await import("maplibre-gl/dist/maplibre-gl.css");
 
-  map = L.map(mapContainer.value, {
-    center: [props.lat, props.lng],
+  map = new maplibregl.Map({
+    container: mapContainer.value,
+    style: "https://tiles.openfreemap.org/styles/bright",
+    center: [props.lng, props.lat],
     zoom: 16,
-    zoomControl: !props.readonly,
-    dragging: !props.readonly,
-    scrollWheelZoom: !props.readonly,
-    doubleClickZoom: !props.readonly,
-    touchZoom: !props.readonly,
-    keyboard: !props.readonly,
+    dragRotate: false,
+    pitchWithRotate: false,
+    touchPitch: false,
+    attributionControl: false,
+    cooperativeGestures: true,
   });
 
-  L.tileLayer(
-    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-    {
-      attribution:
-        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-    },
-  ).addTo(map);
+  map.addControl(new maplibregl.AttributionControl({ compact: true }));
 
-  // Solo registrar moveend en modo edición
-  if (!props.readonly) {
-    map.on("moveend", () => {
-      if (isExternalUpdate || !map) return;
+  map.on("styleimagemissing", (e) => {
+    map!.addImage(e.id, { width: 1, height: 1, data: new Uint8Array(4) });
+  });
+
+  map.addControl(
+    new maplibregl.NavigationControl({ showCompass: false }),
+    "top-right",
+  );
+
+  if (props.readonly) {
+    // Marker real fijado en las coordenadas — el usuario puede navegar libremente
+    marker = new maplibregl.Marker({ color: "#ef4444" })
+      .setLngLat([props.lng, props.lat])
+      .addTo(map);
+  } else {
+    // Pin CSS centrado (Uber-style): moveend actualiza coordenadas
+    map.on("moveend", (e) => {
+      if (!e.originalEvent || !map) return;
       const center = map.getCenter();
       displayLat.value = center.lat.toFixed(6);
       displayLng.value = center.lng.toFixed(6);
@@ -116,8 +135,6 @@ onMounted(async () => {
   }
 });
 
-// flush: 'post' garantiza que el watch corre DESPUÉS de que Vue actualizó el DOM,
-// por lo que mapContainer.value ya existe cuando initMap() lo necesita.
 watch(
   () => [props.lat, props.lng] as [number | null, number | null],
   async ([newLat, newLng]) => {
@@ -127,22 +144,21 @@ watch(
     displayLng.value = newLng.toFixed(6);
 
     if (!map) {
-      // Primera vez que tenemos coordenadas — DOM ya actualizado con flush 'post'
       await initMap();
       return;
     }
 
-    // Ya existe el mapa — volar al nuevo centro sin emitir
-    isExternalUpdate = true;
-    map.setView([newLat, newLng], 16);
-    setTimeout(() => {
-      isExternalUpdate = false;
-    }, 300);
+    // En edición: recentra el mapa (sin emitir, jumpTo no genera originalEvent)
+    // En readonly: reposiciona el marker y recentra
+    if (marker) marker.setLngLat([newLng, newLat]);
+    map.jumpTo({ center: [newLng, newLat] });
   },
   { flush: "post" },
 );
 
 onUnmounted(() => {
+  marker?.remove();
+  marker = null;
   if (map) {
     map.remove();
     map = null;

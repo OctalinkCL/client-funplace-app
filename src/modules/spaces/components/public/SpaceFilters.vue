@@ -1,44 +1,61 @@
 <template>
-  <Card class="shadow-none p-0 grid grid-cols-2">
+  <div class="grid gap-3">
     <!-- Región -->
-    <div class="space-y-1">
-      <label class="text-sm font-medium">Región</label>
-      <div v-if="loading" class="h-9 w-44 animate-pulse rounded-md bg-muted" />
-      <select
+    <div>
+      <div
+        v-if="loading"
+        class="h-9 w-full animate-pulse rounded-md bg-muted"
+      />
+      <Select
         v-else
-        :value="region"
-        class=""
-        @change="onRegionChange(($event.target as HTMLSelectElement).value)"
+        class="mb-0!"
+        :model-value="region || undefined"
+        @update:model-value="onRegionChange(($event as string) ?? '')"
       >
-        <option value="" disabled>Selecciona una región</option>
-        <option v-for="r in regions" :key="r" :value="r">{{ r }}</option>
-      </select>
+        <SelectTrigger class="w-full">
+          <SelectValue placeholder="Selecciona una región" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem v-for="r in regions" :key="r" :value="r">{{
+            r
+          }}</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
 
     <!-- Ciudad -->
-    <div class="space-y-1">
-      <label class="text-sm font-medium">Ciudad</label>
-      <div v-if="loading" class="h-9 w-36 animate-pulse rounded-md bg-muted" />
-      <select
+    <div>
+      <div
+        v-if="loading"
+        class="h-9 w-full animate-pulse rounded-md bg-muted"
+      />
+      <Select
         v-else
-        :value="city"
         :disabled="!region"
-        class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
-        @change="
-          $emit('update:city', ($event.target as HTMLSelectElement).value)
-        "
+        :model-value="city || undefined"
+        @update:model-value="$emit('update:city', ($event as string) ?? '')"
       >
-        <option value="">Todas las ciudades</option>
-        <option v-for="c in availableCities" :key="c" :value="c">
-          {{ c }}
-        </option>
-      </select>
+        <SelectTrigger class="w-full">
+          <SelectValue placeholder="Todas las ciudades" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem v-for="c in availableCities" :key="c" :value="c">{{
+            c
+          }}</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
-  </Card>
+  </div>
 </template>
 
 <script setup lang="ts">
-import Card from "@/components/ui/card/Card.vue";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { computed, onMounted } from "vue";
 import { useLocationFilters } from "../../composables/useLocationFilters";
 

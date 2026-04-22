@@ -71,6 +71,7 @@ function handleSearch() {
         <Button
           v-if="!isMobile"
           class="bg-violet-700 md:col-span-1 h-12 rounded-full"
+          :disabled="!searchRegion"
           @click="handleSearch"
         >
           ¡Vamos!
@@ -80,10 +81,11 @@ function handleSearch() {
     <!-- mobile_button -->
     <Button
       v-if="isMobile"
+      :disabled="!searchRegion"
       @click="handleSearch"
       class="bg-violet-700 h-12 rounded-full"
     >
-      ¡Vamos!
+      {{ searchRegion ? "Vamos por tu espacio" : "Selecciona una región" }}
     </Button>
   </div>
 </template>

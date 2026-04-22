@@ -11,6 +11,9 @@
       {{ error }}
     </p>
 
+    <!-- Stats -->
+    <BookingStats />
+
     <!-- Filtro por espacio (persiste entre tabs) -->
     <div class="mb-5">
       <Select v-model="filterSpaceId" @update:model-value="onSpaceChange">
@@ -169,6 +172,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import MonthNavigator from '../../components/admin/MonthNavigator.vue'
 import BookingCard from '../../components/admin/BookingCard.vue'
+import BookingStats from '../../components/admin/BookingStats.vue'
 import type { Space, BookingStatus } from '@/types'
 
 const authStore = useAuthStore()

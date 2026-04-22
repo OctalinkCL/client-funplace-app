@@ -136,6 +136,12 @@ export const bookingsService = {
     return { emailSent }
   },
 
+  async getStats(year: number): Promise<{ total: number; monthly: { month: number; count: number }[] }> {
+    const { data, error } = await supabase.rpc('get_booking_stats', { year_param: year })
+    if (error) throw error
+    return { total: Number(data.total), monthly: data.monthly ?? [] }
+  },
+
   // Cancela en bulk los PENDINGs cuya fecha ya pasó (sin email — nadie los lee)
   async cancelExpiredPending(bookingIds: string[]): Promise<void> {
     if (bookingIds.length === 0) return

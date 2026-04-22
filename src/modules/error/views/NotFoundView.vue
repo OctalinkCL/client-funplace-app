@@ -1,10 +1,42 @@
+<script setup lang="ts">
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Button } from "@/components/ui/button";
+import { RouterLink } from "vue-router";
+</script>
+
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center gap-4 text-center">
-    <p class="text-7xl font-bold text-muted-foreground">404</p>
-    <h1 class="text-2xl font-semibold">Página no encontrada</h1>
-    <p class="text-muted-foreground">La URL que ingresaste no existe.</p>
-    <RouterLink to="/" class="text-sm underline underline-offset-4">
-      Volver al inicio
-    </RouterLink>
+  <div class="flex items-center justify-center h-dvh">
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia variant="default">
+          <Avatar class="size-30">
+            <AvatarImage
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzCJNVA_pAOtijM-kCJeo7a-SaLk2XcBOFbg&s"
+              class="object-cover"
+            />
+          </Avatar>
+        </EmptyMedia>
+        <EmptyTitle>404 - No Encontrada</EmptyTitle>
+        <EmptyDescription>
+          La página que estás buscando no existe. Intenta buscar lo que
+          necesitas a continuación.
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button class="rounded-full min-w-xs" as-child>
+          <RouterLink to="/">
+            <span>Regresar</span>
+          </RouterLink>
+        </Button>
+      </EmptyContent>
+    </Empty>
   </div>
 </template>

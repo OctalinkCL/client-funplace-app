@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { MapPin } from "lucide-vue-next";
 import { spacesService } from "../../services/spaces.service";
 import SpaceCard from "../../components/public/SpaceCard.vue";
@@ -95,8 +95,16 @@ async function fetchSpaces() {
 }
 
 const route = useRoute();
+const router = useRouter();
 
 watch(filters, () => {
+  router.replace({
+    query: {
+      region: filters.region || undefined,
+      city: filters.city || undefined,
+    },
+  });
+
   if (!filters.region) {
     spaces.value = [];
     return;

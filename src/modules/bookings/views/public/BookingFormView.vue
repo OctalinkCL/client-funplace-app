@@ -89,6 +89,7 @@ import { Button } from '@/components/ui/button'
 import BookingSuccess from '../../components/public/BookingSuccess.vue'
 import BookingUnavailable from '../../components/public/BookingUnavailable.vue'
 import type { Space, SimpleSlot } from '@/types'
+import { MONTHS_ES_LOWER, DAYS_ES } from '@/constants/bookings'
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -106,8 +107,6 @@ const submitError = ref<string | null>(null)
 const form = reactive({ name: '', email: '', phone: '', notes: '' })
 const honeypot = ref('')
 
-const MONTHS_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-const DAYS_ES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
 
 function isValidDate(s: string) { return /^\d{4}-\d{2}-\d{2}$/.test(s) }
 function isValidUUID(s: string) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) }
@@ -116,7 +115,7 @@ const formattedDate = computed(() => {
   if (!date) return ''
   const [y, m, d] = date.split('-').map(Number)
   const dt = new Date(Date.UTC(y, m - 1, d))
-  return `${DAYS_ES[dt.getUTCDay()]} ${d} de ${MONTHS_ES[m - 1]} ${y}`
+  return `${DAYS_ES[dt.getUTCDay()]} ${d} de ${MONTHS_ES_LOWER[m - 1]} ${y}`
 })
 
 async function submitBooking() {

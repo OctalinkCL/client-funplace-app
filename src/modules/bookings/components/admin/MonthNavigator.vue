@@ -18,6 +18,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { MONTHS_ES } from '@/constants/bookings'
 
 const props = defineProps<{
   year: number
@@ -27,8 +28,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   change: [year: number, month: number]
 }>()
-
-const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 
 const label = computed(() => `${MONTHS_ES[props.month]} ${props.year}`)
 

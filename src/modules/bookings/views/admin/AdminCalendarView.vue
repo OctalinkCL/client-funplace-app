@@ -332,6 +332,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import type { WeeklySchedule, SimpleSlot, BookingStatus } from '@/types'
+import { MONTHS_ES, MONTHS_ES_LOWER, DAYS_ES } from '@/constants/bookings'
 
 const route = useRoute()
 const router = useRouter()
@@ -374,9 +375,6 @@ const bookingForm = reactive({ name: '', email: '', phone: '', notes: '' })
 const bookingSubmitting = ref(false)
 const bookingError = ref<string | null>(null)
 
-const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
-const MONTHS_ES_LOWER = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-const DAYS_ES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
 const DAY_LABELS = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do']
 
 const SLOT_STATUS_LABELS: Record<string, string> = {

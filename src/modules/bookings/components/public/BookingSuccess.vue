@@ -3,7 +3,10 @@
     <div class="text-4xl">✅</div>
     <h2 class="text-xl font-semibold">¡Solicitud enviada!</h2>
     <div class="rounded-lg border bg-muted/40 px-5 py-4 space-y-1 text-sm text-left">
-      <p class="font-semibold text-base">{{ spaceName }}</p>
+      <div class="flex items-center justify-between">
+        <p class="font-semibold text-base">{{ spaceName }}</p>
+        <span v-if="bookingNumber != null" class="text-xs text-muted-foreground font-mono">#{{ String(bookingNumber).padStart(6, '0') }}</span>
+      </div>
       <p class="text-muted-foreground">📅 {{ date }}</p>
       <p class="text-muted-foreground">🕐 {{ blockName }} · {{ timeRange }}</p>
     </div>
@@ -25,5 +28,6 @@ defineProps<{
   date: string
   blockName: string
   timeRange: string
+  bookingNumber?: number | null
 }>()
 </script>

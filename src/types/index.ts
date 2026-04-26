@@ -120,6 +120,7 @@ export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
 
 export interface Booking {
   id: string
+  booking_number: number
   space_id: string
   block_id: string | null
   date: string

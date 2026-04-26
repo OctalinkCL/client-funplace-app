@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     .from("bookings")
     .select(
       `
-      id, date, block_name, start_time, end_time,
+      id, booking_number, date, block_name, start_time, end_time,
       customer_name, customer_email, customer_phone, notes,
       spaces (title, admin_id,
         profiles:admin_id (full_name)
@@ -74,6 +74,7 @@ Deno.serve(async (req) => {
   const space = booking.spaces as any;
   const adminProfile = space?.profiles as any;
   const spaceTitle = escapeHtml(space?.title ?? "el espacio");
+  const bookingRef = `#${String(booking.booking_number).padStart(6, "0")}`;
   const customerName = escapeHtml(booking.customer_name);
   const customerEmail = escapeHtml(booking.customer_email);
   const customerPhone = booking.customer_phone ? escapeHtml(booking.customer_phone) : null;
@@ -107,6 +108,7 @@ Deno.serve(async (req) => {
           subject: `Nueva reserva — ${spaceTitle}`,
           html: `
             <h2>Nueva solicitud de reserva</h2>
+            <p><strong>Reserva:</strong> ${bookingRef}</p>
             <p><strong>Espacio:</strong> ${spaceTitle}</p>
             <p><strong>Fecha:</strong> ${formattedDate}</p>
             <p><strong>Horario:</strong> ${blockName} (${timeRange})</p>
@@ -128,6 +130,7 @@ Deno.serve(async (req) => {
         html: `
           <h2>¡Recibimos tu solicitud!</h2>
           <p>Hola ${customerName}, tu solicitud de reserva fue enviada correctamente.</p>
+          <p><strong>Reserva:</strong> ${bookingRef}</p>
           <p><strong>Espacio:</strong> ${spaceTitle}</p>
           <p><strong>Fecha:</strong> ${formattedDate}</p>
           <p><strong>Horario:</strong> ${blockName} (${timeRange})</p>
@@ -145,6 +148,7 @@ Deno.serve(async (req) => {
         html: `
           <h2>¡Tu reserva fue confirmada!</h2>
           <p>Hola ${customerName}, tu reserva quedó confirmada.</p>
+          <p><strong>Reserva:</strong> ${bookingRef}</p>
           <p><strong>Espacio:</strong> ${spaceTitle}</p>
           <p><strong>Fecha:</strong> ${formattedDate}</p>
           <p><strong>Horario:</strong> ${blockName} (${timeRange})</p>
@@ -162,6 +166,7 @@ Deno.serve(async (req) => {
         html: `
           <h2>Tu reserva fue cancelada</h2>
           <p>Hola ${customerName}, lamentamos informarte que tu reserva fue cancelada.</p>
+          <p><strong>Reserva:</strong> ${bookingRef}</p>
           <p><strong>Espacio:</strong> ${spaceTitle}</p>
           <p><strong>Fecha:</strong> ${formattedDate}</p>
           <p><strong>Horario:</strong> ${blockName} (${timeRange})</p>

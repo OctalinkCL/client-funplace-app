@@ -30,15 +30,15 @@ function today(): string {
 }
 
 export const bookingsService = {
-  async create(payload: CreateBookingPayload): Promise<string> {
+  async create(payload: CreateBookingPayload): Promise<{ id: string; booking_number: number }> {
     const { data, error } = await supabase
       .from('bookings')
       .insert(payload)
-      .select('id')
+      .select('id, booking_number')
       .single()
     if (error) throw error
     sendBookingEmail(data.id, 'created')
-    return data.id
+    return data
   },
 
   // Tab 1: "Por atender" — todos los PENDING, sin filtro de fecha

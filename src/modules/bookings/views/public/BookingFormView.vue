@@ -24,6 +24,7 @@
       :date="formattedDate"
       :block-name="slot.blockName"
       :time-range="`${slot.startTime} – ${slot.endTime}`"
+      :booking-number="createdBookingNumber"
     />
 
     <!-- Formulario -->
@@ -106,6 +107,7 @@ const submitError = ref<string | null>(null)
 
 const form = reactive({ name: '', email: '', phone: '', notes: '' })
 const honeypot = ref('')
+const createdBookingNumber = ref<number | null>(null)
 
 
 function isValidDate(s: string) { return /^\d{4}-\d{2}-\d{2}$/.test(s) }
@@ -130,7 +132,7 @@ async function submitBooking() {
       slotUnavailable.value = true
       return
     }
-    await bookingsService.create({
+    const result = await bookingsService.create({
       space_id: space.value.id,
       block_id: slot.value.blockId,
       date,
@@ -142,6 +144,7 @@ async function submitBooking() {
       customer_phone: form.phone || null,
       notes: form.notes || null,
     })
+    createdBookingNumber.value = result.booking_number
     submitted.value = true
   } catch (e: any) {
     if (e?.code === '23505') {

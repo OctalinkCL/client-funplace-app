@@ -47,7 +47,10 @@ function statusBadgeClass(status: BookingStatus) {
   >
     <!-- Fila 1: espacio + badges -->
     <div class="flex items-center justify-between gap-2 flex-wrap">
-      <p class="font-semibold text-sm">{{ booking.spaces?.title ?? "—" }}</p>
+      <div class="flex items-center gap-2">
+        <p class="font-semibold text-sm">{{ booking.spaces?.title ?? "—" }}</p>
+        <span class="text-xs text-muted-foreground font-mono">#{{ String(booking.booking_number).padStart(6, '0') }}</span>
+      </div>
       <div class="flex items-center gap-1.5">
         <Badge
           v-if="expired"

@@ -47,7 +47,7 @@ export async function getSlotsForDate(spaceId: string, date: string, publicOnly 
   // En vista admin (publicOnly=false) traemos también las CANCELLED para permitir reactivar
   let bookingsQuery = supabase
     .from('bookings')
-    .select(publicOnly ? 'block_id, status' : '*')
+    .select('*')
     .eq('space_id', spaceId)
     .eq('date', date)
     .in('block_id', assignedBlockIds)

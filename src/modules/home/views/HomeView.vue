@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import FeaturedSpacesGrid from "../components/FeaturedSpacesGrid.vue";
 import HeroSearch from "../components/HeroSearch.vue";
+import PlanItems from "../components/PlanItems.vue";
 </script>
 
 <template>

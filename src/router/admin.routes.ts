@@ -24,16 +24,6 @@ export const adminRoutes: RouteRecordRaw[] = [
         component: () => import('@/modules/spaces/views/admin/AdminSpacesView.vue'),
       },
       {
-        path: 'espacios/nuevo',
-        name: 'admin-space-new',
-        component: () => import('@/modules/spaces/views/admin/AdminSpaceFormView.vue'),
-      },
-      {
-        path: 'espacios/:id/editar',
-        name: 'admin-space-edit',
-        component: () => import('@/modules/spaces/views/admin/AdminSpaceFormView.vue'),
-      },
-      {
         path: 'espacios/:id',
         name: 'admin-space-detail',
         component: () => import('@/modules/spaces/views/admin/AdminSpaceDetailView.vue'),
@@ -42,16 +32,6 @@ export const adminRoutes: RouteRecordRaw[] = [
         path: 'espacios/:id/disponibilidad',
         name: 'admin-availability',
         component: () => import('@/modules/availability/views/admin/AdminAvailabilityView.vue'),
-      },
-      {
-        path: 'servicios/nuevo',
-        name: 'admin-service-new',
-        component: () => import('@/modules/spaces/views/admin/AdminServiceFormView.vue'),
-      },
-      {
-        path: 'servicios/:id/editar',
-        name: 'admin-service-edit',
-        component: () => import('@/modules/spaces/views/admin/AdminServiceFormView.vue'),
       },
       {
         path: 'perfil',

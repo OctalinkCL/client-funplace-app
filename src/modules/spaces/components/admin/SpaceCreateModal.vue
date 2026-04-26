@@ -59,13 +59,38 @@
                 placeholder="Describe el espacio brevemente..." rows="3" />
             </div>
 
-            <!-- Ubicación -->
-            <PlaceSearchInput @place-selected="applyPlaceData" />
-            <div v-if="form.address" class="text-xs text-muted-foreground -mt-3">
-              <span class="font-medium text-foreground">Región:</span> {{ form.region }}
-              <span class="mx-1">·</span>
-              <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
+            <!-- Región / Ciudad -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <Label>Región</Label>
+                <Select v-model="form.region" @update:modelValue="form.city = null">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona región" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem v-for="r in CHILE_REGIONS" :key="r.name" :value="r.name">
+                      {{ r.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div class="space-y-1.5">
+                <Label>Ciudad / Comuna</Label>
+                <Select v-model="form.city" :disabled="!form.region">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona ciudad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem v-for="c in communesForSelectedRegion" :key="c" :value="c">
+                      {{ c }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+
+            <!-- Dirección -->
+            <PlaceSearchInput @place-selected="applyPlaceData" />
             <LocationMapPicker
               :lat="form.lat"
               :lng="form.lng"
@@ -91,10 +116,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { X } from 'lucide-vue-next'
 import { useSpaceForm } from '../../composables/useSpaceForm'
 import { SPACE_TYPE_LIST } from '@/constants/spaces'
+import { CHILE_REGIONS } from '@/constants/regions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -112,6 +138,10 @@ const emit = defineEmits<{
 }>()
 
 const { form, loading, error, applyPlaceData, submit } = useSpaceForm()
+
+const communesForSelectedRegion = computed(() =>
+  CHILE_REGIONS.find(r => r.name === form.region)?.communes ?? []
+)
 
 const capacityStr = ref('')
 const sizeStr = ref('')

@@ -64,6 +64,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { getAvailableDatesInMonth } from '../../../bookings/composables/useSlots'
+import { MONTHS_ES } from '@/constants/bookings'
 
 const props = defineProps<{
   spaceId: string
@@ -72,7 +73,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{ 'select-date': [date: string] }>()
 
-const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 const DAY_LABELS = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do']
 
 const today = new Date()

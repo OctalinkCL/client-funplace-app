@@ -69,6 +69,7 @@ export interface Space {
     contact_email: string | null
     contact_phone: string | null
     contact_whatsapp: string | null
+    full_name: string | null
   } | null
 }
 
@@ -119,6 +120,7 @@ export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
 
 export interface Booking {
   id: string
+  booking_number: number
   space_id: string
   block_id: string | null
   date: string
@@ -173,7 +175,7 @@ export interface CreateBookingPayload {
   notes?: string | null
 }
 
-export type SlotStatus = 'AVAILABLE' | 'BLOCKED' | 'PENDING' | 'CONFIRMED'
+export type SlotStatus = 'AVAILABLE' | 'BLOCKED' | 'PENDING' | 'CONFIRMED' | 'CANCELLED'
 
 export interface SimpleSlot {
   blockId: string

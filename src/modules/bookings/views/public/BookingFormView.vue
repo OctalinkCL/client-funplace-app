@@ -24,6 +24,7 @@
       :date="formattedDate"
       :block-name="slot.blockName"
       :time-range="`${slot.startTime} – ${slot.endTime}`"
+      :booking-number="createdBookingNumber"
     />
 
     <!-- Formulario -->
@@ -89,6 +90,7 @@ import { Button } from '@/components/ui/button'
 import BookingSuccess from '../../components/public/BookingSuccess.vue'
 import BookingUnavailable from '../../components/public/BookingUnavailable.vue'
 import type { Space, SimpleSlot } from '@/types'
+import { MONTHS_ES_LOWER, DAYS_ES } from '@/constants/bookings'
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -105,9 +107,8 @@ const submitError = ref<string | null>(null)
 
 const form = reactive({ name: '', email: '', phone: '', notes: '' })
 const honeypot = ref('')
+const createdBookingNumber = ref<number | null>(null)
 
-const MONTHS_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-const DAYS_ES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
 
 function isValidDate(s: string) { return /^\d{4}-\d{2}-\d{2}$/.test(s) }
 function isValidUUID(s: string) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s) }
@@ -116,7 +117,7 @@ const formattedDate = computed(() => {
   if (!date) return ''
   const [y, m, d] = date.split('-').map(Number)
   const dt = new Date(Date.UTC(y, m - 1, d))
-  return `${DAYS_ES[dt.getUTCDay()]} ${d} de ${MONTHS_ES[m - 1]} ${y}`
+  return `${DAYS_ES[dt.getUTCDay()]} ${d} de ${MONTHS_ES_LOWER[m - 1]} ${y}`
 })
 
 async function submitBooking() {
@@ -131,7 +132,7 @@ async function submitBooking() {
       slotUnavailable.value = true
       return
     }
-    await bookingsService.create({
+    const result = await bookingsService.create({
       space_id: space.value.id,
       block_id: slot.value.blockId,
       date,
@@ -143,9 +144,14 @@ async function submitBooking() {
       customer_phone: form.phone || null,
       notes: form.notes || null,
     })
+    createdBookingNumber.value = result.booking_number
     submitted.value = true
-  } catch (e) {
-    submitError.value = e instanceof Error ? e.message : 'Error al enviar la solicitud. Intenta de nuevo.'
+  } catch (e: any) {
+    if (e?.code === '23505') {
+      slotUnavailable.value = true
+    } else {
+      submitError.value = 'Error al enviar la solicitud. Intenta de nuevo.'
+    }
   } finally {
     submitting.value = false
   }
@@ -153,6 +159,12 @@ async function submitBooking() {
 
 onMounted(async () => {
   if (!date || !blockId || !isValidDate(date) || !isValidUUID(blockId)) {
+    slotUnavailable.value = true
+    return
+  }
+  const [y, m, d] = date.split('-').map(Number)
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  if (new Date(y, m - 1, d) < today) {
     slotUnavailable.value = true
     return
   }

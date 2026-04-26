@@ -3,10 +3,8 @@
     :to="{ name: 'space-detail', params: { slug: space.slug } }"
     class="group"
   >
-    <Card
-      class="p-1.5 h-full bg-gray-100 border-0 shadow-none gap-2 group-hover:shadow-xl shadow-violet-400/20 transition-shadow duration-300"
-    >
-      <!-- Imagen -->
+    <Card class="p-1 h-full bg-gray-100 border-0 shadow-none gap-2">
+      <!-- imagen -->
       <div class="aspect-4/3 overflow-hidden bg-muted rounded-lg relative">
         <img
           v-if="coverImage"
@@ -20,22 +18,21 @@
         >
           Sin imagen
         </div>
-
+        <!-- :class="{ 'bg-violet-700/70': space.kind === 'space' }" -->
         <div class="absolute top-2 left-2">
-          <Badge
-            v-if="space.space_type"
-            :class="{ 'bg-violet-700/70': space.kind === 'space' }"
-          >
-            <span class="font-semibold">{{
+          <Badge class="bg-white" v-if="space.space_type">
+            <span class="font-mono text-black">{{
               SPACE_TYPE_LABELS[space.space_type] ?? space.space_type
             }}</span>
           </Badge>
         </div>
       </div>
-
+      <!-- info -->
       <div class="bg-white rounded-lg p-2 flex-1 flex flex-col">
         <div class="flex justify-between items-start">
-          <h4 class="font-semibold text-base">{{ space.title }}</h4>
+          <h4 class="font-heading text-xl font-semibold">
+            {{ space.title }}
+          </h4>
           <Badge variant="outline">
             <UsersIcon class="w-4 h-4 mr-1" />
             {{ space.capacity }}

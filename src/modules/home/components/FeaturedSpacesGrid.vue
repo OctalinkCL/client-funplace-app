@@ -2,7 +2,6 @@
   <div class="space-y-12">
     <!-- Espacios Destacados -->
     <div>
-      <h3 class="text-xl font-semibold mb-6">Espacios Destacados</h3>
       <div v-if="loading" class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div
           v-for="n in 4"
@@ -20,7 +19,6 @@
 
     <!-- Servicios Destacados -->
     <div v-if="!loading && servicios.length">
-      <h3 class="text-xl font-semibold mb-6">Servicios Destacados</h3>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
         <SpaceCard
           v-for="service in servicios"

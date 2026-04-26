@@ -49,13 +49,38 @@
                 placeholder="Describe el servicio brevemente..." rows="3" />
             </div>
 
+            <!-- Región / Ciudad -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <Label>Región</Label>
+                <Select v-model="form.region" @update:modelValue="form.city = null">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona región" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem v-for="r in CHILE_REGIONS" :key="r.name" :value="r.name">
+                      {{ r.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div class="space-y-1.5">
+                <Label>Ciudad / Comuna</Label>
+                <Select v-model="form.city" :disabled="!form.region">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona ciudad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem v-for="c in communesForSelectedRegion" :key="c" :value="c">
+                      {{ c }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <!-- Dirección -->
             <PlaceSearchInput @place-selected="applyPlaceData" />
-            <div v-if="form.address" class="text-xs text-muted-foreground -mt-3">
-              <span class="font-medium text-foreground">Región:</span> {{ form.region }}
-              <span class="mx-1">·</span>
-              <span class="font-medium text-foreground">Ciudad:</span> {{ form.city }}
-            </div>
             <LocationMapPicker
               :lat="form.lat"
               :lng="form.lng"
@@ -81,10 +106,11 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
+import { watch, computed } from 'vue'
 import { X } from 'lucide-vue-next'
 import { useServiceForm } from '../../composables/useServiceForm'
 import { SERVICE_TYPES } from '@/constants/plans'
+import { CHILE_REGIONS } from '@/constants/regions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -102,6 +128,10 @@ const emit = defineEmits<{
 }>()
 
 const { form, loading, error, applyPlaceData, submit } = useServiceForm()
+
+const communesForSelectedRegion = computed(() =>
+  CHILE_REGIONS.find(r => r.name === form.region)?.communes ?? []
+)
 
 watch(() => props.open, (val) => {
   if (val) {

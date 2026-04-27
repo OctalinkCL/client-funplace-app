@@ -21,98 +21,159 @@
     </div>
 
     <div v-else class="grid gap-6 lg:grid-cols-[1fr_360px]">
-      <!-- Calendario -->
-      <div class="space-y-3">
-        <!-- Cabecera del mes -->
-        <div class="flex items-center justify-between">
-          <button
-            class="p-1.5 rounded-md hover:bg-muted transition-colors disabled:opacity-30"
-            :disabled="isPrevMonthDisabled"
-            @click="prevMonth"
-          >
-            ←
-          </button>
-          <span class="font-semibold text-sm">{{ MONTHS_ES[month] }} {{ year }}</span>
-          <button class="p-1.5 rounded-md hover:bg-muted transition-colors" @click="nextMonth">
-            →
-          </button>
-        </div>
+      <!-- Calendario / Semana -->
+      <Tabs v-model="activeView" class="space-y-3">
+        <TabsList>
+          <TabsTrigger value="month">Mensual</TabsTrigger>
+          <TabsTrigger value="week">Semanal</TabsTrigger>
+        </TabsList>
 
-        <!-- Días de la semana -->
-        <div class="grid grid-cols-7 text-center text-xs text-muted-foreground font-medium">
-          <span v-for="d in DAY_LABELS" :key="d">{{ d }}</span>
-        </div>
+        <!-- ── VISTA MENSUAL ── -->
+        <TabsContent value="month" class="space-y-3">
+          <!-- Cabecera del mes -->
+          <div class="flex items-center justify-between">
+            <button
+              class="p-1.5 rounded-md hover:bg-muted transition-colors disabled:opacity-30"
+              :disabled="isPrevMonthDisabled"
+              @click="prevMonth"
+            >←</button>
+            <span class="font-semibold text-sm">{{ MONTHS_ES[month] }} {{ year }}</span>
+            <button class="p-1.5 rounded-md hover:bg-muted transition-colors" @click="nextMonth">→</button>
+          </div>
 
-        <!-- Grilla de días -->
-        <div class="grid grid-cols-7 gap-1">
-          <div v-for="n in firstDayOffset" :key="`e-${n}`" />
-          <button
-            v-for="day in daysInMonth"
-            :key="day"
-            class="h-10 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring relative"
-            :class="dayClass(day)"
-            @click="selectDay(day)"
-          >
-            {{ day }}
-            <template v-if="hasPending(day) && !isSelected(day)">
-              <span
-                v-if="pendingCount(day) > 1"
-                class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-500 text-white text-[9px] font-bold flex items-center justify-center"
-              >{{ pendingCount(day) }}</span>
-              <span
-                v-else
-                class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-orange-500"
-              />
-            </template>
-          </button>
-        </div>
+          <!-- Días de la semana -->
+          <div class="grid grid-cols-7 text-center text-xs text-muted-foreground font-medium">
+            <span v-for="d in DAY_LABELS" :key="d">{{ d }}</span>
+          </div>
 
-        <!-- Leyenda -->
-        <div class="grid grid-cols-2 gap-x-6 gap-y-3 text-xs pt-1 sm:grid-cols-3">
-          <span class="flex items-start gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-green-100 border border-green-300 inline-block mt-0.5 shrink-0" />
-            <span>
-              <span class="font-medium text-foreground">Disponible</span>
-              <span class="block text-muted-foreground">Todos los bloques libres</span>
+          <!-- Grilla de días -->
+          <div class="grid grid-cols-7 gap-1">
+            <div v-for="n in firstDayOffset" :key="`e-${n}`" />
+            <button
+              v-for="day in daysInMonth"
+              :key="day"
+              class="h-10 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring relative"
+              :class="dayClass(day)"
+              @click="selectDay(day)"
+            >
+              {{ day }}
+              <template v-if="hasPending(day) && !isSelected(day)">
+                <span
+                  v-if="pendingCount(day) > 1"
+                  class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-500 text-white text-[9px] font-bold flex items-center justify-center"
+                >{{ pendingCount(day) }}</span>
+                <span
+                  v-else
+                  class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-orange-500"
+                />
+              </template>
+            </button>
+          </div>
+
+          <!-- Leyenda -->
+          <div class="grid grid-cols-2 gap-x-6 gap-y-3 text-xs pt-1 sm:grid-cols-3">
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-green-100 border border-green-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Disponible</span>
+                <span class="block text-muted-foreground">Todos los bloques libres</span>
+              </span>
             </span>
-          </span>
-          <span class="flex items-start gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-orange-100 border border-orange-300 inline-block mt-0.5 shrink-0" />
-            <span>
-              <span class="font-medium text-foreground">Con reservas pendientes</span>
-              <span class="block text-muted-foreground">Tienes solicitudes por confirmar</span>
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-orange-100 border border-orange-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Con reservas pendientes</span>
+                <span class="block text-muted-foreground">Tienes solicitudes por confirmar</span>
+              </span>
             </span>
-          </span>
-          <span class="flex items-start gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-amber-100 border border-amber-300 inline-block mt-0.5 shrink-0" />
-            <span>
-              <span class="font-medium text-foreground">Pendiente expirada</span>
-              <span class="block text-muted-foreground">Solicitud cuya fecha ya pasó</span>
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-amber-100 border border-amber-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Pendiente expirada</span>
+                <span class="block text-muted-foreground">Solicitud cuya fecha ya pasó</span>
+              </span>
             </span>
-          </span>
-          <span class="flex items-start gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-blue-100 border border-blue-300 inline-block mt-0.5 shrink-0" />
-            <span>
-              <span class="font-medium text-foreground">Confirmado parcial</span>
-              <span class="block text-muted-foreground">Hay reservas confirmadas y bloques libres</span>
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-blue-100 border border-blue-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Confirmado parcial</span>
+                <span class="block text-muted-foreground">Hay reservas confirmadas y bloques libres</span>
+              </span>
             </span>
-          </span>
-          <span class="flex items-start gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-purple-100 border border-purple-300 inline-block mt-0.5 shrink-0" />
-            <span>
-              <span class="font-medium text-foreground">Completo (con reservas)</span>
-              <span class="block text-muted-foreground">Todos los bloques ocupados con reservas</span>
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-purple-100 border border-purple-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Completo (con reservas)</span>
+                <span class="block text-muted-foreground">Todos los bloques ocupados con reservas</span>
+              </span>
             </span>
-          </span>
-          <span class="flex items-start gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-red-100 border border-red-300 inline-block mt-0.5 shrink-0" />
-            <span>
-              <span class="font-medium text-foreground">Bloqueado manualmente</span>
-              <span class="block text-muted-foreground">Día cerrado por ti, sin reservas</span>
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-red-100 border border-red-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Bloqueado manualmente</span>
+                <span class="block text-muted-foreground">Día cerrado por ti, sin reservas</span>
+              </span>
             </span>
-          </span>
-        </div>
-      </div>
+          </div>
+        </TabsContent>
+
+        <!-- ── VISTA SEMANAL ── -->
+        <TabsContent value="week" class="space-y-3">
+          <!-- Navegación semana -->
+          <div class="flex items-center justify-between">
+            <button
+              class="p-1.5 rounded-md hover:bg-muted transition-colors disabled:opacity-30"
+              :disabled="isPrevWeekDisabled"
+              @click="prevWeek"
+            >←</button>
+            <span class="font-semibold text-sm">{{ weekRangeLabel }}</span>
+            <button class="p-1.5 rounded-md hover:bg-muted transition-colors" @click="nextWeek">→</button>
+          </div>
+
+          <!-- Loading -->
+          <div v-if="loadingWeek" class="py-8 text-center text-sm text-muted-foreground">
+            Cargando...
+          </div>
+
+          <!-- Grilla semanal: 7 columnas -->
+          <div v-else class="grid grid-cols-7 gap-1.5">
+            <div v-for="wd in weekDays" :key="weekDateStr(wd)" class="space-y-1.5">
+              <!-- Cabecera del día -->
+              <button
+                class="w-full text-center py-1.5 rounded-md transition-colors"
+                :class="weekDayHeaderClass(wd)"
+                @click="selectWeekDay(wd)"
+              >
+                <div class="text-[10px] font-medium uppercase text-muted-foreground">{{ formatWeekDayName(wd) }}</div>
+                <div class="text-sm font-semibold">{{ wd.getDate() }}</div>
+              </button>
+
+              <!-- Sin bloques configurados -->
+              <div v-if="getWeekSlotsForDay(wd).length === 0" class="text-center text-muted-foreground/30 text-xs py-3">
+                —
+              </div>
+
+              <!-- Bloques apilados -->
+              <button
+                v-for="slot in getWeekSlotsForDay(wd)"
+                :key="slot.blockId"
+                class="w-full rounded-md border p-1.5 text-left text-xs transition-colors"
+                :class="weekSlotCardClass(slot.status, isDatePast(wd))"
+                @click="selectWeekDay(wd)"
+              >
+                <div class="font-medium truncate leading-tight">{{ slot.blockName }}</div>
+                <div class="text-muted-foreground text-[10px]">{{ slot.startTime }}–{{ slot.endTime }}</div>
+                <Badge
+                  :class="slot.status === 'PENDING' && isDatePast(wd) ? 'bg-amber-100 text-amber-700 border-amber-300' : slotBadgeClass(slot.status)"
+                  class="mt-1 text-[10px] h-4 px-1 leading-none"
+                >
+                  {{ slot.status === 'PENDING' && isDatePast(wd) ? 'Expirada' : SLOT_STATUS_LABELS[slot.status] }}
+                </Badge>
+              </button>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <!-- Panel del día -->
       <div class="space-y-4">
@@ -331,6 +392,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -660,6 +722,120 @@ async function submitAdminBooking(slot: SimpleSlot) {
     bookingSubmitting.value = false
   }
 }
+
+// ─── VISTA SEMANAL ────────────────────────────────────────────
+
+const activeView = ref<'month' | 'week'>('month')
+
+function getMonday(d: Date): Date {
+  const date = new Date(d)
+  const day = date.getDay()
+  date.setDate(date.getDate() - (day === 0 ? 6 : day - 1))
+  date.setHours(0, 0, 0, 0)
+  return date
+}
+
+const weekStart = ref<Date>(getMonday(today))
+const weekSlots = ref<Map<string, SimpleSlot[]>>(new Map())
+const loadingWeek = ref(false)
+
+const weekDays = computed(() =>
+  Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart.value)
+    d.setDate(d.getDate() + i)
+    return d
+  }),
+)
+
+function weekDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+const isPrevWeekDisabled = computed(() => {
+  const thisMonday = getMonday(today)
+  return weekStart.value.getTime() <= thisMonday.getTime()
+})
+
+const weekRangeLabel = computed(() => {
+  const s = weekDays.value[0]
+  const e = weekDays.value[6]
+  const sStr = `${s.getDate()} ${MONTHS_ES_LOWER[s.getMonth()]}`
+  const eStr = `${e.getDate()} ${MONTHS_ES_LOWER[e.getMonth()]} ${e.getFullYear()}`
+  return `${sStr} – ${eStr}`
+})
+
+function prevWeek() {
+  if (isPrevWeekDisabled.value) return
+  const d = new Date(weekStart.value)
+  d.setDate(d.getDate() - 7)
+  weekStart.value = d
+}
+
+function nextWeek() {
+  const d = new Date(weekStart.value)
+  d.setDate(d.getDate() + 7)
+  weekStart.value = d
+}
+
+async function loadWeekSlots() {
+  loadingWeek.value = true
+  const map = new Map<string, SimpleSlot[]>()
+  await Promise.all(
+    weekDays.value.map(async (day) => {
+      const ds = weekDateStr(day)
+      map.set(ds, await getSlotsForDate(spaceId, ds))
+    }),
+  )
+  weekSlots.value = map
+  loadingWeek.value = false
+}
+
+function getWeekSlotsForDay(d: Date): SimpleSlot[] {
+  return weekSlots.value.get(weekDateStr(d)) ?? []
+}
+
+function isDatePast(d: Date): boolean {
+  return weekDateStr(d) < todayStr()
+}
+
+function formatWeekDayName(d: Date): string {
+  return DAY_LABELS[(d.getDay() + 6) % 7]
+}
+
+function weekDayHeaderClass(d: Date): string {
+  const ds = weekDateStr(d)
+  if (ds === selectedDate.value) return 'bg-primary text-primary-foreground'
+  if (ds === todayStr()) return 'ring-1 ring-primary text-primary'
+  return 'text-muted-foreground hover:bg-muted'
+}
+
+function weekSlotCardClass(status: string, past: boolean): string {
+  if (past && status === 'PENDING') return 'border-amber-200 bg-amber-50/60 hover:bg-amber-100/60'
+  if (status === 'PENDING') return 'border-orange-200 bg-orange-50/60 hover:bg-orange-100/60'
+  if (status === 'CONFIRMED') return 'border-green-200 bg-green-50/40 hover:bg-green-100/40'
+  if (status === 'BLOCKED') return 'border-red-200 bg-red-50/40 opacity-70'
+  if (status === 'AVAILABLE') return 'border-green-200 bg-green-50/20 hover:bg-green-50/50'
+  return 'border-border bg-muted/20'
+}
+
+function selectWeekDay(d: Date) {
+  const ds = weekDateStr(d)
+  if (weekSlots.value.has(ds)) {
+    slots.value = weekSlots.value.get(ds) ?? []
+    selectedDate.value = ds
+    cancelBookingForm()
+  }
+}
+
+watch(activeView, (view) => {
+  if (view === 'week') loadWeekSlots()
+})
+
+watch(weekStart, () => {
+  if (activeView.value === 'week') loadWeekSlots()
+})
+
+// ──────────────────────────────────────────────────────────────
 
 watch([year, month], async () => {
   selectedDate.value = ''

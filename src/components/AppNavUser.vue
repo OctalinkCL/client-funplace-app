@@ -63,7 +63,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronsUpDown, MoreVertical, User, LogOut } from "lucide-vue-next";
+import { ChevronsUpDown, User, LogOut } from "lucide-vue-next";
 import { useAuthStore } from "@/stores/auth.store";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {

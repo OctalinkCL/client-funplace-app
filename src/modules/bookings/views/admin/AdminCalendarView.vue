@@ -84,6 +84,13 @@
             </span>
           </span>
           <span class="flex items-start gap-1.5">
+            <span class="w-3 h-3 rounded-sm bg-amber-100 border border-amber-300 inline-block mt-0.5 shrink-0" />
+            <span>
+              <span class="font-medium text-foreground">Pendiente expirada</span>
+              <span class="block text-muted-foreground">Solicitud cuya fecha ya pasó</span>
+            </span>
+          </span>
+          <span class="flex items-start gap-1.5">
             <span class="w-3 h-3 rounded-sm bg-blue-100 border border-blue-300 inline-block mt-0.5 shrink-0" />
             <span>
               <span class="font-medium text-foreground">Confirmado parcial</span>
@@ -152,8 +159,11 @@
                   <p class="font-medium text-sm">{{ slot.blockName }}</p>
                   <p class="text-xs text-muted-foreground">{{ slot.startTime }} – {{ slot.endTime }}</p>
                 </div>
-                <Badge :class="slotBadgeClass(slot.status)" class="shrink-0">
-                  {{ SLOT_STATUS_LABELS[slot.status] }}
+                <Badge
+                  :class="slot.status === 'PENDING' && isSelectedDatePast ? 'bg-amber-100 text-amber-700 border-amber-300' : slotBadgeClass(slot.status)"
+                  class="shrink-0"
+                >
+                  {{ slot.status === 'PENDING' && isSelectedDatePast ? 'Expirada' : SLOT_STATUS_LABELS[slot.status] }}
                 </Badge>
               </div>
 
@@ -253,9 +263,9 @@
                   Desbloquear
                 </Button>
 
-                <!-- PENDING: confirmar + cancelar -->
+                <!-- PENDING: confirmar (solo si no expirada) + cancelar -->
                 <Button
-                  v-if="slot.status === 'PENDING'"
+                  v-if="slot.status === 'PENDING' && !isSelectedDatePast"
                   size="sm"
                   class="h-7 text-xs"
                   :disabled="actionLoading === slot.blockId"
@@ -347,6 +357,7 @@ const year = ref(today.getFullYear())
 const month = ref(today.getMonth())
 
 const pendingDates = ref<Map<string, number>>(new Map())
+const expiredPendingDates = ref<Map<string, number>>(new Map())
 const confirmedDates = ref<Map<string, number>>(new Map())
 const blockedSlotDates = ref<Map<string, number>>(new Map())
 const selectedDate = ref('')
@@ -418,6 +429,10 @@ function hasConfirmed(day: number): boolean {
   return (confirmedDates.value.get(dateStr(day)) ?? 0) > 0
 }
 
+function hasExpiredPending(day: number): boolean {
+  return (expiredPendingDates.value.get(dateStr(day)) ?? 0) > 0
+}
+
 function totalBlocksForDay(day: number): number {
   if (!schedule.value) return 0
   const dow = new Date(year.value, month.value, day).getDay()
@@ -455,9 +470,10 @@ function dayClass(day: number): string {
   const confirmed = hasConfirmed(day)
 
   if (selected) return 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
-  if (!enabled) return 'text-muted-foreground/40 cursor-default'
+  if (!enabled || totalBlocksForDay(day) === 0) return 'text-muted-foreground/40 cursor-default'
   const ring = isT ? ' ring-1 ring-primary ring-offset-1' : ''
   if (pending) return `bg-orange-50 text-orange-800 border border-orange-200 hover:bg-orange-100 cursor-pointer${ring}`
+  if (hasExpiredPending(day)) return `bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 cursor-pointer${ring}`
   if (isFullyBooked(day)) return `bg-purple-50 text-purple-800 border border-purple-200 hover:bg-purple-100 cursor-pointer${ring}`
   if (isFullyBlockedManually(day)) return `bg-red-50 text-red-800 border border-red-200 hover:bg-red-100 cursor-pointer${ring}`
   if (confirmed) return `bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 cursor-pointer${ring}`
@@ -471,6 +487,8 @@ function slotBadgeClass(status: string): string {
   return 'bg-muted text-muted-foreground'
 }
 
+const isSelectedDatePast = computed(() => !!selectedDate.value && selectedDate.value < todayStr())
+
 const formatSelectedDate = computed(() => {
   if (!selectedDate.value) return ''
   const [y, m, d] = selectedDate.value.split('-').map(Number)
@@ -479,7 +497,7 @@ const formatSelectedDate = computed(() => {
 })
 
 function selectDay(day: number) {
-  if (!isEnabled(day)) return
+  if (!isEnabled(day) || totalBlocksForDay(day) === 0) return
   selectedDate.value = dateStr(day)
   cancelBookingForm()
 }
@@ -492,6 +510,7 @@ function monthRange() {
 
 async function loadPendingDates() {
   const { start, end } = monthRange()
+  const today = todayStr()
   const { data } = await supabase
     .from('bookings')
     .select('date')
@@ -499,11 +518,17 @@ async function loadPendingDates() {
     .eq('status', 'PENDING')
     .gte('date', start)
     .lte('date', end)
-  const map = new Map<string, number>()
+  const activeMap = new Map<string, number>()
+  const expiredMap = new Map<string, number>()
   for (const r of (data ?? [])) {
-    map.set(r.date, (map.get(r.date) ?? 0) + 1)
+    if (r.date < today) {
+      expiredMap.set(r.date, (expiredMap.get(r.date) ?? 0) + 1)
+    } else {
+      activeMap.set(r.date, (activeMap.get(r.date) ?? 0) + 1)
+    }
   }
-  pendingDates.value = map
+  pendingDates.value = activeMap
+  expiredPendingDates.value = expiredMap
 }
 
 async function loadConfirmedDates() {

@@ -2,16 +2,21 @@
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <div>
-        <button
-          class="text-sm text-muted-foreground hover:text-foreground mb-1"
-          @click="router.push({ name: 'admin-spaces' })"
-        >
-          ← Mis espacios
-        </button>
-        <h1 class="text-2xl font-semibold">
-          Calendario{{ spaceName ? ` — ${spaceName}` : '' }}
-        </h1>
+      <div class="space-y-1">
+        <h1 class="text-2xl font-semibold">Calendario</h1>
+        <div v-if="adminSpaces.length > 1">
+          <Select :model-value="spaceId" @update:model-value="switchSpace">
+            <SelectTrigger class="w-[220px] h-8 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="s in adminSpaces" :key="s.id" :value="s.id">
+                {{ s.title }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <p v-else-if="spaceName" class="text-sm text-muted-foreground">{{ spaceName }}</p>
       </div>
     </div>
 
@@ -21,91 +26,159 @@
     </div>
 
     <div v-else class="grid gap-6 lg:grid-cols-[1fr_360px]">
-      <!-- Calendario -->
-      <div class="space-y-3">
-        <!-- Cabecera del mes -->
-        <div class="flex items-center justify-between">
-          <button
-            class="p-1.5 rounded-md hover:bg-muted transition-colors disabled:opacity-30"
-            :disabled="isPrevMonthDisabled"
-            @click="prevMonth"
-          >
-            ←
-          </button>
-          <span class="font-semibold text-sm">{{ MONTHS_ES[month] }} {{ year }}</span>
-          <button class="p-1.5 rounded-md hover:bg-muted transition-colors" @click="nextMonth">
-            →
-          </button>
-        </div>
+      <!-- Calendario / Semana -->
+      <Tabs v-model="activeView" class="space-y-3">
+        <TabsList>
+          <TabsTrigger value="month">Mensual</TabsTrigger>
+          <TabsTrigger value="week">Semanal</TabsTrigger>
+        </TabsList>
 
-        <!-- Días de la semana -->
-        <div class="grid grid-cols-7 text-center text-xs text-muted-foreground font-medium">
-          <span v-for="d in DAY_LABELS" :key="d">{{ d }}</span>
-        </div>
+        <!-- ── VISTA MENSUAL ── -->
+        <TabsContent value="month" class="space-y-3">
+          <!-- Cabecera del mes -->
+          <div class="flex items-center justify-between">
+            <button
+              class="p-1.5 rounded-md hover:bg-muted transition-colors disabled:opacity-30"
+              :disabled="isPrevMonthDisabled"
+              @click="prevMonth"
+            >←</button>
+            <span class="font-semibold text-sm">{{ MONTHS_ES[month] }} {{ year }}</span>
+            <button class="p-1.5 rounded-md hover:bg-muted transition-colors" @click="nextMonth">→</button>
+          </div>
 
-        <!-- Grilla de días -->
-        <div class="grid grid-cols-7 gap-1">
-          <div v-for="n in firstDayOffset" :key="`e-${n}`" />
-          <button
-            v-for="day in daysInMonth"
-            :key="day"
-            class="h-10 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring relative"
-            :class="dayClass(day)"
-            @click="selectDay(day)"
-          >
-            {{ day }}
-            <template v-if="hasPending(day) && !isSelected(day)">
-              <span
-                v-if="pendingCount(day) > 1"
-                class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-500 text-white text-[9px] font-bold flex items-center justify-center"
-              >{{ pendingCount(day) }}</span>
-              <span
-                v-else
-                class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-orange-500"
-              />
-            </template>
-          </button>
-        </div>
+          <!-- Días de la semana -->
+          <div class="grid grid-cols-7 text-center text-xs text-muted-foreground font-medium">
+            <span v-for="d in DAY_LABELS" :key="d">{{ d }}</span>
+          </div>
 
-        <!-- Leyenda -->
-        <div class="grid grid-cols-2 gap-x-6 gap-y-3 text-xs pt-1 sm:grid-cols-3">
-          <span class="flex items-start gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-green-100 border border-green-300 inline-block mt-0.5 shrink-0" />
-            <span>
-              <span class="font-medium text-foreground">Disponible</span>
-              <span class="block text-muted-foreground">Todos los bloques libres</span>
+          <!-- Grilla de días -->
+          <div class="grid grid-cols-7 gap-1">
+            <div v-for="n in firstDayOffset" :key="`e-${n}`" />
+            <button
+              v-for="day in daysInMonth"
+              :key="day"
+              class="h-10 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring relative"
+              :class="dayClass(day)"
+              @click="selectDay(day)"
+            >
+              {{ day }}
+              <template v-if="hasPending(day) && !isSelected(day)">
+                <span
+                  v-if="pendingCount(day) > 1"
+                  class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-500 text-white text-[9px] font-bold flex items-center justify-center"
+                >{{ pendingCount(day) }}</span>
+                <span
+                  v-else
+                  class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-orange-500"
+                />
+              </template>
+            </button>
+          </div>
+
+          <!-- Leyenda -->
+          <div class="grid grid-cols-2 gap-x-6 gap-y-3 text-xs pt-1 sm:grid-cols-3">
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-green-100 border border-green-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Disponible</span>
+                <span class="block text-muted-foreground">Todos los bloques libres</span>
+              </span>
             </span>
-          </span>
-          <span class="flex items-start gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-orange-100 border border-orange-300 inline-block mt-0.5 shrink-0" />
-            <span>
-              <span class="font-medium text-foreground">Con reservas pendientes</span>
-              <span class="block text-muted-foreground">Tienes solicitudes por confirmar</span>
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-orange-100 border border-orange-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Con reservas pendientes</span>
+                <span class="block text-muted-foreground">Tienes solicitudes por confirmar</span>
+              </span>
             </span>
-          </span>
-          <span class="flex items-start gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-blue-100 border border-blue-300 inline-block mt-0.5 shrink-0" />
-            <span>
-              <span class="font-medium text-foreground">Confirmado parcial</span>
-              <span class="block text-muted-foreground">Hay reservas confirmadas y bloques libres</span>
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-amber-100 border border-amber-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Pendiente expirada</span>
+                <span class="block text-muted-foreground">Solicitud cuya fecha ya pasó</span>
+              </span>
             </span>
-          </span>
-          <span class="flex items-start gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-purple-100 border border-purple-300 inline-block mt-0.5 shrink-0" />
-            <span>
-              <span class="font-medium text-foreground">Completo (con reservas)</span>
-              <span class="block text-muted-foreground">Todos los bloques ocupados con reservas</span>
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-blue-100 border border-blue-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Confirmado parcial</span>
+                <span class="block text-muted-foreground">Hay reservas confirmadas y bloques libres</span>
+              </span>
             </span>
-          </span>
-          <span class="flex items-start gap-1.5">
-            <span class="w-3 h-3 rounded-sm bg-red-100 border border-red-300 inline-block mt-0.5 shrink-0" />
-            <span>
-              <span class="font-medium text-foreground">Bloqueado manualmente</span>
-              <span class="block text-muted-foreground">Día cerrado por ti, sin reservas</span>
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-purple-100 border border-purple-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Completo (con reservas)</span>
+                <span class="block text-muted-foreground">Todos los bloques ocupados con reservas</span>
+              </span>
             </span>
-          </span>
-        </div>
-      </div>
+            <span class="flex items-start gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-red-100 border border-red-300 inline-block mt-0.5 shrink-0" />
+              <span>
+                <span class="font-medium text-foreground">Bloqueado manualmente</span>
+                <span class="block text-muted-foreground">Día cerrado por ti, sin reservas</span>
+              </span>
+            </span>
+          </div>
+        </TabsContent>
+
+        <!-- ── VISTA SEMANAL ── -->
+        <TabsContent value="week" class="space-y-3">
+          <!-- Navegación semana -->
+          <div class="flex items-center justify-between">
+            <button
+              class="p-1.5 rounded-md hover:bg-muted transition-colors disabled:opacity-30"
+              :disabled="isPrevWeekDisabled"
+              @click="prevWeek"
+            >←</button>
+            <span class="font-semibold text-sm">{{ weekRangeLabel }}</span>
+            <button class="p-1.5 rounded-md hover:bg-muted transition-colors" @click="nextWeek">→</button>
+          </div>
+
+          <!-- Loading -->
+          <div v-if="loadingWeek" class="py-8 text-center text-sm text-muted-foreground">
+            Cargando...
+          </div>
+
+          <!-- Grilla semanal: 7 columnas -->
+          <div v-else class="grid grid-cols-7 gap-1.5">
+            <div v-for="wd in weekDays" :key="weekDateStr(wd)" class="space-y-1.5">
+              <!-- Cabecera del día -->
+              <button
+                class="w-full text-center py-1.5 rounded-md transition-colors"
+                :class="weekDayHeaderClass(wd)"
+                @click="selectWeekDay(wd)"
+              >
+                <div class="text-[10px] font-medium uppercase text-muted-foreground">{{ formatWeekDayName(wd) }}</div>
+                <div class="text-sm font-semibold">{{ wd.getDate() }}</div>
+              </button>
+
+              <!-- Sin bloques configurados -->
+              <div v-if="getWeekSlotsForDay(wd).length === 0" class="text-center text-muted-foreground/30 text-xs py-3">
+                —
+              </div>
+
+              <!-- Bloques apilados -->
+              <button
+                v-for="slot in getWeekSlotsForDay(wd)"
+                :key="slot.blockId"
+                class="w-full rounded-md border p-1.5 text-left text-xs transition-colors"
+                :class="weekSlotCardClass(slot.status, isDatePast(wd))"
+                @click="selectWeekDay(wd)"
+              >
+                <div class="font-medium truncate leading-tight">{{ slot.blockName }}</div>
+                <div class="text-muted-foreground text-[10px]">{{ slot.startTime }}–{{ slot.endTime }}</div>
+                <Badge
+                  :class="slot.status === 'PENDING' && isDatePast(wd) ? 'bg-amber-100 text-amber-700 border-amber-300' : slotBadgeClass(slot.status)"
+                  class="mt-1 text-[10px] h-4 px-1 leading-none"
+                >
+                  {{ slot.status === 'PENDING' && isDatePast(wd) ? 'Expirada' : SLOT_STATUS_LABELS[slot.status] }}
+                </Badge>
+              </button>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <!-- Panel del día -->
       <div class="space-y-4">
@@ -152,8 +225,11 @@
                   <p class="font-medium text-sm">{{ slot.blockName }}</p>
                   <p class="text-xs text-muted-foreground">{{ slot.startTime }} – {{ slot.endTime }}</p>
                 </div>
-                <Badge :class="slotBadgeClass(slot.status)" class="shrink-0">
-                  {{ SLOT_STATUS_LABELS[slot.status] }}
+                <Badge
+                  :class="slot.status === 'PENDING' && isSelectedDatePast ? 'bg-amber-100 text-amber-700 border-amber-300' : slotBadgeClass(slot.status)"
+                  class="shrink-0"
+                >
+                  {{ slot.status === 'PENDING' && isSelectedDatePast ? 'Expirada' : SLOT_STATUS_LABELS[slot.status] }}
                 </Badge>
               </div>
 
@@ -253,9 +329,9 @@
                   Desbloquear
                 </Button>
 
-                <!-- PENDING: confirmar + cancelar -->
+                <!-- PENDING: confirmar (solo si no expirada) + cancelar -->
                 <Button
-                  v-if="slot.status === 'PENDING'"
+                  v-if="slot.status === 'PENDING' && !isSelectedDatePast"
                   size="sm"
                   class="h-7 text-xs"
                   :disabled="actionLoading === slot.blockId"
@@ -321,6 +397,14 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -331,14 +415,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import type { WeeklySchedule, SimpleSlot, BookingStatus } from '@/types'
+import { useAuthStore } from '@/stores/auth.store'
+import type { WeeklySchedule, SimpleSlot, BookingStatus, Space } from '@/types'
 import { MONTHS_ES, MONTHS_ES_LOWER, DAYS_ES } from '@/constants/bookings'
 
 const route = useRoute()
 const router = useRouter()
-const spaceId = route.params.spaceId as string
+const auth = useAuthStore()
+const spaceId = computed(() => route.params.spaceId as string)
 
 const spaceName = ref<string | null>(null)
+const adminSpaces = ref<Pick<Space, 'id' | 'title'>[]>([])
+
+function switchSpace(id: unknown) {
+  if (typeof id === 'string' && id) router.replace({ name: 'admin-calendar', params: { spaceId: id } })
+}
 const schedule = ref<WeeklySchedule | null>(null)
 const loadingInit = ref(true)
 
@@ -347,6 +438,7 @@ const year = ref(today.getFullYear())
 const month = ref(today.getMonth())
 
 const pendingDates = ref<Map<string, number>>(new Map())
+const expiredPendingDates = ref<Map<string, number>>(new Map())
 const confirmedDates = ref<Map<string, number>>(new Map())
 const blockedSlotDates = ref<Map<string, number>>(new Map())
 const selectedDate = ref('')
@@ -418,6 +510,10 @@ function hasConfirmed(day: number): boolean {
   return (confirmedDates.value.get(dateStr(day)) ?? 0) > 0
 }
 
+function hasExpiredPending(day: number): boolean {
+  return (expiredPendingDates.value.get(dateStr(day)) ?? 0) > 0
+}
+
 function totalBlocksForDay(day: number): number {
   if (!schedule.value) return 0
   const dow = new Date(year.value, month.value, day).getDay()
@@ -455,9 +551,10 @@ function dayClass(day: number): string {
   const confirmed = hasConfirmed(day)
 
   if (selected) return 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer'
-  if (!enabled) return 'text-muted-foreground/40 cursor-default'
+  if (!enabled || totalBlocksForDay(day) === 0) return 'text-muted-foreground/40 cursor-default'
   const ring = isT ? ' ring-1 ring-primary ring-offset-1' : ''
   if (pending) return `bg-orange-50 text-orange-800 border border-orange-200 hover:bg-orange-100 cursor-pointer${ring}`
+  if (hasExpiredPending(day)) return `bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 cursor-pointer${ring}`
   if (isFullyBooked(day)) return `bg-purple-50 text-purple-800 border border-purple-200 hover:bg-purple-100 cursor-pointer${ring}`
   if (isFullyBlockedManually(day)) return `bg-red-50 text-red-800 border border-red-200 hover:bg-red-100 cursor-pointer${ring}`
   if (confirmed) return `bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 cursor-pointer${ring}`
@@ -471,6 +568,8 @@ function slotBadgeClass(status: string): string {
   return 'bg-muted text-muted-foreground'
 }
 
+const isSelectedDatePast = computed(() => !!selectedDate.value && selectedDate.value < todayStr())
+
 const formatSelectedDate = computed(() => {
   if (!selectedDate.value) return ''
   const [y, m, d] = selectedDate.value.split('-').map(Number)
@@ -479,7 +578,7 @@ const formatSelectedDate = computed(() => {
 })
 
 function selectDay(day: number) {
-  if (!isEnabled(day)) return
+  if (!isEnabled(day) || totalBlocksForDay(day) === 0) return
   selectedDate.value = dateStr(day)
   cancelBookingForm()
 }
@@ -492,18 +591,25 @@ function monthRange() {
 
 async function loadPendingDates() {
   const { start, end } = monthRange()
+  const today = todayStr()
   const { data } = await supabase
     .from('bookings')
     .select('date')
-    .eq('space_id', spaceId)
+    .eq('space_id', spaceId.value)
     .eq('status', 'PENDING')
     .gte('date', start)
     .lte('date', end)
-  const map = new Map<string, number>()
+  const activeMap = new Map<string, number>()
+  const expiredMap = new Map<string, number>()
   for (const r of (data ?? [])) {
-    map.set(r.date, (map.get(r.date) ?? 0) + 1)
+    if (r.date < today) {
+      expiredMap.set(r.date, (expiredMap.get(r.date) ?? 0) + 1)
+    } else {
+      activeMap.set(r.date, (activeMap.get(r.date) ?? 0) + 1)
+    }
   }
-  pendingDates.value = map
+  pendingDates.value = activeMap
+  expiredPendingDates.value = expiredMap
 }
 
 async function loadConfirmedDates() {
@@ -511,7 +617,7 @@ async function loadConfirmedDates() {
   const { data } = await supabase
     .from('bookings')
     .select('date')
-    .eq('space_id', spaceId)
+    .eq('space_id', spaceId.value)
     .eq('status', 'CONFIRMED')
     .gte('date', start)
     .lte('date', end)
@@ -527,7 +633,7 @@ async function loadBlockedDates() {
   const { data } = await supabase
     .from('blocked_slots')
     .select('date')
-    .eq('space_id', spaceId)
+    .eq('space_id', spaceId.value)
     .gte('date', start)
     .lte('date', end)
   const map = new Map<string, number>()
@@ -541,7 +647,7 @@ async function loadSlotsForDate(date: string) {
   loadingSlots.value = true
   clearSlotsCache()
   try {
-    slots.value = await getSlotsForDate(spaceId, date)
+    slots.value = await getSlotsForDate(spaceId.value, date)
   } finally {
     loadingSlots.value = false
   }
@@ -550,7 +656,7 @@ async function loadSlotsForDate(date: string) {
 async function refreshDay() {
   if (!selectedDate.value) return
   clearSlotsCache()
-  slots.value = await getSlotsForDate(spaceId, selectedDate.value)
+  slots.value = await getSlotsForDate(spaceId.value, selectedDate.value)
 }
 
 async function blockSlot(slot: SimpleSlot) {
@@ -558,7 +664,7 @@ async function blockSlot(slot: SimpleSlot) {
   actionLoading.value = slot.blockId
   try {
     await supabase.from('blocked_slots').insert({
-      space_id: spaceId,
+      space_id: spaceId.value,
       date: selectedDate.value,
       block_id: slot.blockId,
     })
@@ -615,7 +721,7 @@ async function submitAdminBooking(slot: SimpleSlot) {
   bookingError.value = null
   try {
     await bookingsService.create({
-      space_id: spaceId,
+      space_id: spaceId.value,
       block_id: slot.blockId,
       date: selectedDate.value,
       start_time: slot.startTime + ':00',
@@ -635,6 +741,148 @@ async function submitAdminBooking(slot: SimpleSlot) {
     bookingSubmitting.value = false
   }
 }
+
+// ─── VISTA SEMANAL ────────────────────────────────────────────
+
+const activeView = ref<'month' | 'week'>('month')
+
+function getMonday(d: Date): Date {
+  const date = new Date(d)
+  const day = date.getDay()
+  date.setDate(date.getDate() - (day === 0 ? 6 : day - 1))
+  date.setHours(0, 0, 0, 0)
+  return date
+}
+
+const weekStart = ref<Date>(getMonday(today))
+const weekSlots = ref<Map<string, SimpleSlot[]>>(new Map())
+const loadingWeek = ref(false)
+
+const weekDays = computed(() =>
+  Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart.value)
+    d.setDate(d.getDate() + i)
+    return d
+  }),
+)
+
+function weekDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+const isPrevWeekDisabled = computed(() => {
+  const thisMonday = getMonday(today)
+  return weekStart.value.getTime() <= thisMonday.getTime()
+})
+
+const weekRangeLabel = computed(() => {
+  const s = weekDays.value[0]
+  const e = weekDays.value[6]
+  const sStr = `${s.getDate()} ${MONTHS_ES_LOWER[s.getMonth()]}`
+  const eStr = `${e.getDate()} ${MONTHS_ES_LOWER[e.getMonth()]} ${e.getFullYear()}`
+  return `${sStr} – ${eStr}`
+})
+
+function prevWeek() {
+  if (isPrevWeekDisabled.value) return
+  const d = new Date(weekStart.value)
+  d.setDate(d.getDate() - 7)
+  weekStart.value = d
+}
+
+function nextWeek() {
+  const d = new Date(weekStart.value)
+  d.setDate(d.getDate() + 7)
+  weekStart.value = d
+}
+
+async function loadWeekSlots() {
+  loadingWeek.value = true
+  const map = new Map<string, SimpleSlot[]>()
+  await Promise.all(
+    weekDays.value.map(async (day) => {
+      const ds = weekDateStr(day)
+      map.set(ds, await getSlotsForDate(spaceId.value, ds))
+    }),
+  )
+  weekSlots.value = map
+  loadingWeek.value = false
+}
+
+function getWeekSlotsForDay(d: Date): SimpleSlot[] {
+  return weekSlots.value.get(weekDateStr(d)) ?? []
+}
+
+function isDatePast(d: Date): boolean {
+  return weekDateStr(d) < todayStr()
+}
+
+function formatWeekDayName(d: Date): string {
+  return DAY_LABELS[(d.getDay() + 6) % 7]
+}
+
+function weekDayHeaderClass(d: Date): string {
+  const ds = weekDateStr(d)
+  if (ds === selectedDate.value) return 'bg-primary text-primary-foreground'
+  if (ds === todayStr()) return 'ring-1 ring-primary text-primary'
+  return 'text-muted-foreground hover:bg-muted'
+}
+
+function weekSlotCardClass(status: string, past: boolean): string {
+  if (past && status === 'PENDING') return 'border-amber-200 bg-amber-50/60 hover:bg-amber-100/60'
+  if (status === 'PENDING') return 'border-orange-200 bg-orange-50/60 hover:bg-orange-100/60'
+  if (status === 'CONFIRMED') return 'border-green-200 bg-green-50/40 hover:bg-green-100/40'
+  if (status === 'BLOCKED') return 'border-red-200 bg-red-50/40 opacity-70'
+  if (status === 'AVAILABLE') return 'border-green-200 bg-green-50/20 hover:bg-green-50/50'
+  return 'border-border bg-muted/20'
+}
+
+function selectWeekDay(d: Date) {
+  const ds = weekDateStr(d)
+  if (weekSlots.value.has(ds)) {
+    slots.value = weekSlots.value.get(ds) ?? []
+    selectedDate.value = ds
+    cancelBookingForm()
+  }
+}
+
+watch(activeView, (view) => {
+  if (view === 'week') loadWeekSlots()
+})
+
+watch(weekStart, () => {
+  if (activeView.value === 'week') loadWeekSlots()
+})
+
+// ──────────────────────────────────────────────────────────────
+
+watch(spaceId, async (newId) => {
+  if (!newId) return
+  selectedDate.value = ''
+  slots.value = []
+  spaceName.value = null
+  schedule.value = null
+  pendingDates.value = new Map()
+  expiredPendingDates.value = new Map()
+  confirmedDates.value = new Map()
+  blockedSlotDates.value = new Map()
+  weekSlots.value = new Map()
+  cancelBookingForm()
+  clearSlotsCache()
+  loadingInit.value = true
+  try {
+    const [s] = await Promise.all([
+      availabilityService.getBySpaceId(newId),
+      spacesService.getById(newId).then(sp => { spaceName.value = sp.title }).catch(() => {}),
+      loadPendingDates(),
+      loadConfirmedDates(),
+      loadBlockedDates(),
+    ])
+    schedule.value = s
+  } finally {
+    loadingInit.value = false
+  }
+})
 
 watch([year, month], async () => {
   selectedDate.value = ''
@@ -659,10 +907,15 @@ function nextMonth() {
 }
 
 onMounted(async () => {
+  if (auth.profile?.id) {
+    spacesService.getByAdmin(auth.profile.id)
+      .then(s => { adminSpaces.value = s })
+      .catch(() => {})
+  }
   try {
     const [s] = await Promise.all([
-      availabilityService.getBySpaceId(spaceId),
-      spacesService.getById(spaceId).then(sp => { spaceName.value = sp.title }).catch(() => {}),
+      availabilityService.getBySpaceId(spaceId.value),
+      spacesService.getById(spaceId.value).then(sp => { spaceName.value = sp.title }).catch(() => {}),
       loadPendingDates(),
       loadConfirmedDates(),
       loadBlockedDates(),

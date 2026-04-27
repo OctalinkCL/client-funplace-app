@@ -9,21 +9,25 @@ export const publicRoutes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'home',
+        meta: { title: 'Funplace - Todo para tu fiesta' },
         component: () => import('@/modules/home/views/HomeView.vue'),
       },
       {
         path: 'espacios',
         name: 'spaces-list',
+        meta: { title: 'Funplace - Explorar espacios' },
         component: () => import('@/modules/spaces/views/public/SpacesListView.vue'),
       },
       {
         path: 'espacios/:slug',
         name: 'space-detail',
+        meta: { title: 'Funplace' },
         component: () => import('@/modules/spaces/views/public/SpaceDetailView.vue'),
       },
       {
         path: 'espacios/:slug/reservar',
         name: 'booking-form',
+        meta: { title: 'Funplace - Reservar' },
         component: () => import('@/modules/bookings/views/public/BookingFormView.vue'),
       },
     ],

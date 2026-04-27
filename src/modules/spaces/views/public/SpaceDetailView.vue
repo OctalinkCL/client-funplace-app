@@ -108,6 +108,7 @@ onMounted(async () => {
   loading.value = true;
   try {
     space.value = await spacesService.getBySlug(slug);
+    document.title = `Funplace - ${space.value.title}`
     const images = space.value.space_images;
     if (images && images.length > 0) {
       const sorted = [...images].sort((a, b) => a.sort_order - b.sort_order);

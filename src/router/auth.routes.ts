@@ -10,18 +10,19 @@ export const authRoutes: RouteRecordRaw[] = [
       {
         path: 'login',
         name: 'login',
+        meta: { title: 'Funplace - Iniciar sesión' },
         component: () => import('@/modules/auth/views/LoginView.vue'),
       },
       {
         path: 'update-password',
         name: 'update-password',
-        meta: { guestOnly: false, requiresRecovery: true },
+        meta: { guestOnly: false, requiresRecovery: true, title: 'Funplace - Cambiar contraseña' },
         component: () => import('@/modules/auth/views/UpdatePasswordView.vue'),
       },
       {
         path: 'setup-account',
         name: 'setup-account',
-        meta: { guestOnly: false, requiresRecovery: true },
+        meta: { guestOnly: false, requiresRecovery: true, title: 'Funplace - Configurar cuenta' },
         component: () => import('@/modules/auth/views/SetupAccountView.vue'),
       },
     ],

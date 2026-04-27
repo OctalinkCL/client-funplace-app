@@ -5,7 +5,7 @@ export const adminRoutes: RouteRecordRaw[] = [
   {
     path: '/admin',
     component: AdminLayout,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: 'Funplace - Admin' },
     redirect: '/admin/reservas',
     children: [
       {

@@ -3,16 +3,7 @@
     <SidebarHeader>
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" as-child>
-            <RouterLink to="/admin" @click="handleNavClick">
-              <div
-                class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
-              >
-                <LayoutDashboard class="size-4" />
-              </div>
-              <span class="font-semibold truncate">Funplace Admin</span>
-            </RouterLink>
-          </SidebarMenuButton>
+          <div class="pt-3"><AppLogo :width="120" /></div>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarHeader>
@@ -23,7 +14,7 @@
           <SidebarMenu>
             <SidebarMenuItem v-for="item in navItems" :key="item.to">
               <SidebarMenuButton as-child :is-active="isActive(item.to)">
-                <RouterLink :to="item.to" @click="handleNavClick">
+                <RouterLink :to="item.to" @click="handleNavClick" class="py-5">
                   <component :is="item.icon" />
                   <span>{{ item.label }}</span>
                 </RouterLink>
@@ -43,12 +34,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute } from "vue-router";
-import {
-  CalendarDays,
-  Building2,
-  User,
-  LayoutDashboard,
-} from "lucide-vue-next";
+import { CalendarDays, Building2, User } from "lucide-vue-next";
 import AppNavUser from "@/components/AppNavUser.vue";
 import { useAuthStore } from "@/stores/auth.store";
 import { getSidebarLabel } from "@/constants/plans";
@@ -64,6 +50,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import AppLogo from "../components/layouts/AppLogo.vue";
 
 const auth = useAuthStore();
 const route = useRoute();

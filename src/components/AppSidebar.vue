@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute } from "vue-router";
-import { CalendarDays, Building2, User } from "lucide-vue-next";
+import { CalendarDays, Calendar, Building2, User } from "lucide-vue-next";
 import AppNavUser from "@/components/AppNavUser.vue";
 import { useAuthStore } from "@/stores/auth.store";
 import { getSidebarLabel } from "@/constants/plans";
@@ -64,6 +64,7 @@ function handleNavClick() {
 const navItems = computed(() => [
   { to: "/admin/reservas", label: "Reservas", icon: CalendarDays },
   { to: "/admin/espacios", label: sidebarLabel.value, icon: Building2 },
+  { to: "/admin/calendario", label: "Calendario", icon: Calendar },
   { to: "/admin/perfil", label: "Mi Perfil", icon: User },
 ]);
 

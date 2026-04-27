@@ -2,16 +2,21 @@
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <div>
-        <button
-          class="text-sm text-muted-foreground hover:text-foreground mb-1"
-          @click="router.push({ name: 'admin-spaces' })"
-        >
-          ← Mis espacios
-        </button>
-        <h1 class="text-2xl font-semibold">
-          Calendario{{ spaceName ? ` — ${spaceName}` : '' }}
-        </h1>
+      <div class="space-y-1">
+        <h1 class="text-2xl font-semibold">Calendario</h1>
+        <div v-if="adminSpaces.length > 1">
+          <Select :model-value="spaceId" @update:model-value="switchSpace">
+            <SelectTrigger class="w-[220px] h-8 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="s in adminSpaces" :key="s.id" :value="s.id">
+                {{ s.title }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <p v-else-if="spaceName" class="text-sm text-muted-foreground">{{ spaceName }}</p>
       </div>
     </div>
 
@@ -394,6 +399,13 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -403,14 +415,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import type { WeeklySchedule, SimpleSlot, BookingStatus } from '@/types'
+import { useAuthStore } from '@/stores/auth.store'
+import type { WeeklySchedule, SimpleSlot, BookingStatus, Space } from '@/types'
 import { MONTHS_ES, MONTHS_ES_LOWER, DAYS_ES } from '@/constants/bookings'
 
 const route = useRoute()
 const router = useRouter()
-const spaceId = route.params.spaceId as string
+const auth = useAuthStore()
+const spaceId = computed(() => route.params.spaceId as string)
 
 const spaceName = ref<string | null>(null)
+const adminSpaces = ref<Pick<Space, 'id' | 'title'>[]>([])
+
+function switchSpace(id: unknown) {
+  if (typeof id === 'string' && id) router.replace({ name: 'admin-calendar', params: { spaceId: id } })
+}
 const schedule = ref<WeeklySchedule | null>(null)
 const loadingInit = ref(true)
 
@@ -576,7 +595,7 @@ async function loadPendingDates() {
   const { data } = await supabase
     .from('bookings')
     .select('date')
-    .eq('space_id', spaceId)
+    .eq('space_id', spaceId.value)
     .eq('status', 'PENDING')
     .gte('date', start)
     .lte('date', end)
@@ -598,7 +617,7 @@ async function loadConfirmedDates() {
   const { data } = await supabase
     .from('bookings')
     .select('date')
-    .eq('space_id', spaceId)
+    .eq('space_id', spaceId.value)
     .eq('status', 'CONFIRMED')
     .gte('date', start)
     .lte('date', end)
@@ -614,7 +633,7 @@ async function loadBlockedDates() {
   const { data } = await supabase
     .from('blocked_slots')
     .select('date')
-    .eq('space_id', spaceId)
+    .eq('space_id', spaceId.value)
     .gte('date', start)
     .lte('date', end)
   const map = new Map<string, number>()
@@ -628,7 +647,7 @@ async function loadSlotsForDate(date: string) {
   loadingSlots.value = true
   clearSlotsCache()
   try {
-    slots.value = await getSlotsForDate(spaceId, date)
+    slots.value = await getSlotsForDate(spaceId.value, date)
   } finally {
     loadingSlots.value = false
   }
@@ -637,7 +656,7 @@ async function loadSlotsForDate(date: string) {
 async function refreshDay() {
   if (!selectedDate.value) return
   clearSlotsCache()
-  slots.value = await getSlotsForDate(spaceId, selectedDate.value)
+  slots.value = await getSlotsForDate(spaceId.value, selectedDate.value)
 }
 
 async function blockSlot(slot: SimpleSlot) {
@@ -645,7 +664,7 @@ async function blockSlot(slot: SimpleSlot) {
   actionLoading.value = slot.blockId
   try {
     await supabase.from('blocked_slots').insert({
-      space_id: spaceId,
+      space_id: spaceId.value,
       date: selectedDate.value,
       block_id: slot.blockId,
     })
@@ -702,7 +721,7 @@ async function submitAdminBooking(slot: SimpleSlot) {
   bookingError.value = null
   try {
     await bookingsService.create({
-      space_id: spaceId,
+      space_id: spaceId.value,
       block_id: slot.blockId,
       date: selectedDate.value,
       start_time: slot.startTime + ':00',
@@ -783,7 +802,7 @@ async function loadWeekSlots() {
   await Promise.all(
     weekDays.value.map(async (day) => {
       const ds = weekDateStr(day)
-      map.set(ds, await getSlotsForDate(spaceId, ds))
+      map.set(ds, await getSlotsForDate(spaceId.value, ds))
     }),
   )
   weekSlots.value = map
@@ -837,6 +856,34 @@ watch(weekStart, () => {
 
 // ──────────────────────────────────────────────────────────────
 
+watch(spaceId, async (newId) => {
+  if (!newId) return
+  selectedDate.value = ''
+  slots.value = []
+  spaceName.value = null
+  schedule.value = null
+  pendingDates.value = new Map()
+  expiredPendingDates.value = new Map()
+  confirmedDates.value = new Map()
+  blockedSlotDates.value = new Map()
+  weekSlots.value = new Map()
+  cancelBookingForm()
+  clearSlotsCache()
+  loadingInit.value = true
+  try {
+    const [s] = await Promise.all([
+      availabilityService.getBySpaceId(newId),
+      spacesService.getById(newId).then(sp => { spaceName.value = sp.title }).catch(() => {}),
+      loadPendingDates(),
+      loadConfirmedDates(),
+      loadBlockedDates(),
+    ])
+    schedule.value = s
+  } finally {
+    loadingInit.value = false
+  }
+})
+
 watch([year, month], async () => {
   selectedDate.value = ''
   slots.value = []
@@ -860,10 +907,15 @@ function nextMonth() {
 }
 
 onMounted(async () => {
+  if (auth.profile?.id) {
+    spacesService.getByAdmin(auth.profile.id)
+      .then(s => { adminSpaces.value = s })
+      .catch(() => {})
+  }
   try {
     const [s] = await Promise.all([
-      availabilityService.getBySpaceId(spaceId),
-      spacesService.getById(spaceId).then(sp => { spaceName.value = sp.title }).catch(() => {}),
+      availabilityService.getBySpaceId(spaceId.value),
+      spacesService.getById(spaceId.value).then(sp => { spaceName.value = sp.title }).catch(() => {}),
       loadPendingDates(),
       loadConfirmedDates(),
       loadBlockedDates(),
